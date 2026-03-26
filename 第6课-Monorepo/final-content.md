@@ -651,3 +651,549 @@ This is an e-commerce platform built with Next.js, React, and TypeScript.
 - Test files: *.test.ts or *.spec.ts
 ```
 
+这个文件放在项目根目录。当 AI 打开你的项目时，它会首先读取这个文件，了解项目的整体架构和约定。
+
+这就像给新入职的同事写一份项目文档。只不过这份文档是写给 AI 的。
+
+---
+
+## Section 4：项目规范文件（30 min）
+
+### 4.1 AGENTS.md（项目级 AI 指令）
+
+我们刚才看了一个简单的 `AGENTS.md` 示例。现在让我们深入讲讲如何写好这个文件。
+
+`AGENTS.md` 是一个通用的 AI 指令文件。它不绑定任何特定的 AI 工具。无论你用 Cursor、Claude Code、GitHub Copilot 还是其他工具，都可以读取这个文件。
+
+一个好的 `AGENTS.md` 应该包含以下几个部分：
+
+**1. 项目概述**
+
+告诉 AI 这个项目是什么，用了什么技术栈。
+
+```markdown
+## Project Overview
+E-commerce platform for B2B wholesale market.
+Tech stack: Next.js 15, React 19, TypeScript 5.5, Tailwind CSS v4, Prisma ORM.
+Database: PostgreSQL. Cache: Redis. Search: Elasticsearch.
+```
+
+**2. 架构说明**
+
+告诉 AI 项目的整体架构。
+
+```markdown
+## Architecture
+- Monorepo: Turborepo + pnpm workspace
+- Frontend: Next.js App Router with RSC (React Server Components)
+- API: Next.js Route Handlers + tRPC
+- Auth: NextAuth.js v5
+- State: Zustand for client state, React Query for server state
+```
+
+**3. 代码约定**
+
+告诉 AI 你的代码风格和约定。
+
+```markdown
+## Code Conventions
+- Always use TypeScript strict mode
+- Prefer 'interface' over 'type' for object shapes
+- Use named exports, avoid default exports
+- Component files: one component per file
+- Max file length: 300 lines (split if longer)
+- Error handling: use Result pattern, avoid try-catch in business logic
+```
+
+**4. 禁止事项**
+
+告诉 AI 什么不能做。这一点非常重要。
+
+```markdown
+## Do NOT
+- Do NOT use `any` type
+- Do NOT use `var`, always use `const` or `let`
+- Do NOT use CSS modules, use Tailwind CSS
+- Do NOT use class components
+- Do NOT import from internal paths of packages, use public API only
+- Do NOT add new dependencies without discussing first
+```
+
+**5. 常见任务指南**
+
+告诉 AI 如何完成常见的开发任务。
+
+```markdown
+## Common Tasks
+
+### Adding a new API endpoint
+1. Create route handler in `apps/web/app/api/[resource]/route.ts`
+2. Define input/output types in `packages/types/api/`
+3. Add validation with Zod schema
+4. Write unit test in `__tests__/` directory
+
+### Adding a new UI component
+1. Create component in `packages/ui/src/[ComponentName]/`
+2. Include: ComponentName.tsx, ComponentName.test.tsx, index.ts
+3. Export from `packages/ui/src/index.ts`
+4. Add Storybook story if it's a visual component
+```
+
+这些信息对 AI 来说非常有价值。它让 AI 知道你的项目是怎么工作的，应该遵循什么规范。
+
+### 4.2 .cursorrules（Cursor 专用）
+
+如果你的团队使用 Cursor，你还可以创建 `.cursorrules` 文件。
+
+`.cursorrules` 和 `AGENTS.md` 类似，但它是 Cursor 专用的。Cursor 会在每次对话开始时自动加载这个文件。
+
+一个典型的 `.cursorrules` 文件：
+
+```
+You are an expert in TypeScript, React, Next.js, and Tailwind CSS.
+
+Key Principles:
+- Write concise, technical TypeScript code with accurate examples
+- Use functional and declarative programming patterns; avoid classes
+- Prefer iteration and modularization over code duplication
+- Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError)
+
+Project Structure:
+- This is a Turborepo monorepo with pnpm workspace
+- apps/web: Next.js 15 with App Router
+- packages/ui: Shared React components
+- packages/features: Business logic organized by feature
+
+TypeScript:
+- Use TypeScript for all code; prefer interfaces over types
+- Avoid enums; use const objects with 'as const'
+- Use functional components with TypeScript interfaces for props
+
+React:
+- Use functional components with hooks
+- Minimize 'use client'; prefer React Server Components
+- Wrap client components in Suspense with fallback
+- Use dynamic loading for non-critical components
+
+Styling:
+- Use Tailwind CSS v4 for all styling
+- Use cn() utility for conditional classes
+- Follow mobile-first responsive design
+
+State Management:
+- URL state: nuqs for search params
+- Client state: Zustand
+- Server state: React Query (TanStack Query)
+
+Error Handling:
+- Use error boundaries for unexpected errors
+- Model expected errors as return values
+- Use useActionState for form validation
+- Always provide user-friendly error messages
+```
+
+`.cursorrules` 和 `AGENTS.md` 的区别是什么？
+
+- `AGENTS.md` 更偏向项目文档，描述项目的架构和约定
+- `.cursorrules` 更偏向 AI 的行为指令，告诉 AI 应该怎么写代码
+
+在实际项目中，我建议两个都写。`AGENTS.md` 放在项目根目录，`.cursorrules` 也放在项目根目录。它们可以有一些重叠，但侧重点不同。
+
+### 4.3 Memory 管理
+
+最后，我们来讲 Memory 管理。
+
+不同的 AI 工具有不同的 Memory 机制：
+
+- **Cursor**：有 `.cursorrules` 和 Notepad 功能
+- **Claude Code**：有 `CLAUDE.md` 文件
+- **Windsurf**：有 `.windsurfrules` 文件
+- **Kiro**：有 Steering 文件和 Specs 功能
+
+Memory 的核心思想是：**让 AI 记住项目的上下文，避免每次对话都要重复解释。**
+
+以 Claude Code 的 `CLAUDE.md` 为例：
+
+```markdown
+# CLAUDE.md
+
+## Project
+B2B e-commerce platform monorepo.
+
+## Quick Reference
+- Build: `pnpm build`
+- Dev: `pnpm dev`
+- Test: `pnpm test`
+- Lint: `pnpm lint`
+- Type check: `pnpm typecheck`
+
+## Architecture Decisions
+- We use App Router, NOT Pages Router
+- We use Server Components by default, 'use client' only when needed
+- We use Zustand for client state, NOT Redux
+- We use Prisma, NOT TypeORM or Drizzle
+
+## Current Sprint Focus
+- Implementing order management module
+- Refactoring auth flow to support SSO
+- Performance optimization for product listing page
+
+## Known Issues
+- Hot reload sometimes fails in packages/ui, restart dev server
+- Prisma client needs regeneration after schema changes: `pnpm db:generate`
+```
+
+注意最后两个部分：**Current Sprint Focus** 和 **Known Issues**。
+
+这些信息对 AI 非常有用。当 AI 知道你当前在做什么，它可以更好地理解你的需求。当 AI 知道已知的问题，它可以避免踩坑。
+
+**Memory 管理的最佳实践：**
+
+1. **定期更新**：每个 Sprint 开始时更新 Current Sprint Focus
+2. **记录决策**：重要的技术决策都记录下来
+3. **记录坑**：遇到的坑和解决方案都记录下来
+4. **保持简洁**：不要写太长，AI 的上下文窗口是有限的
+
+### 4.4 Monorepo 中的分层 AGENTS.md
+
+在 Monorepo 里，你可以在不同层级放置 `AGENTS.md`：
+
+```
+my-project/
+├── AGENTS.md                    # 项目级：整体架构和约定
+├── apps/
+│   ├── web/
+│   │   └── AGENTS.md            # 应用级：Web 应用的特定约定
+│   └── admin/
+│       └── AGENTS.md            # 应用级：Admin 应用的特定约定
+└── packages/
+    ├── ui/
+    │   └── AGENTS.md            # 包级：UI 组件的开发规范
+    └── features/
+        └── order/
+            └── AGENTS.md        # 功能级：订单模块的业务规则
+```
+
+每个层级的 `AGENTS.md` 关注不同的内容：
+
+- **项目级**：整体架构、技术栈、通用约定
+- **应用级**：路由结构、页面组织、部署配置
+- **包级**：API 设计、组件规范、测试要求
+- **功能级**：业务规则、数据模型、接口定义
+
+这种分层的好处是：当 AI 在某个目录下工作时，它只需要加载当前目录和上级目录的 `AGENTS.md`，不需要加载整个项目的所有规范。
+
+**这就是 AI 友好的核心思想：给 AI 提供精确的、局部的上下文。**
+
+---
+
+## Section 5：横向对比（15 min）
+
+### 5.1 Monorepo 工具对比
+
+好，我们已经深入讲了 Turborepo + pnpm workspace。但市面上还有其他 Monorepo 工具。让我们做一个横向对比。
+
+| 特性 | Turborepo | Nx | Lerna | Rush | Bun workspace |
+|------|-----------|-----|-------|------|---------------|
+| 开发者 | Vercel | Nrwl | 社区 (现 Nx 维护) | Microsoft | Oven |
+| 语言 | Rust (Go→Rust) | TypeScript | TypeScript | TypeScript | Zig |
+| 任务编排 | ✅ 自动 | ✅ 自动 | ⚠️ 基础 | ✅ 自动 | ❌ 无 |
+| Remote Caching | ✅ 内置 | ✅ Nx Cloud | ❌ 无 | ⚠️ 需配置 | ❌ 无 |
+| 增量构建 | ✅ | ✅ | ⚠️ 基础 | ✅ | ❌ |
+| 依赖图可视化 | ✅ | ✅ 强大 | ❌ | ✅ | ❌ |
+| 代码生成器 | ❌ | ✅ 强大 | ❌ | ❌ | ❌ |
+| 学习曲线 | 低 | 中高 | 低 | 高 | 低 |
+| 配置复杂度 | 低 | 中 | 低 | 高 | 低 |
+| 生态系统 | Vercel 生态 | 独立生态 | npm 生态 | 微软生态 | Bun 生态 |
+| AI 友好度 | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+
+### 5.2 各工具详细分析
+
+#### Turborepo
+
+**优势：**
+- 配置简单，上手快
+- Rust 编写，性能优秀
+- 与 Vercel 生态深度集成
+- Remote Caching 开箱即用
+
+**劣势：**
+- 功能相对简单，没有代码生成器
+- 不支持模块边界检查
+
+**适合场景：** 中小型团队，Next.js 项目，追求简单高效
+
+#### Nx
+
+**优势：**
+- 功能最全面：代码生成器、模块边界检查、依赖图可视化
+- 支持多语言（不只是 JavaScript）
+- 社区活跃，插件丰富
+
+**劣势：**
+- 学习曲线较陡
+- 配置较复杂
+- 有一定的"框架锁定"感
+
+**适合场景：** 大型团队，企业级项目，需要严格的模块边界管理
+
+#### Lerna
+
+**优势：**
+- 历史悠久，社区认知度高
+- 配置简单
+
+**劣势：**
+- 功能有限，现在由 Nx 团队维护
+- 没有 Remote Caching
+- 增量构建能力弱
+
+**适合场景：** 主要用于 npm 包发布管理，不推荐用于应用开发
+
+#### Rush
+
+**优势：**
+- 微软出品，企业级稳定性
+- 严格的依赖管理
+- 支持大规模 Monorepo
+
+**劣势：**
+- 配置复杂
+- 学习曲线陡峭
+- 社区相对小
+
+**适合场景：** 超大型团队，微软技术栈
+
+#### Bun workspace
+
+**优势：**
+- 速度极快（Zig 编写）
+- 内置包管理器、打包器、测试运行器
+- 配置极简
+
+**劣势：**
+- 生态还不成熟
+- 没有任务编排
+- 没有 Remote Caching
+
+**适合场景：** 个人项目，小型团队，追求极致速度
+
+### 5.3 我的推荐
+
+对于大多数前端团队，我推荐 **Turborepo + pnpm workspace**。原因很简单：
+
+1. **上手快**：配置简单，10 分钟就能搭建好
+2. **性能好**：Rust 编写，构建速度快
+3. **AI 友好**：清晰的项目结构，完美配合 AI 工具
+4. **生态好**：与 Vercel、Next.js 深度集成
+
+如果你的团队规模超过 50 人，或者需要严格的模块边界管理，可以考虑 Nx。
+
+如果你是个人开发者，想要极致的速度，可以试试 Bun workspace。
+
+---
+
+## Closing（20 min）
+
+### 6.1 实战演示
+
+好，理论讲完了。让我们来做一个实战演示。
+
+我会从零开始，用 Turborepo + pnpm workspace 搭建一个 AI 友好的 Monorepo 项目。
+
+**Step 1：初始化项目**
+
+```bash
+# 使用 Turborepo 官方模板创建项目
+pnpm dlx create-turbo@latest my-ai-friendly-project
+
+# 进入项目目录
+cd my-ai-friendly-project
+```
+
+**Step 2：查看项目结构**
+
+```
+my-ai-friendly-project/
+├── apps/
+│   ├── web/              # Next.js 应用
+│   └── docs/             # 文档站点
+├── packages/
+│   ├── ui/               # 共享 UI 组件
+│   ├── eslint-config/    # ESLint 配置
+│   └── typescript-config/ # TypeScript 配置
+├── package.json
+├── pnpm-workspace.yaml
+└── turbo.json
+```
+
+**Step 3：添加功能切片结构**
+
+```bash
+# 创建 features 目录
+mkdir -p packages/features/auth/{components,hooks,services,types}
+mkdir -p packages/features/order/{components,hooks,services,types}
+mkdir -p packages/features/user/{components,hooks,services,types}
+```
+
+**Step 4：创建 AGENTS.md**
+
+在项目根目录创建 `AGENTS.md`：
+
+```markdown
+# AI Agent Instructions
+
+## Project Overview
+This is a demo e-commerce platform built with Turborepo + pnpm workspace.
+
+## Tech Stack
+- Framework: Next.js 15 (App Router)
+- Language: TypeScript 5.5 (strict mode)
+- Styling: Tailwind CSS v4
+- State: Zustand + React Query
+- Testing: Vitest + Playwright
+
+## Monorepo Structure
+- apps/web: Main website (Next.js)
+- apps/docs: Documentation (Next.js)
+- packages/ui: Shared UI components
+- packages/features/auth: Authentication feature
+- packages/features/order: Order management feature
+- packages/features/user: User management feature
+
+## Conventions
+- Use functional components with hooks
+- One component per file
+- Named exports only
+- Tailwind CSS for styling (no CSS modules)
+- Zod for validation
+- Error boundaries for error handling
+
+## Commands
+- Dev: pnpm dev
+- Build: pnpm build
+- Test: pnpm test
+- Lint: pnpm lint
+```
+
+**Step 5：创建 .cursorrules**
+
+```
+You are an expert in TypeScript, React, Next.js, and Tailwind CSS.
+
+This is a Turborepo monorepo. When modifying code:
+1. Check which package the file belongs to
+2. Respect package boundaries - import through public API (index.ts)
+3. Use workspace protocol for internal dependencies
+4. Follow the naming conventions in AGENTS.md
+
+When creating new features:
+1. Create under packages/features/[feature-name]/
+2. Include: components/, hooks/, services/, types/, index.ts
+3. Export public API through index.ts
+4. Add package.json with workspace dependencies
+```
+
+**Step 6：在 Cursor 中测试**
+
+现在，打开 Cursor，让 AI 帮你实现一个功能：
+
+> "在 packages/features/order 里实现一个订单列表组件，包含分页和搜索功能。使用 React Query 获取数据，Zustand 管理筛选状态。"
+
+你会发现，AI 生成的代码：
+- 自动遵循了你的命名约定
+- 自动使用了 Tailwind CSS
+- 自动使用了 React Query 和 Zustand
+- 自动放在了正确的目录结构里
+
+**这就是 AI 友好的项目架构的威力。**
+
+### 6.2 总结
+
+好，让我们总结一下今天学到的内容。
+
+**核心观点：项目架构决定了 AI 的效率。**
+
+1. **Monorepo**：把所有代码放在一个仓库里，让 AI 拥有完整的上下文
+2. **功能切片**：按业务功能组织代码，让 AI 只需要局部上下文
+3. **Turborepo + pnpm**：高效的构建工具和包管理器
+4. **命名约定**：清晰的命名让 AI 快速定位代码
+5. **项目规范文件**：AGENTS.md、.cursorrules、CLAUDE.md 告诉 AI 如何工作
+
+记住一句话：**你的项目结构越清晰，AI 生成的代码质量越高。**
+
+这不只是关于 AI。好的项目结构对人类开发者同样重要。当你的新同事加入团队时，清晰的项目结构和规范文件可以帮助他们快速上手。
+
+AI 友好的项目架构，本质上就是对人类友好的项目架构。只不过，AI 对"清晰"和"一致"的要求更高。
+
+### 6.3 预告下节课
+
+下节课，我们会讲 **MCP Tools**。
+
+MCP 是 Model Context Protocol 的缩写。它是 Anthropic 提出的一个开放协议，让 AI 可以连接外部工具和数据源。
+
+想象一下：你的 AI 不仅能读写代码，还能直接查询数据库、调用 API、操作文件系统、管理 Git 仓库。
+
+MCP 让这一切成为可能。
+
+下节课我们会讲：
+- MCP 的架构和原理
+- 如何开发自定义 MCP Server
+- 实战：构建一个连接数据库的 MCP Tool
+- MCP 在团队协作中的应用
+
+非常期待和大家一起探索。
+
+### 6.4 Q&A
+
+好，现在是 Q&A 时间。大家有什么问题？
+
+**常见问题预备：**
+
+**Q1：我们团队已经有多个仓库了，迁移到 Monorepo 的成本高吗？**
+
+A：迁移成本取决于你的项目规模。对于小型项目（3-5 个仓库），通常一周内可以完成迁移。关键步骤是：
+1. 创建 Monorepo 骨架
+2. 把各个仓库的代码移入对应的 packages
+3. 统一依赖版本
+4. 配置 Turborepo 的任务编排
+5. 更新 CI/CD 流程
+
+建议先迁移一个小项目试水，积累经验后再迁移大项目。
+
+**Q2：Monorepo 会不会导致 Git 仓库太大？**
+
+A：这是一个常见的担忧。实际上，代码本身的体积通常不是问题。问题在于：
+- 大文件（图片、视频等）：使用 Git LFS
+- 构建产物：确保 `.gitignore` 配置正确
+- 历史记录：定期清理不需要的分支
+
+Google、Meta、Microsoft 都在使用 Monorepo，管理着数十亿行代码。工具层面的问题都有解决方案。
+
+**Q3：不同的 packages 可以使用不同的框架吗？**
+
+A：可以。这正是 Monorepo 的优势之一。你可以在 `apps/web` 里用 Next.js，在 `apps/admin` 里用 Vite + React，在 `apps/mobile` 里用 React Native。它们共享 `packages/ui` 和 `packages/utils`，但各自有独立的构建配置。
+
+**Q4：如何处理 Monorepo 中的权限管理？**
+
+A：这是企业级 Monorepo 的一个重要问题。几种方案：
+- **GitHub CODEOWNERS**：定义每个目录的负责人，PR 自动分配 reviewer
+- **分支保护规则**：限制谁可以合并到特定分支
+- **CI 检查**：在 CI 中检查修改是否超出了开发者的权限范围
+
+对于大型团队，可以考虑使用 Nx 的模块边界检查功能，强制执行包之间的依赖规则。
+
+**Q5：AGENTS.md 和 .cursorrules 需要提交到 Git 吗？**
+
+A：需要。这些文件是项目的一部分，应该和代码一起版本管理。这样，团队里的每个人都使用相同的 AI 配置，保证代码风格的一致性。
+
+唯一的例外是个人偏好的配置。比如，你个人喜欢 AI 用中文回复，但团队约定用英文。这种个人偏好可以放在 `.cursorrules.local`（加入 `.gitignore`）。
+
+---
+
+好，今天的课就到这里。感谢大家的参与。
+
+记住：**好的项目架构是 AI 编程的基础。** 在你开始用 AI 写代码之前，先花时间把项目结构理清楚。这个投入会在后续的开发中获得数倍的回报。
+
+下节课见！
+
