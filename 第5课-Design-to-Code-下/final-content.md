@@ -1,112 +1,447 @@
-# 第5课：Design to Code（下）- AI 代码生成工具实战
+# Design to Code（下）：AI 代码生成工具实战
+## 最终版演讲稿（融合版）
 
-**时长：2.5 小时**
-**受众：3-5 年中高级前端工程师**
+**演讲时长**: 2.5 小时
+**风格**: 故事开场 + 技术深度 + 实践建议
 
 ---
 
 ## Opening Hook（10 min）
 
-大家好，欢迎来到第5课。
+大家好，欢迎来到第 5 课。
 
-在开始之前，我想问大家一个问题：你们有没有想过，五年后，前端工程师的日常工作会是什么样的？
+上节课我们讲了设计工具的 AI 革命——Figma AI、Penpot、Pencil.dev。今天我们换个角度，不从设计工具出发，而是从**代码生成工具**出发。
 
-我先说一个真实的故事。去年，我们团队有个项目，需要快速搭建一个管理后台。按照传统流程，设计师出稿，前端拿到 Figma 文件，然后开始写代码。一个中等复杂度的表单页面，熟练的工程师大概需要半天到一天时间。
+我先给大家看一个场景。
 
-但这次，我们尝试了一个新方法。我直接把 Figma 的截图扔给了 v0.dev，30 秒后，一个完整的 React 组件就生成了。代码质量怎么样？说实话，比我们团队里一些初级工程师写的还要规范。
+产品经理发了一张竞品截图到群里，说："我们也做一个类似的页面，明天要。"
 
-这不是个例。我观察到一个趋势：前端工程师的角色正在从"写代码"变成"审代码"。
+**传统做法**：
+1. 设计师出设计稿（半天）
+2. 开发者还原设计稿（1-2 天）
+3. 反复对稿修改（半天）
+4. 总计：2-3 天
 
-什么意思？以前我们的工作流程是：看设计稿 → 写 HTML → 写 CSS → 写 JS → 调试 → 优化。现在呢？看设计稿 → AI 生成代码 → 审查代码 → 调整细节 → 集成到项目。
+**AI-Native 做法**：
+1. 把截图丢给 v0.dev
+2. v0.dev 生成 React + Tailwind + shadcn/ui 代码
+3. 开发者审查和调整
+4. 总计：2-3 小时
 
-注意，我说的是"审代码"，不是"不写代码"。这是一个本质的区别。
+我现在就给大家演示。
 
-就像建筑师不会亲自搬砖，但他必须懂得如何审查施工质量。未来的前端工程师，核心竞争力不再是"我能写多快"，而是"我能判断这段代码好不好，以及如何让它变得更好"。
+（打开 v0.dev，上传竞品截图）
 
-今天这节课，我们就来深入探讨这个话题。我会带大家实战体验几个最前沿的 AI 代码生成工具，看看它们到底能做到什么程度，以及我们应该如何使用它们。
+大家看，v0.dev 生成的代码：
+- 使用了 shadcn/ui 的 Card、Button、Badge 组件
+- 样式全部用 Tailwind
+- 响应式布局
+- 代码质量很高，基本不用改
 
-准备好了吗？让我们开始。
+**这就是今天要讲的核心：AI 代码生成工具如何改变前端开发。**
 
 ---
 
 ## Section 1：AI 代码生成工具的定位（15 min）
 
-### 1.1 先破除一个误区
+### 不是替代，是加速
 
-首先，我要破除一个常见的误区：AI 代码生成工具不是来替代开发者的。
+首先要明确一点：**AI 代码生成工具不是替代开发者，而是加速从原型到生产的过程。**
 
-我经常听到有人说："AI 都能写代码了，前端工程师是不是要失业了？"
+你可以把它理解为一个"超级初稿生成器"：
+- 它生成 80% 的代码
+- 你负责审查和优化剩下的 20%
 
-这个问题就像在问："有了计算器，数学家是不是要失业了？"
+### 角色转变
 
-答案显然是否定的。计算器解放了数学家的计算能力，让他们可以专注于更高层次的数学问题。同样，AI 代码生成工具解放的是我们的"重复劳动"，让我们可以专注于更有价值的事情。
+传统前端开发者的工作：
+```
+需求 → 设计稿 → 写代码 → 调试 → 上线
+         ↑ 大部分时间花在这里
+```
 
-### 1.2 AI 代码生成工具的真正价值
+AI 时代前端开发者的工作：
+```
+需求 → AI 生成代码 → 审查代码 → 优化 → 上线
+                      ↑ 大部分时间花在这里
+```
 
-那么，这些工具的真正价值是什么？
+**从"写代码"变成"审代码"。**
 
-我总结为一句话：**加速从原型到生产的过程**。
+### 生成代码的质量评估标准
 
-让我展开说说：
+不是所有 AI 生成的代码都能用。评估标准：
 
-**第一，快速原型验证**
-
-以前，我们要验证一个设计方案，需要先写出来才能看到效果。现在，AI 可以在几十秒内生成一个可交互的原型。这大大加快了设计迭代的速度。
-
-举个例子，产品经理说："我想要一个带搜索、筛选、分页的表格。"以前你可能要花半天时间写出来，现在你可以用 v0.dev 30 秒生成一个，然后和产品经理一起看着原型讨论细节。
-
-**第二，降低实现成本**
-
-有些功能，你知道怎么做，但就是很繁琐。比如一个复杂的表单验证，或者一个多步骤的向导流程。这种时候，AI 可以帮你快速生成基础代码，你只需要在此基础上调整细节。
-
-**第三，学习最佳实践**
-
-这一点很多人忽略了。AI 生成的代码，往往遵循了当前的最佳实践。比如 v0.dev 生成的代码，会使用 shadcn/ui 组件，会遵循 Tailwind 的设计原则，会考虑可访问性。
-
-对于初级工程师来说，这是一个很好的学习机会。你可以看到"好的代码"长什么样，然后模仿和学习。
-
-### 1.3 定位：从助手到协作者
-
-我给 AI 代码生成工具的定位是：**从助手到协作者**。
-
-什么意思？
-
-**助手阶段**：你告诉它做什么，它帮你做。就像一个初级工程师，你需要给出明确的指令。
-
-**协作者阶段**：你和它一起讨论方案，它会给出建议，你们共同完成任务。就像一个有经验的同事。
-
-目前，大部分工具还处在"助手阶段"，但我们已经可以看到"协作者阶段"的雏形。比如 v0.dev 的迭代式修改，就有点像你和一个同事在结对编程。
-
-### 1.4 我们应该关注什么
-
-作为中高级前端工程师，我们应该关注什么？
-
-**第一，Prompt 工程能力**
-
-如何用自然语言准确描述你的需求，这是一门新的技能。好的 Prompt 可以让 AI 生成更符合预期的代码。
-
-**第二，代码审查能力**
-
-AI 生成的代码不一定完美，你需要能够快速判断哪些地方需要调整。这需要你对代码质量、性能、安全性有深刻的理解。
-
-**第三，工具选择能力**
-
-不同的工具适合不同的场景。v0.dev 适合生成单个组件，Bolt.new 适合快速搭建全栈原型，Screenshot to Code 适合还原设计稿。你需要知道什么时候用什么工具。
-
-**第四，集成能力**
-
-AI 生成的代码如何集成到现有项目中？如何保持代码风格的一致性？如何处理依赖冲突？这些都是实际工作中会遇到的问题。
-
-好，理论部分就到这里。接下来，我们进入实战环节。
+| 维度 | 好的生成 | 差的生成 |
+|------|---------|---------|
+| 技术栈 | 使用指定的技术栈 | 混用不同技术栈 |
+| 组件 | 使用 shadcn/ui | 自己写原生 HTML |
+| 样式 | Tailwind utility | 内联 style 或自定义 CSS |
+| 类型 | TypeScript 完整 | any 满天飞 |
+| 可访问性 | 语义化标签 | div 套 div |
+| 响应式 | 移动端适配 | 只有桌面端 |
 
 ---
 
 ## Section 2：v0.dev 深度解析（40 min）
 
-### 2.1 v0.dev 是什么
+### 核心能力
 
-v0.dev 是 Vercel 推出的 AI 代码生成工具，专注于生成 React 组件。
+v0.dev 是 Vercel 出品的 AI 代码生成工具，专门为 React + Tailwind + shadcn/ui 优化。
 
-它的特点是：
-- 生成的代码基于 React + TypeScript
-- 使用 Tailwind CSS 进行样式
+**能力 1：从文字描述生成代码**
+
+```
+Prompt: "创建一个现代的登录页面，包含邮箱和密码输入框，
+社交登录按钮（Google、GitHub），记住我复选框，
+忘记密码链接。使用 shadcn/ui 组件，支持暗色模式。"
+```
+
+v0.dev 会生成完整的组件代码，包含：
+- shadcn/ui 的 Card、Input、Button、Checkbox
+- Tailwind 样式
+- 暗色模式支持
+- 响应式布局
+
+**能力 2：从图片生成代码（截图转代码）**
+
+上传一张设计稿截图或竞品截图，v0.dev 会：
+1. 分析图片中的 UI 元素
+2. 识别布局结构
+3. 生成对应的 React 代码
+
+**能力 3：迭代式修改**
+
+生成代码后，你可以用自然语言修改：
+- "把按钮改成圆角"
+- "添加一个加载状态"
+- "改成暗色主题"
+- "让卡片在移动端竖排"
+
+v0.dev 会在现有代码基础上修改，而不是重新生成。
+
+### Prompt 技巧
+
+**技巧 1：明确指定技术栈**
+
+```
+❌ "创建一个登录页面"
+✅ "创建一个登录页面，使用 React + Tailwind CSS + shadcn/ui"
+```
+
+**技巧 2：描述视觉细节**
+
+```
+❌ "创建一个卡片"
+✅ "创建一个卡片，白色背景，圆角 12px，轻微阴影，
+    hover 时阴影加深，包含标题、描述和操作按钮"
+```
+
+**技巧 3：指定响应式行为**
+
+```
+✅ "移动端单列布局，平板双列，桌面三列，使用 CSS Grid"
+```
+
+**技巧 4：指定交互状态**
+
+```
+✅ "按钮有 hover、active、disabled、loading 四种状态"
+```
+
+**技巧 5：分步生成**
+
+复杂页面不要一次性生成，分步来：
+1. 先生成整体布局
+2. 再逐个完善每个区域
+3. 最后添加交互和动画
+
+### 生成代码示例
+
+我让 v0.dev 生成一个定价页面：
+
+```
+Prompt: "创建一个 SaaS 定价页面，三个套餐（基础版、专业版、企业版），
+专业版标记为'最受欢迎'。每个套餐包含价格、功能列表、CTA 按钮。
+支持月/年切换。使用 shadcn/ui 组件。"
+```
+
+v0.dev 生成的代码：
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { Check } from 'lucide-react'
+
+const plans = [
+  {
+    name: '基础版',
+    monthlyPrice: 29,
+    yearlyPrice: 290,
+    features: ['5 个项目', '10GB 存储', '基础分析', '邮件支持'],
+    popular: false,
+  },
+  {
+    name: '专业版',
+    monthlyPrice: 79,
+    yearlyPrice: 790,
+    features: ['无限项目', '100GB 存储', '高级分析', 'AI 助手', '优先支持'],
+    popular: true,
+  },
+  {
+    name: '企业版',
+    monthlyPrice: 199,
+    yearlyPrice: 1990,
+    features: ['无限一切', '1TB 存储', '自定义分析', 'AI 助手', '专属客服', 'SLA 保障'],
+    popular: false,
+  },
+]
+
+export function PricingPage() {
+  const [isYearly, setIsYearly] = useState(false)
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-16">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">选择适合你的方案</h1>
+        <p className="text-gray-600 mb-8">所有方案都包含 14 天免费试用</p>
+        <div className="flex items-center justify-center gap-3">
+          <span className={!isYearly ? 'font-semibold' : 'text-gray-500'}>月付</span>
+          <Switch checked={isYearly} onCheckedChange={setIsYearly} />
+          <span className={isYearly ? 'font-semibold' : 'text-gray-500'}>
+            年付 <Badge variant="secondary">省 20%</Badge>
+          </span>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-8">
+        {plans.map((plan) => (
+          <Card
+            key={plan.name}
+            className={cn(
+              "relative",
+              plan.popular && "border-2 border-primary shadow-lg scale-105"
+            )}
+          >
+            {plan.popular && (
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+                最受欢迎
+              </Badge>
+            )}
+            <CardHeader>
+              <CardTitle>{plan.name}</CardTitle>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">
+                  ¥{isYearly ? plan.yearlyPrice : plan.monthlyPrice}
+                </span>
+                <span className="text-gray-500">/{isYearly ? '年' : '月'}</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-green-500 shrink-0" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Button
+                className="w-full"
+                variant={plan.popular ? 'default' : 'outline'}
+              >
+                开始试用
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+**一次生成，代码质量很高。** 使用了 shadcn/ui 组件、Tailwind 样式、响应式布局、月/年切换逻辑。
+
+---
+
+## Section 3：横向对比其他 AI 生成工具（35 min）
+
+### Bolt.new
+
+**定位**：全栈应用原型工具
+
+**核心特色**：
+- 在线 IDE 环境（StackBlitz）
+- 支持全栈开发（前端 + 后端 + 数据库）
+- 实时预览
+- 一键部署
+
+**适用场景**：
+- 快速搭建全栈原型
+- 需要后端逻辑的项目
+- 演示和 POC
+
+**代码示例**：
+
+```
+Prompt: "创建一个待办事项应用，包含：
+- 添加/删除/完成任务
+- 数据持久化（SQLite）
+- 用户认证
+使用 Next.js + Prisma + shadcn/ui"
+```
+
+Bolt.new 会生成完整的全栈应用，包含前端、后端、数据库。
+
+### Lovable
+
+**定位**：端到端应用生成
+
+**核心特色**：
+- 从描述生成完整应用
+- 包含后端和数据库（Supabase）
+- 自动部署
+- 支持协作编辑
+
+**适用场景**：
+- 非技术人员快速搭建应用
+- MVP 快速验证
+- 内部工具
+
+### Screenshot to Code
+
+**定位**：截图转代码
+
+**核心特色**：
+- 上传截图，生成 HTML/React/Vue 代码
+- 支持多种框架
+- 开源免费
+
+**适用场景**：
+- 快速还原设计稿
+- 竞品分析
+- 原型制作
+
+### Builder.io Visual Copilot
+
+**定位**：Figma 插件
+
+**核心特色**：
+- 直接在 Figma 中使用
+- 生成多种框架的代码
+- 与设计工作流无缝集成
+
+**适用场景**：
+- 设计师和开发者协作
+- Figma 重度用户
+
+### 对比表格
+
+| 工具 | 技术栈 | 代码质量 | 全栈 | 价格 | 适用场景 |
+|------|--------|---------|------|------|---------|
+| **v0.dev** | React + Tailwind + shadcn | ⭐⭐⭐⭐⭐ | ❌ | 免费/付费 | 组件/页面生成 |
+| **Bolt.new** | 多框架 | ⭐⭐⭐⭐ | ✅ | 免费/付费 | 全栈原型 |
+| **Lovable** | React + Supabase | ⭐⭐⭐⭐ | ✅ | 付费 | 端到端应用 |
+| **Screenshot to Code** | 多框架 | ⭐⭐⭐ | ❌ | 开源 | 截图还原 |
+| **Builder.io** | 多框架 | ⭐⭐⭐⭐ | ❌ | 付费 | Figma 集成 |
+
+### 如何选择
+
+```
+需要生成组件/页面？ → v0.dev
+需要全栈原型？ → Bolt.new
+需要端到端应用？ → Lovable
+需要从截图还原？ → Screenshot to Code
+需要 Figma 集成？ → Builder.io
+```
+
+---
+
+## Section 4：实战演示（40 min）
+
+### 实战 1：v0.dev 从 prompt 到生产级组件
+
+**需求**：创建一个用户设置页面
+
+```
+Prompt: "创建一个用户设置页面，包含：
+1. 个人信息表单（头像上传、姓名、邮箱、手机号）
+2. 通知设置（邮件通知、推送通知、短信通知的开关）
+3. 安全设置（修改密码、两步验证）
+4. 危险区域（删除账号）
+使用 shadcn/ui 的 Tabs 组件组织，支持暗色模式"
+```
+
+现场演示生成过程和代码质量。
+
+### 实战 2：Bolt.new 快速搭建全栈原型
+
+**需求**：创建一个简单的博客系统
+
+```
+Prompt: "创建一个博客系统：
+- 文章列表页
+- 文章详情页
+- Markdown 编辑器
+- 用户认证（登录/注册）
+- SQLite 数据库
+使用 Next.js + Prisma + shadcn/ui"
+```
+
+现场演示 Bolt.new 的在线 IDE 和实时预览。
+
+### 实战 3：对比不同工具生成同一设计稿
+
+拿同一张设计稿，分别用 v0.dev、Bolt.new、Screenshot to Code 生成代码，对比：
+- 代码质量
+- 还原度
+- 生成速度
+- 可维护性
+
+---
+
+## Closing（20 min）
+
+### 今天的核心要点
+
+1. **AI 代码生成工具改变了前端开发的角色**：从"写代码"到"审代码"
+2. **v0.dev 是组件/页面生成的首选**：React + Tailwind + shadcn/ui 的最佳搭档
+3. **不同工具有不同的适用场景**：选对工具很重要
+4. **Prompt 质量决定生成质量**：学会写好 Prompt
+
+### 行动建议
+
+1. 注册 v0.dev，试试从 prompt 生成一个页面
+2. 用 Bolt.new 搭建一个全栈原型
+3. 把竞品截图丢给 Screenshot to Code，看看效果
+
+### 下节课预告
+
+下节课我们讲 **Monorepo 与代码组织**：
+- 为什么 Monorepo 更 AI 友好
+- Turborepo + pnpm workspace
+- AGENTS.md 和 .cursorrules
+
+### Q&A
+
+现在我们有 20 分钟的 Q&A 时间。
+
+---
+
+**演讲稿完成！**
+
+**总时长**: 约 2.5 小时
+- Opening: 10 min
+- Section 1: 15 min
+- Section 2: 40 min
+- Section 3: 35 min
+- Section 4: 40 min
+- Closing: 20 min
