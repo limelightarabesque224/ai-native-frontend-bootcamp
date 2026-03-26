@@ -1001,3 +1001,613 @@ Framer AI:
 
 ### 4.1 演示一:Figma 设计稿 → AI Agent → shadcn/ui 代码
 
+我现在打开Figma,给大家看一个完整的流程。
+
+**场景设定:**
+
+我们要把一个"用户管理后台"的设计稿转换成可运行的代码。这个页面包含:
+- 顶部搜索栏
+- 用户列表表格
+- 分页组件
+- 操作按钮（编辑、删除）
+
+**第一步:在Figma中打开设计稿**
+
+大家看屏幕,这是设计师交付的用户管理页面。我们可以看到:
+- 左侧是导航栏
+- 右侧主内容区有一个搜索框
+- 下面是一个数据表格,显示用户的姓名、邮箱、角色、状态
+- 每行右侧有操作按钮
+- 底部有分页
+
+**第二步:切换到Dev Mode**
+
+我点击右上角的"Dev Mode"按钮,切换到开发者视角。
+
+现在界面变了,你可以看到:
+- 每个元素都有间距标注
+- 右侧面板显示了CSS属性
+- 底部有代码生成区域
+
+**第三步:选择整个页面,使用AI Agent生成代码**
+
+我选中整个页面区域,然后点击"Generate Code with Agent"。
+
+在弹出的配置面板中,我选择:
+- Framework: React
+- Component Library: shadcn/ui
+- Styling: Tailwind CSS
+- Language: TypeScript
+
+点击"Generate"。
+
+（等待几秒钟）
+
+好,代码生成完成了。让我们看看生成了什么:
+
+```tsx
+// generated: user-management-page.tsx
+
+"use client"
+
+import { useState } from "react"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Badge } from "@/components/ui/badge"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
+import { Search, MoreHorizontal, Plus, Pencil, Trash2 } from "lucide-react"
+
+interface User {
+  id: string
+  name: string
+  email: string
+  role: "管理员" | "编辑" | "查看者"
+  status: "活跃" | "已禁用"
+  lastLogin: string
+}
+
+const mockUsers: User[] = [
+  {
+    id: "1",
+    name: "张三",
+    email: "zhangsan@example.com",
+    role: "管理员",
+    status: "活跃",
+    lastLogin: "2026-03-25 14:30",
+  },
+  {
+    id: "2",
+    name: "李四",
+    email: "lisi@example.com",
+    role: "编辑",
+    status: "活跃",
+    lastLogin: "2026-03-24 09:15",
+  },
+  {
+    id: "3",
+    name: "王五",
+    email: "wangwu@example.com",
+    role: "查看者",
+    status: "已禁用",
+    lastLogin: "2026-03-20 16:45",
+  },
+]
+
+export function UserManagementPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const roleVariantMap: Record<User["role"], "default" | "secondary" | "outline"> = {
+    "管理员": "default",
+    "编辑": "secondary",
+    "查看者": "outline",
+  }
+
+  const filteredUsers = mockUsers.filter(
+    (user) =>
+      user.name.includes(searchQuery) ||
+      user.email.includes(searchQuery)
+  )
+
+  return (
+    <div className="space-y-6 p-6">
+      {/* 页面标题和操作 */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">用户管理</h1>
+          <p className="text-muted-foreground">管理系统中的所有用户账户</p>
+        </div>
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          添加用户
+        </Button>
+      </div>
+
+      {/* 搜索栏 */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="搜索用户..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      {/* 用户表格 */}
+      <div className="rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>姓名</TableHead>
+              <TableHead>邮箱</TableHead>
+              <TableHead>角色</TableHead>
+              <TableHead>状态</TableHead>
+              <TableHead>最后登录</TableHead>
+              <TableHead className="w-[60px]">操作</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell className="font-medium">{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>
+                  <Badge variant={roleVariantMap[user.role]}>
+                    {user.role}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant={user.status === "活跃" ? "default" : "destructive"}
+                    className={
+                      user.status === "活跃"
+                        ? "bg-green-100 text-green-800 hover:bg-green-100"
+                        : ""
+                    }
+                  >
+                    {user.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {user.lastLogin}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">操作菜单</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>
+                        <Pencil className="mr-2 h-4 w-4" />
+                        编辑
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        删除
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* 分页 */}
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious href="#" />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#" isActive>1</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#">2</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink href="#">3</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext href="#" />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
+  )
+}
+```
+
+**大家注意看这段代码的几个亮点:**
+
+第一,**组件选择精准**。AI正确地识别了设计稿中的每个元素,并映射到了对应的shadcn/ui组件:
+- 搜索框 → Input + Search图标
+- 数据表格 → Table系列组件
+- 角色标签 → Badge
+- 操作菜单 → DropdownMenu
+- 分页 → Pagination
+
+第二,**交互逻辑完整**。AI不只是生成了静态UI,还添加了:
+- 搜索过滤功能
+- 下拉菜单交互
+- 状态管理(useState)
+
+第三,**无障碍性**。注意看操作按钮那里:
+```tsx
+<span className="sr-only">操作菜单</span>
+```
+AI自动添加了屏幕阅读器文本,这是很多开发者容易忽略的细节。
+
+第四,**TypeScript类型**。User接口定义完整,角色和状态使用了联合类型,类型安全。
+
+**第四步:开发者Review和调整**
+
+AI生成的代码已经非常好了,但我们还需要做一些调整:
+
+1. 替换mock数据为真实的API调用
+2. 添加loading状态
+3. 添加错误处理
+4. 实现真正的搜索（可能需要防抖）
+5. 实现分页逻辑
+
+这些是业务逻辑层面的工作,AI帮我们完成了UI层面的工作。
+
+**时间对比:**
+
+| 步骤 | 传统方式 | AI辅助方式 |
+|------|---------|-----------|
+| 测量设计稿 | 30分钟 | 0分钟 |
+| 编写HTML/JSX结构 | 45分钟 | 0分钟 |
+| 编写CSS/Tailwind样式 | 60分钟 | 0分钟 |
+| AI生成代码 | 0分钟 | 2分钟 |
+| Review和调整 | 0分钟 | 15分钟 |
+| 添加业务逻辑 | 60分钟 | 60分钟 |
+| 对稿修改 | 45分钟 | 5分钟 |
+| **总计** | **4小时** | **1小时22分钟** |
+
+节省了将近3小时,效率提升了约65%。
+
+### 4.2 演示二:Pencil.dev 在 IDE 中的工作流
+
+现在让我们看看另一种工作方式:Pencil.dev。
+
+**场景设定:**
+
+我们要在VS Code中,使用Pencil.dev创建一个定价页面组件。
+
+**第一步:安装和启动Pencil.dev**
+
+```bash
+# 安装Pencil.dev VS Code扩展
+# 在VS Code扩展市场搜索 "Pencil.dev" 并安装
+```
+
+安装完成后,在VS Code的侧边栏会出现Pencil.dev的图标。
+
+**第二步:创建新组件**
+
+我点击Pencil.dev图标,选择"New Component"。
+
+VS Code现在分成了两个面板:
+- 左侧:代码编辑器
+- 右侧:Pencil.dev可视化设计面板
+
+**第三步:在可视化面板中设计**
+
+我在右侧面板中:
+1. 拖入一个Section容器
+2. 添加标题文本:"选择适合你的方案"
+3. 拖入三个Card组件,水平排列
+4. 在每个Card中添加:方案名称、价格、功能列表、选择按钮
+
+每一步操作,左侧的代码都在实时更新。
+
+**第四步:查看自动生成的代码**
+
+```tsx
+// pricing-section.tsx - Pencil.dev实时生成
+
+export function PricingSection() {
+  return (
+    <section className="py-20 px-6">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-4">
+          选择适合你的方案
+        </h2>
+        <p className="text-center text-muted-foreground mb-12">
+          所有方案均包含14天免费试用
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* 基础版 */}
+          <div className="rounded-xl border bg-card p-8 space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold">基础版</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                适合个人开发者
+              </p>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-bold">¥0</span>
+              <span className="text-muted-foreground">/月</span>
+            </div>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                最多3个项目
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                基础组件库
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                社区支持
+              </li>
+            </ul>
+            <Button variant="outline" className="w-full">
+              开始使用
+            </Button>
+          </div>
+
+          {/* 专业版 - 推荐 */}
+          <div className="rounded-xl border-2 border-primary bg-card p-8 space-y-6 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge>最受欢迎</Badge>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">专业版</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                适合小型团队
+              </p>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-bold">¥99</span>
+              <span className="text-muted-foreground">/月</span>
+            </div>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                无限项目
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                完整组件库
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                AI代码生成
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                优先支持
+              </li>
+            </ul>
+            <Button className="w-full">开始试用</Button>
+          </div>
+
+          {/* 企业版 */}
+          <div className="rounded-xl border bg-card p-8 space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold">企业版</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                适合大型组织
+              </p>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-bold">¥399</span>
+              <span className="text-muted-foreground">/月</span>
+            </div>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                所有专业版功能
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                私有部署
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                SSO单点登录
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                专属客户经理
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon className="h-4 w-4 text-green-500" />
+                SLA保障
+              </li>
+            </ul>
+            <Button variant="outline" className="w-full">
+              联系销售
+            </Button>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+```
+
+**第五步:在代码中微调**
+
+现在我在左侧代码编辑器中做一些修改:
+
+```tsx
+// 我把价格数据提取成配置
+const plans = [
+  {
+    name: "基础版",
+    description: "适合个人开发者",
+    price: 0,
+    features: ["最多3个项目", "基础组件库", "社区支持"],
+    cta: "开始使用",
+    variant: "outline" as const,
+    popular: false,
+  },
+  {
+    name: "专业版",
+    description: "适合小型团队",
+    price: 99,
+    features: ["无限项目", "完整组件库", "AI代码生成", "优先支持"],
+    cta: "开始试用",
+    variant: "default" as const,
+    popular: true,
+  },
+  {
+    name: "企业版",
+    description: "适合大型组织",
+    price: 399,
+    features: ["所有专业版功能", "私有部署", "SSO单点登录", "专属客户经理", "SLA保障"],
+    cta: "联系销售",
+    variant: "outline" as const,
+    popular: false,
+  },
+]
+```
+
+当我保存代码,右侧的可视化面板立即更新,反映了我的修改。
+
+这就是双向同步的魅力——**设计和代码始终保持一致。**
+
+**Pencil.dev工作流的关键优势:**
+
+1. **零切换成本** - 设计和编码在同一个窗口
+2. **代码质量可控** - 你随时可以手动优化代码
+3. **Git友好** - 所有变更都是代码变更,可以正常使用Git
+4. **组件复用** - 设计好的组件可以直接在其他页面中import
+
+**两种工作流的对比:**
+
+| 维度 | Figma → AI → Code | Pencil.dev |
+|------|-------------------|------------|
+| 适合谁 | 有设计师的团队 | 全栈/前端独立开发 |
+| 设计精度 | 高(专业设计工具) | 中(IDE内设计) |
+| 代码质量 | 高(AI生成+人工Review) | 高(实时同步+手动调整) |
+| 工作流 | 设计→生成→调整 | 设计=编码,同步进行 |
+| 协作模式 | 设计师+开发者分工 | 一人完成设计+开发 |
+| 学习成本 | 低(各用各的工具) | 中(需要适应新工具) |
+
+两种方式各有优势,选择哪种取决于你的团队结构和项目需求。
+
+---
+
+## Closing（20分钟）
+
+### 总结
+
+好,让我们来总结一下今天的内容。
+
+今天我们用了2个多小时,从传统设计交付的痛点出发,一路探索到了2026年最前沿的设计到代码工作流。
+
+**核心要点回顾:**
+
+第一,**传统的设计到代码流程正在被颠覆。** 那个"设计稿→切图→手写还原→反复对稿"的时代正在过去。AI正在填平设计和代码之间的鸿沟。
+
+第二,**Figma已经构建了完整的AI生态。** 从AI Agents到Make Designs,从Dev Mode到Agent Skills,Figma提供了一条从设计到shadcn/ui代码的完整管线。这条管线可以将设计还原的工作量减少60-70%。
+
+第三,**Figma不是唯一的选择。** Penpot的开源+MCP集成、Pencil.dev的双向同步、Google Stitch的快速探索、Framer的设计即发布——每个工具都有自己的独特价值。
+
+第四,**AI生成的代码是起点,不是终点。** 无论使用哪个工具,AI生成的代码都需要开发者的Review、调整和增强。AI帮你跳过了"翻译"的步骤,让你可以把精力集中在业务逻辑、性能优化、无障碍性等真正有价值的工作上。
+
+### 给大家的实践建议
+
+1. **今天就试试Figma Dev Mode的AI代码生成。** 不需要等到新项目,拿一个现有的设计稿试试,感受一下AI生成代码的质量。
+
+2. **关注Penpot。** 如果你的团队对数据安全有要求,或者你想要更多的控制权,Penpot是一个非常好的选择。它的MCP集成让它可以无缝接入你的AI工作流。
+
+3. **尝试Pencil.dev。** 如果你是全栈开发者,或者你的团队没有专职设计师,Pencil.dev的双向同步工作流可能会让你的效率翻倍。
+
+4. **建立你的Design-to-Code管线。** 不要只是零散地使用这些工具,而是要建立一个完整的、可重复的工作流。配置好Figma Agent Skills,设置好shadcn/ui,让整个流程自动化。
+
+5. **保持学习。** 这个领域变化非常快。今天我们讲的内容,可能半年后就会有新的突破。保持关注,保持学习。
+
+### 预告下节课
+
+下节课是"Design to Code（下）- AI代码生成工具"。
+
+如果说今天我们讲的是"从设计工具出发,生成代码",那下节课我们要讲的是"从AI工具出发,直接生成完整的应用"。
+
+我们会深入探讨:
+- v0.dev - Vercel的AI UI生成器
+- bolt.new - StackBlitz的AI全栈生成器
+- Lovable - AI驱动的应用构建器
+- Claude Artifacts - Anthropic的代码生成能力
+- 这些工具与Figma工作流的结合
+
+下节课的内容会更加实战,我们会现场用这些工具从零构建一个完整的应用。
+
+### Q&A
+
+好,现在是提问时间。大家有什么问题都可以提出来。
+
+（以下是一些可能的问题和回答）
+
+**Q: AI生成的代码质量真的能用于生产环境吗?**
+
+A: 这是一个很好的问题。我的回答是:可以,但需要Review。AI生成的代码在UI还原度上已经非常高了,通常能达到90-95%。但在以下方面,你仍然需要人工把关:
+- 业务逻辑的正确性
+- 边界情况的处理
+- 性能优化(比如大列表的虚拟滚动)
+- 安全性(比如XSS防护)
+- 无障碍性的完整性
+
+把AI生成的代码当作一个高质量的起点,而不是最终产品。
+
+**Q: 如果设计师不用Figma怎么办?**
+
+A: 如果你的设计师用的是Sketch或其他工具,也不用担心。首先,很多设计工具都在添加AI能力。其次,你可以使用截图转代码的方式——把设计稿截图,然后用v0.dev或Claude等AI工具直接从截图生成代码。我们下节课会详细讲这个方法。
+
+**Q: Penpot的MCP集成成熟吗?**
+
+A: Penpot的MCP集成在2026年初已经相当成熟了。它支持读取设计数据、组件信息、样式Token等。但相比Figma的原生AI能力,Penpot的AI功能还在追赶中。如果你主要看重的是开源和私有部署,Penpot是最好的选择;如果你主要看重AI能力,Figma目前仍然领先。
+
+**Q: 这些工具会取代前端开发者吗?**
+
+A: 不会。这些工具改变的是前端开发者的工作内容,而不是取代前端开发者。以前我们花大量时间在"翻译"设计稿上,现在AI帮我们做了这部分工作。但前端开发的核心价值——业务逻辑实现、性能优化、用户体验打磨、架构设计——这些AI目前还无法替代。
+
+换个角度想:AI让你从"设计稿翻译员"变成了"产品体验工程师"。你的工作变得更有价值了,而不是更没价值。
+
+**Q: 如何说服团队采用这些新工具?**
+
+A: 我的建议是:不要一上来就推翻现有流程。找一个小项目或者一个新页面,用AI辅助的方式来做,然后对比效率和质量。用数据说话。当团队看到实际的效率提升,自然就会愿意采用。
+
+好,今天的课就到这里。感谢大家的参与!
+
+下课前再提醒一下:
+- 课后请尝试用Figma Dev Mode生成一个组件的代码
+- 有兴趣的同学可以注册Penpot账号,体验一下开源设计工具
+- 下节课我们会做更多的实战演示,请大家提前安装好v0.dev的CLI工具
+
+我们下节课见!
+
+---
+
+*（全文完,总时长约2.5小时）*
