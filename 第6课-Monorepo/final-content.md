@@ -467,3 +467,187 @@ pnpm dev
 
 Turborepo 会自动处理任务编排，pnpm 会自动处理依赖管理。
 
+---
+
+## Section 3：AI 友好的文件结构约定（25 min）
+
+### 3.1 命名约定
+
+好，现在我们有了 Monorepo 的基础架构。但这还不够。
+
+要让 AI 真正理解你的项目，你需要建立一套清晰的命名约定。
+
+为什么命名约定这么重要？因为 AI 是通过文件名和目录名来理解代码结构的。
+
+举个例子。假设你有两个文件：
+
+```
+utils.ts
+userAuthenticationHelpers.ts
+```
+
+哪个文件名更 AI 友好？
+
+显然是第二个。`userAuthenticationHelpers.ts` 这个名字告诉 AI：这个文件包含用户认证相关的辅助函数。
+
+而 `utils.ts` 呢？AI 完全不知道里面有什么。它可能包含日期格式化，可能包含加密解密，可能包含任何东西。
+
+**好的命名约定应该遵循这些原则：**
+
+1. **描述性（Descriptive）**：文件名应该清楚地描述内容
+2. **一致性（Consistent）**：整个项目使用相同的命名风格
+3. **层次性（Hierarchical）**：通过目录结构表达层次关系
+
+让我们看一些具体的例子。
+
+#### 3.1.1 组件命名
+
+```
+# ❌ 不好的命名
+Button.tsx
+Modal.tsx
+Card.tsx
+
+# ✅ 好的命名
+Button.tsx              # 基础组件可以简单命名
+UserProfileCard.tsx     # 业务组件应该包含业务含义
+OrderConfirmModal.tsx   # 清楚地表达用途
+```
+
+#### 3.1.2 Hook 命名
+
+```
+# ❌ 不好的命名
+useData.ts
+useFetch.ts
+
+# ✅ 好的命名
+useUserProfile.ts       # 清楚地表达获取什么数据
+useOrderList.ts         # 业务含义明确
+useAuthToken.ts         # 功能清晰
+```
+
+#### 3.1.3 工具函数命名
+
+```
+# ❌ 不好的命名
+utils/
+├── index.ts            # 什么都有
+
+# ✅ 好的命名
+utils/
+├── date/
+│   ├── formatDate.ts
+│   └── parseDate.ts
+├── string/
+│   ├── capitalize.ts
+│   └── truncate.ts
+└── validation/
+    ├── validateEmail.ts
+    └── validatePhone.ts
+```
+
+看到区别了吗？好的命名约定让 AI 可以通过文件名快速定位到相关代码。
+
+### 3.2 目录结构约定
+
+除了命名，目录结构也很重要。
+
+我推荐使用"功能切片 + 分层"的混合结构：
+
+```
+packages/
+├── features/           # 业务功能
+│   ├── auth/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── index.ts
+│   ├── order/
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── services/
+│   │   ├── types/
+│   │   └── index.ts
+│   └── user/
+│       ├── components/
+│       ├── hooks/
+│       ├── services/
+│       ├── types/
+│       └── index.ts
+├── ui/                 # 通用 UI 组件
+│   ├── Button/
+│   ├── Input/
+│   └── Modal/
+├── utils/              # 通用工具函数
+│   ├── date/
+│   ├── string/
+│   └── validation/
+└── config/             # 配置文件
+    ├── api.ts
+    └── constants.ts
+```
+
+这种结构的优势是：
+
+1. **业务功能聚合**：所有和"订单"相关的代码都在 `features/order` 里
+2. **通用代码分离**：UI 组件、工具函数等通用代码独立出来
+3. **层次清晰**：每个 feature 内部按技术分层，但 feature 之间按业务分离
+
+### 3.3 AGENTS.md / CLAUDE.md / .cursorrules
+
+现在，我们来讲今天最重要的一个概念：**项目规范文件**。
+
+这些文件是专门写给 AI 看的。它们告诉 AI：这个项目是怎么组织的，有哪些约定，应该怎么生成代码。
+
+不同的 AI 工具有不同的规范文件：
+
+- **AGENTS.md**：通用的 AI 指令文件，适用于所有 AI 工具
+- **CLAUDE.md**：专门给 Claude 看的指令文件
+- **.cursorrules**：Cursor 专用的规则文件
+
+让我们看一个 `AGENTS.md` 的例子：
+
+```markdown
+# AI Agent Instructions
+
+## Project Overview
+This is an e-commerce platform built with Next.js, React, and TypeScript.
+
+## Architecture
+- Monorepo managed by Turborepo + pnpm workspace
+- Feature-sliced design: code organized by business features
+- Shared packages: ui, utils, config, types
+
+## Code Organization
+- `apps/web`: Main website
+- `apps/admin`: Admin dashboard
+- `packages/features/*`: Business features (auth, order, user, product)
+- `packages/ui`: Shared UI components
+- `packages/utils`: Utility functions
+
+## Naming Conventions
+- Components: PascalCase (e.g., UserProfileCard.tsx)
+- Hooks: camelCase with 'use' prefix (e.g., useUserProfile.ts)
+- Utils: camelCase (e.g., formatDate.ts)
+- Types: PascalCase with 'Type' or 'Interface' suffix
+
+## Code Style
+- Use TypeScript strict mode
+- Prefer functional components with hooks
+- Use Tailwind CSS for styling
+- Follow ESLint and Prettier rules
+
+## When Adding New Features
+1. Create a new directory under `packages/features/`
+2. Include: components/, hooks/, services/, types/, index.ts
+3. Export public APIs through index.ts
+4. Add dependencies in package.json with workspace protocol
+
+## Testing
+- Unit tests: Vitest
+- E2E tests: Playwright
+- Test files: *.test.ts or *.spec.ts
+```
+

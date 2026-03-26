@@ -1,463 +1,456 @@
-# 全链路整合与未来展望
-## 最终版演讲稿（融合版）
+# 第 11 课：全链路整合与未来展望
 
-**演讲时长**: 2.5 小时
-**风格**: 故事开场 + 技术深度 + 实践建议
-
----
-
-## Opening Hook（10 min）
-
-大家好，欢迎来到我们整个系列课程的最后一课。
-
-先让我问大家一个问题：从拿到一个产品需求，到最终部署上线，传统的开发流程需要多长时间？
-
-一周？两周？一个月？
-
-我先不说答案。等会儿我会给大家现场演示，用 AI-Native 的工作流，同样的项目，我们能把时间压缩到什么程度。
-
-回顾一下我们这十节课都学了什么：
-
-- **第 0 课**：认知重构——AI 友好性是新的选型维度
-- **第 1 课**：Tailwind CSS v4——utility-first 是 AI 最佳拍档
-- **第 2 课**：shadcn/ui——Copy-Paste 比 npm 黑盒更 AI 友好
-- **第 3 课**：Radix UI——Composition 模式让 AI 理解组件结构
-- **第 4 课**：Figma AI——设计到代码的距离从"天"到"分钟"
-- **第 5 课**：v0.dev / Bolt.new——AI 代码生成工具实战
-- **第 6 课**：Monorepo——AI 友好的项目架构
-- **第 7 课**：Playwright MCP——AI 驱动的自动化测试
-- **第 8 课**：Cursor + Memory 管理——让 AI 越用越懂你
-- **第 9 课**：Vercel AI SDK——在前端集成 AI 能力
-- **第 10 课**：Biome + 全栈化——AI 时代的工程化
-
-今天，我们把这些全部串起来。
+> 讲师演讲稿 | 时长：2.5 小时  
+> 受众：3-5 年中高级前端工程师  
+> 风格：融合版（故事开场 + 技术深度 + 实践建议）
 
 ---
 
-## Section 1：全链路 AI-Native 工作流（30 min）
+## Opening Hook（10 min）：从设计到部署的完整 AI-Native 工作流
 
-### 完整的工作流
+大家好，欢迎来到我们中级训练营的第 11 课，也是我们整个课程体系的收官之课。
+
+在正式开始之前，我想先给大家讲一个真实的故事。
+
+上个月，我的一个朋友——一位有 5 年经验的前端工程师，接到了一个紧急需求：公司要在三天内上线一个全新的客户反馈管理平台。三天，一个完整的平台，从设计到部署。按照传统的开发流程，这几乎是不可能完成的任务。
+
+但他做到了。
+
+第一天上午，他用 Figma AI 生成了整套 UI 设计稿，然后通过 v0.dev 把设计稿直接转成了 React 组件代码。第一天下午，他在 Cursor 里用 AI 辅助完成了核心业务逻辑的开发，shadcn/ui 和 Tailwind CSS 帮他搞定了所有的样式系统。第二天，他用 Vercel AI SDK 接入了智能分析功能，让平台能自动对用户反馈进行情感分析和分类。第二天晚上，Playwright MCP 帮他自动生成并运行了端到端测试。第三天上午，CI/CD 流水线自动完成了构建和部署。
+
+三天，一个人，一个完整的平台。
+
+大家可能会想，这听起来像是在吹牛。但我想说的是，这就是 AI-Native 工作流的力量。这不是未来，这是现在。
+
+回想一下我们过去十节课学到的内容：我们学了 Cursor 智能编辑器，学了 Tailwind CSS 和 shadcn/ui 组件库，学了 Vercel AI SDK，学了 Playwright MCP 自动化测试，学了 CI/CD 流水线。每一个工具、每一项技术，都是这条全链路上的一个关键节点。
+
+但是，我发现很多同学在学完之后，还是把这些工具当作独立的个体在使用。今天这节课，我要做的事情就是——把所有这些点，串成一条线，再织成一张网。
+
+今天的课程分为四个核心部分：
+
+第一部分，我们会从全局视角梳理整条 AI-Native 开发链路，让大家看到每个工具在链路中的位置和价值。
+
+第二部分，是今天的重头戏——我会带大家做一个完整的项目实战，从 Figma 设计稿开始，一路走到线上部署，全程 AI 加持。同时我们会做一个效率对比，看看 AI-Native 工作流到底能快多少。
+
+第三部分，我们聊聊职业发展。AI 时代，前端工程师的核心竞争力到底是什么？我们的角色正在发生怎样的转变？
+
+第四部分，我们展望未来。AI-Native 框架的崛起、设计与开发边界的模糊化，这些趋势会如何重塑我们的行业？
+
+最后，我会做一个完整的课程总结，给大家一些具体的行动建议。
+
+好，准备好了吗？让我们开始这趟全链路之旅。
+
+---
+
+## Section 1（30 min）：全链路工作流串联
+
+### 1.1 全链路总览：AI-Native 开发的八个关键节点
+
+好，我们先来看一张全景图。
+
+一个完整的 AI-Native 前端开发工作流，从头到尾包含八个关键节点。我把它画出来，大家看一下：
 
 ```
-需求 → 设计 → 代码 → 测试 → 审查 → 部署
+设计 → 转码 → 开发 → 组件 → AI功能 → 测试 → CI/CD → 部署
+ │       │      │      │       │        │       │       │
+Figma   v0    Cursor  shadcn  Vercel  Playwright GitHub  Vercel
+ AI    .dev    AI     /ui +   AI SDK    MCP    Actions  Platform
+              Copilot Tailwind
 ```
 
-传统流程中，每个环节都是独立的，需要人工衔接。
+这八个节点，覆盖了前端开发的完整生命周期。传统工作流里，每个节点之间都有大量的人工衔接成本。而在 AI-Native 工作流里，这些衔接成本被大幅压缩，甚至接近于零。
 
-AI-Native 流程中，每个环节都有 AI 参与，而且环节之间可以自动衔接。
+让我逐一给大家拆解。
 
-让我逐一讲解：
+### 1.2 节点一：设计——Figma AI
 
-### 环节 1：需求 → 设计（Figma AI）
+第一个节点是设计。
 
-产品经理给你一个需求文档。
+过去，设计师出设计稿，前端工程师拿到设计稿再开始开发。这中间有大量的沟通成本：这个间距是多少？这个颜色值是什么？这个交互效果怎么实现？
 
-**传统做法**：设计师花 3-5 天出设计稿，反复修改。
+现在，Figma AI 改变了这个游戏规则。
 
-**AI-Native 做法**：
-1. 用 Figma Make Designs，从文字描述生成初版设计
-2. 设计师在此基础上调整
-3. 1 天内完成设计稿
+Figma AI 能做什么？它可以根据文字描述自动生成 UI 设计稿，可以智能调整布局和配色，可以自动生成设计规范文档。更重要的是，它生成的设计稿是结构化的——每个图层都有清晰的命名和层级关系，这为后续的自动转码打下了基础。
 
-**时间节省：60-70%**
+举个例子，你在 Figma 里输入一段描述：
 
-### 环节 2：设计 → 代码（v0.dev / Figma Agent Skills）
+```
+"设计一个现代风格的用户反馈管理仪表盘，包含：
+- 顶部导航栏，带搜索框和用户头像
+- 左侧边栏，包含反馈分类菜单
+- 主内容区，展示反馈列表，每条反馈包含用户头像、内容摘要、情感标签、时间
+- 右侧面板，展示选中反馈的详细信息和 AI 分析结果
+- 底部状态栏，显示统计数据"
+```
 
-设计稿完成后，需要转化为代码。
+Figma AI 会在几秒钟内生成一个完整的设计稿。当然，它生成的不一定完美，你可能需要微调。但关键是——它把你从零到一的时间从几个小时压缩到了几分钟。
 
-**传统做法**：开发者对着设计稿手写代码，2-3 天。
+这里有一个重要的认知转变：作为前端工程师，你不再只是设计稿的"消费者"，你也可以成为设计稿的"生产者"。这意味着什么？意味着你可以更快地验证想法，更快地做原型，更快地和产品经理、设计师对齐需求。
 
-**AI-Native 做法**：
-1. 用 Figma Agent Skills 直接生成 shadcn/ui 代码
-2. 或者用 v0.dev 从设计截图生成代码
-3. 开发者审查和调整
-4. 2-3 小时完成
+### 1.3 节点二：设计转代码——v0.dev
+
+第二个节点是设计转代码，也就是 D2C（Design to Code）。
+
+v0.dev 是 Vercel 推出的 AI 驱动的 UI 生成工具。它的核心能力是：你给它一段描述或者一张设计图，它直接给你生成可用的 React 组件代码。
+
+注意，我说的是"可用的"，不是"玩具级的"。v0.dev 生成的代码直接基于 shadcn/ui 和 Tailwind CSS，代码质量相当高，可以直接集成到你的项目中。
+
+来看一个实际的例子。我给 v0.dev 这样一段提示：
+
+```
+"创建一个反馈列表组件，每条反馈包含：
+- 用户头像（圆形）
+- 用户名和提交时间
+- 反馈内容摘要（最多显示两行）
+- 情感分析标签（正面/中性/负面，用不同颜色区分）
+- 操作按钮（查看详情、标记已处理）
+列表支持虚拟滚动，每页显示 20 条"
+```
+
+v0.dev 会生成类似这样的代码：
 
 ```tsx
-// v0.dev 生成的代码，直接可用
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+// FeedbackList.tsx — 由 v0.dev 生成，基于 shadcn/ui + Tailwind
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { formatDistanceToNow } from "date-fns"
+import { zhCN } from "date-fns/locale"
 
-export function PricingCard({ plan }) {
-  return (
-    <Card className="w-[350px] relative overflow-hidden">
-      {plan.popular && (
-        <Badge className="absolute top-4 right-4">最受欢迎</Badge>
-      )}
-      <CardHeader>
-        <CardTitle className="text-2xl">{plan.name}</CardTitle>
-        <p className="text-4xl font-bold mt-2">
-          ¥{plan.price}<span className="text-sm text-gray-500">/月</span>
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <ul className="space-y-2">
-          {plan.features.map((feature) => (
-            <li key={feature} className="flex items-center gap-2">
-              <CheckIcon className="w-4 h-4 text-green-500" />
-              <span className="text-sm">{feature}</span>
-            </li>
-          ))}
-        </ul>
-        <Button className="w-full" variant={plan.popular ? 'default' : 'outline'}>
-          开始使用
-        </Button>
-      </CardContent>
-    </Card>
-  )
+interface Feedback {
+  id: string
+  user: {
+    name: string
+    avatar: string
+  }
+  content: string
+  sentiment: "positive" | "neutral" | "negative"
+  createdAt: Date
+  isProcessed: boolean
 }
-```
 
-**时间节省：80-90%**
+const sentimentConfig = {
+  positive: { label: "正面", className: "bg-green-100 text-green-800" },
+  neutral: { label: "中性", className: "bg-gray-100 text-gray-800" },
+  negative: { label: "负面", className: "bg-red-100 text-red-800" },
+}
 
-### 环节 3：开发（Cursor + .cursorrules + Memory）
+interface FeedbackListProps {
+  feedbacks: Feedback[]
+  onViewDetail: (id: string) => void
+  onMarkProcessed: (id: string) => void
+}
 
-拿到生成的代码后，开发者在 Cursor 中进行开发。
-
-**关键配置**：
-- `.cursorrules`：告诉 AI 项目规范
-- `AGENTS.md`：告诉 AI 项目上下文
-- Memory：让 AI 记住你的偏好
-
-```
-// .cursorrules
-使用 Tailwind CSS v4 + shadcn/ui
-组件使用函数式 + TypeScript
-状态管理用 Zustand
-数据请求用 TanStack Query
-```
-
-AI 生成的代码自动符合项目规范。
-
-### 环节 4：AI 功能集成（Vercel AI SDK）
-
-如果项目需要 AI 功能（聊天、搜索等）：
-
-```tsx
-// 10 行代码实现 AI 聊天
-import { useChat } from 'ai/react'
-
-export function Chat() {
-  const { messages, input, handleInputChange, handleSubmit } = useChat()
+export function FeedbackList({
+  feedbacks,
+  onViewDetail,
+  onMarkProcessed,
+}: FeedbackListProps) {
   return (
-    <div>
-      {messages.map(m => <div key={m.id}>{m.content}</div>)}
-      <form onSubmit={handleSubmit}>
-        <input value={input} onChange={handleInputChange} />
-      </form>
+    <div className="space-y-3">
+      {feedbacks.map((feedback) => (
+        <Card key={feedback.id} className="hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={feedback.user.avatar} />
+                <AvatarFallback>
+                  {feedback.user.name.slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">
+                    {feedback.user.name}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(feedback.createdAt, {
+                      addSuffix: true,
+                      locale: zhCN,
+                    })}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  {feedback.content}
+                </p>
+                <div className="flex items-center justify-between mt-2">
+                  <Badge
+                    variant="secondary"
+                    className={
+                      sentimentConfig[feedback.sentiment].className
+                    }
+                  >
+                    {sentimentConfig[feedback.sentiment].label}
+                  </Badge>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onViewDetail(feedback.id)}
+                    >
+                      查看详情
+                    </Button>
+                    {!feedback.isProcessed && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onMarkProcessed(feedback.id)}
+                      >
+                        标记已处理
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   )
 }
 ```
 
-### 环节 5：测试（Playwright MCP）
+大家看，这段代码的质量是不是相当不错？类型定义完整，组件结构清晰，样式用的是 Tailwind，UI 组件用的是 shadcn/ui。你拿到这段代码，几乎不需要做太多修改就能直接用。
 
-代码写完后，用 Playwright MCP 自动生成和运行测试：
+这就是 D2C 的威力。它不是要取代你，而是帮你跳过那些重复性的 UI 搭建工作，让你把精力集中在真正需要思考的业务逻辑上。
 
-```
-// 告诉 AI
-"帮我测试这个定价页面：
-1. 检查三个套餐卡片是否正确显示
-2. 点击'开始使用'按钮，检查是否跳转到注册页
-3. 切换月/年计费，检查价格是否正确更新"
-```
+### 1.4 节点三：智能开发——Cursor AI
 
-AI 自动生成 Playwright 测试脚本并执行。
+第三个节点是开发环节，我们的主力工具是 Cursor。
 
-### 环节 6：代码审查（AI Code Review）
+Cursor 在我们之前的课程里已经深入讲过了，这里我重点强调它在全链路中的角色。
 
-提交 PR 后，AI 自动审查代码：
-- 检查代码质量
-- 检查安全问题
-- 检查性能问题
-- 提出改进建议
+Cursor 不只是一个代码编辑器，它是整个开发环节的 AI 中枢。你从 v0.dev 拿到的组件代码，导入到 Cursor 项目中之后，Cursor 能帮你做什么？
 
-### 环节 7：CI/CD → 部署
+第一，智能补全和重构。当你把 v0.dev 生成的组件集成到项目中时，Cursor 会根据你项目的上下文，自动调整 import 路径、适配你的状态管理方案、补充缺失的错误处理逻辑。
 
-Turborepo 的增量构建 + 智能测试选择，CI/CD 时间从 30 分钟缩短到 5 分钟。
-
-### 效率对比
-
-| 环节 | 传统流程 | AI-Native 流程 | 节省 |
-|------|---------|---------------|------|
-| 设计 | 3-5 天 | 1 天 | 70% |
-| 设计转代码 | 2-3 天 | 2-3 小时 | 90% |
-| 开发 | 5-7 天 | 1-2 天 | 70% |
-| 测试 | 2-3 天 | 半天 | 80% |
-| 代码审查 | 1 天 | 2 小时 | 80% |
-| CI/CD | 30 分钟 | 5 分钟 | 85% |
-| **总计** | **2-3 周** | **3-4 天** | **75%** |
-
-**从 2-3 周缩短到 3-4 天。这就是 AI-Native 工作流的威力。**
-
----
-
-## Section 2：完整项目实战演示（50 min）
-
-### 项目需求
-
-我们现在现场演示，从零开始构建一个"AI 驱动的任务管理应用"：
-
-**功能**：
-- 任务列表（增删改查）
-- AI 智能分类（自动给任务打标签）
-- AI 助手（用自然语言管理任务）
-
-### Step 1：设计（5 min）
-
-用 v0.dev 生成初版设计：
+第二，业务逻辑生成。你可以用自然语言描述业务需求，Cursor 帮你生成对应的代码。比如：
 
 ```
-Prompt: "创建一个现代的任务管理应用界面，
-包含侧边栏导航、任务列表、AI 聊天面板。
-使用 shadcn/ui 组件，支持暗色模式。"
+// 在 Cursor 中使用 Cmd+K 输入：
+// "实现反馈列表的筛选逻辑：支持按情感类型、时间范围、处理状态筛选，
+//  使用 URL search params 持久化筛选条件"
 ```
 
-v0.dev 生成完整的页面代码。
+Cursor 会生成完整的筛选逻辑，包括自定义 Hook、URL 参数解析、筛选函数等。
 
-### Step 2：项目搭建（5 min）
+第三，代码审查。你写完代码后，可以让 Cursor 帮你审查，它会指出潜在的性能问题、安全隐患、可访问性缺陷。
 
-```bash
-npx create-next-app@latest ai-todo --typescript --tailwind --app
-cd ai-todo
-npx shadcn@latest init
-npx shadcn@latest add button input card dialog
-pnpm add ai @ai-sdk/openai zustand @tanstack/react-query prisma
-```
+这里我想强调一个关键理念：Cursor 的价值不在于它能写多少代码，而在于它能让你保持在"心流"状态中。传统开发中，你经常需要中断思路去查文档、去 Stack Overflow 搜答案、去翻以前的代码找参考。Cursor 把这些中断都消除了，你只需要专注于"我要实现什么"，而不是"我该怎么写"。
 
-### Step 3：数据库（5 min）
+### 1.5 节点四：组件系统——shadcn/ui + Tailwind CSS
 
-```prisma
-// prisma/schema.prisma
-model Task {
-  id        String   @id @default(cuid())
-  title     String
-  completed Boolean  @default(false)
-  tags      String[] @default([])
-  createdAt DateTime @default(now())
-}
-```
+第四个节点是组件系统。
 
-### Step 4：Server Actions（10 min）
+shadcn/ui 加 Tailwind CSS，这个组合我们在之前的课程里也详细讲过。在全链路中，它们扮演的角色是"标准化层"。
+
+什么意思？当你的代码来源多样化——有些来自 v0.dev 生成，有些来自 Cursor AI 辅助编写，有些是你手写的——你需要一个统一的组件系统来保证一致性。shadcn/ui 就是这个统一层。
+
+而且 shadcn/ui 有一个非常重要的特性：它不是一个传统的 npm 包，而是把组件代码直接复制到你的项目中。这意味着你对每个组件都有完全的控制权，可以根据项目需求自由定制。
+
+Tailwind CSS 则提供了原子化的样式系统，确保所有组件的样式风格一致。更重要的是，Tailwind 的类名是"自描述的"——`text-sm text-muted-foreground mt-1 line-clamp-2`，你一看就知道这个元素的样式是什么。这对 AI 生成代码来说非常友好，因为 AI 可以精确地理解和生成 Tailwind 类名。
+
+### 1.6 节点五：AI 功能集成——Vercel AI SDK
+
+第五个节点是 AI 功能集成。
+
+现在越来越多的应用需要内置 AI 能力——智能搜索、内容生成、数据分析、对话交互。Vercel AI SDK 让这些能力的集成变得非常简单。
+
+在我们的反馈管理平台中，我们需要一个 AI 功能：自动分析用户反馈的情感倾向，并生成处理建议。来看看用 Vercel AI SDK 怎么实现：
 
 ```typescript
-// app/actions.ts
-'use server'
-
-import { prisma } from '@/lib/prisma'
-
-export async function createTask(title: string) {
-  return await prisma.task.create({
-    data: { title }
-  })
-}
-
-export async function toggleTask(id: string) {
-  const task = await prisma.task.findUnique({ where: { id } })
-  return await prisma.task.update({
-    where: { id },
-    data: { completed: !task?.completed }
-  })
-}
-```
-
-### Step 5：AI 功能（10 min）
-
-```typescript
-// app/api/chat/route.ts
-import { streamText, tool } from 'ai'
-import { openai } from '@ai-sdk/openai'
-import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+// app/api/analyze-feedback/route.ts
+import { openai } from "@ai-sdk/openai"
+import { streamText } from "ai"
 
 export async function POST(req: Request) {
-  const { messages } = await req.json()
+  const { feedback } = await req.json()
 
   const result = streamText({
-    model: openai('gpt-4o'),
-    messages,
-    system: '你是一个任务管理助手。用户可以用自然语言管理任务。',
-    tools: {
-      createTask: tool({
-        description: '创建新任务',
-        parameters: z.object({ title: z.string() }),
-        execute: async ({ title }) => {
-          const task = await prisma.task.create({ data: { title } })
-          return `已创建任务：${task.title}`
-        },
-      }),
-      listTasks: tool({
-        description: '列出所有任务',
-        parameters: z.object({}),
-        execute: async () => {
-          const tasks = await prisma.task.findMany()
-          return tasks.map(t => `${t.completed ? '✅' : '⬜'} ${t.title}`).join('\n')
-        },
-      }),
-    },
+    model: openai("gpt-4o"),
+    system: `你是一个专业的客户反馈分析师。请分析以下用户反馈，给出：
+1. 情感倾向（正面/中性/负面）及置信度
+2. 关键问题提取
+3. 建议的处理优先级（高/中/低）
+4. 推荐的回复策略
+请用 JSON 格式返回结果。`,
+    prompt: feedback,
   })
 
   return result.toDataStreamResponse()
 }
 ```
 
-### Step 6：测试（5 min）
+客户端调用也很简洁：
 
-用 Playwright MCP 自动生成测试。
+```tsx
+// hooks/useAnalyzeFeedback.ts
+import { useCompletion } from "ai/react"
 
-### Step 7：部署（5 min）
+export function useAnalyzeFeedback() {
+  const { complete, completion, isLoading } = useCompletion({
+    api: "/api/analyze-feedback",
+  })
 
-```bash
-vercel deploy
+  const analyze = async (feedback: string) => {
+    const result = await complete(feedback)
+    try {
+      return JSON.parse(result || "{}")
+    } catch {
+      return null
+    }
+  }
+
+  return { analyze, isLoading, rawResult: completion }
+}
 ```
 
-**从零到部署，不到 1 小时。**
+大家注意看，整个 AI 功能的集成，核心代码不超过 30 行。这就是 Vercel AI SDK 的价值——它把复杂的 AI 接口调用、流式响应处理、错误重试等底层细节都封装好了，你只需要关注业务逻辑。
 
----
+### 1.7 节点六：自动化测试——Playwright MCP
 
-## Section 3：职业发展（25 min）
+第六个节点是测试。
 
-### AI 时代前端工程师的角色转变
+传统的前端测试是一个痛点。写测试用例耗时，维护测试用例更耗时。很多团队的测试覆盖率长期在 30% 以下徘徊，不是不想写，是真的没时间写。
 
-**过去**：前端工程师 = 写代码的人
-- 核心技能：HTML/CSS/JS、框架使用、性能优化
+Playwright MCP 改变了这个局面。MCP（Model Context Protocol）让 AI 能够直接与 Playwright 交互，自动生成和执行测试用例。
 
-**现在**：前端工程师 = 设计 + 审查代码的人
-- 核心技能：技术选型、架构设计、AI 工具使用、代码审查
+来看一个例子：
 
-### 新的核心竞争力
+```typescript
+// tests/feedback-list.spec.ts
+// 这个测试文件可以通过 Playwright MCP 自动生成
+import { test, expect } from "@playwright/test"
 
-1. **技术选型能力**
-   - 能评估技术的 AI 友好性
-   - 能选择最优的技术栈组合
+test.describe("反馈列表功能", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/dashboard/feedbacks")
+  })
 
-2. **架构设计能力**
-   - 能设计 AI 友好的项目架构
-   - 能规划 Monorepo 结构
+  test("应该正确展示反馈列表", async ({ page }) => {
+    // 等待列表加载完成
+    await expect(page.getByRole("list")).toBeVisible()
 
-3. **AI 工具使用能力**
-   - 能高效使用 Cursor、v0.dev 等工具
-   - 能写出高质量的 Prompt
-   - 能管理 AI Memory
+    // 验证列表项包含必要元素
+    const firstItem = page.getByRole("listitem").first()
+    await expect(firstItem.getByRole("img")).toBeVisible() // 头像
+    await expect(firstItem.getByText(/正面|中性|负面/)).toBeVisible() // 情感标签
+  })
 
-4. **代码审查能力**
-   - 能审查 AI 生成的代码
-   - 能发现潜在问题
-   - 能优化代码质量
+  test("应该支持按情感类型筛选", async ({ page }) => {
+    // 点击筛选按钮
+    await page.getByRole("button", { name: "筛选" }).click()
 
-5. **产品思维**
-   - 能理解产品需求
-   - 能设计用户体验
-   - 能做技术决策
+    // 选择"负面"筛选条件
+    await page.getByLabel("情感类型").selectOption("negative")
+    await page.getByRole("button", { name: "应用" }).click()
 
-### 持续学习路径
+    // 验证所有列表项都是负面标签
+    const badges = page.locator('[data-testid="sentiment-badge"]')
+    const count = await badges.count()
+    for (let i = 0; i < count; i++) {
+      await expect(badges.nth(i)).toHaveText("负面")
+    }
+  })
 
+  test("应该能查看反馈详情并触发 AI 分析", async ({ page }) => {
+    // 点击第一条反馈的"查看详情"
+    await page.getByRole("button", { name: "查看详情" }).first().click()
+
+    // 验证详情面板打开
+    await expect(page.getByRole("complementary")).toBeVisible()
+
+    // 点击 AI 分析按钮
+    await page.getByRole("button", { name: "AI 分析" }).click()
+
+    // 等待分析结果
+    await expect(
+      page.getByText("情感倾向", { exact: false })
+    ).toBeVisible({ timeout: 10000 })
+  })
+})
 ```
-初级：学会使用 AI 工具（Cursor、Copilot）
-  → 中级：掌握 AI-Native 技术栈（Tailwind、shadcn/ui、Monorepo）
-    → 高级：能设计 AI-Native 架构，管理 AI 工作流
-      → 专家：能在产品中集成 AI 能力，引领团队转型
+
+关键点在于：这些测试用例不是你手写的，而是 Playwright MCP 根据你的页面结构和业务逻辑自动生成的。你需要做的只是审查和微调。
+
+这就是 AI 在测试环节的价值：不是取代测试，而是大幅降低编写测试的成本，让"高测试覆盖率"从一个理想变成现实。
+
+### 1.8 节点七和八：CI/CD 与部署
+
+最后两个节点是 CI/CD 和部署。
+
+GitHub Actions 负责自动化流水线：代码推送后自动运行 lint、类型检查、单元测试、E2E 测试，全部通过后自动构建和部署。
+
+```yaml
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm type-check
+      - run: pnpm test -- --run
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps
+      - run: pnpm build
+      - run: pnpm exec playwright test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [quality, e2e]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: "--prod"
 ```
 
----
+Vercel Platform 负责部署和托管。它提供了开箱即用的 Preview Deployment——每个 PR 都会自动生成一个预览环境，方便团队成员审查。
 
-## Section 4：未来展望（25 min）
+### 1.9 全链路的核心价值
 
-### 趋势 1：AI-Native 框架的崛起
+好，八个节点我们都过了一遍。现在我想让大家思考一个问题：这条全链路的核心价值到底是什么？
 
-未来会出现专门为 AI 设计的前端框架：
-- 代码结构天然 AI 友好
-- 内置 AI 工具集成
-- 自动化的测试和部署
+不是速度快。速度快只是表象。
 
-### 趋势 2：设计与开发的边界模糊化
+核心价值是：降低了从想法到产品的摩擦力。
 
-- Figma AI 让设计师可以直接生成代码
-- Pencil.dev 让开发者可以在 IDE 中设计
-- v0.dev 让任何人都可以创建 UI
+传统工作流中，每个环节之间都有巨大的摩擦力——设计和开发之间的沟通摩擦、手动编码的认知摩擦、写测试的意愿摩擦、部署的操作摩擦。AI-Native 工作流把这些摩擦力逐一消除，让你能够以接近"思考速度"的效率把想法变成产品。
 
-**未来，"设计师"和"开发者"的界限会越来越模糊。**
+这才是真正的范式转变。
 
-### 趋势 3：全栈化加速
-
-- Server Actions 让前端直接写后端
-- Edge Computing 让前端代码运行在边缘
-- AI 让一个人可以完成整个应用的开发
-
-### 趋势 4：AI Agent 驱动的开发
-
-未来的开发流程可能是：
-1. 你描述需求
-2. AI Agent 自动设计、编码、测试、部署
-3. 你审查和调整
-
-**前端工程师的角色从"执行者"变成"指挥者"。**
+好，理论部分讲完了。接下来，我们进入今天的重头戏——完整项目实战。
 
 ---
-
-## Closing（20 min）
-
-### 课程总结
-
-回顾整个课程，我们学到了什么？
-
-**认知层面**：
-- AI 友好性是新的技术选型维度
-- 不是所有技术栈在 AI 面前都是平等的
-
-**技术层面**：
-- 样式：Tailwind CSS v4（语义内联）
-- 组件：shadcn/ui + Radix UI（源码可见 + 组合模式）
-- 设计：Figma AI + v0.dev（设计到代码）
-- 架构：Turborepo + pnpm（约定优于配置）
-- 测试：Playwright MCP（AI 驱动测试）
-- 开发：Cursor + Memory（AI 越用越懂你）
-- 集成：Vercel AI SDK（前端 AI 能力）
-- 工程化：Biome + 全栈化（AI 友好的工程化）
-
-**实践层面**：
-- 完整的 AI-Native 工作流
-- 从设计到部署的全链路 AI 集成
-- 效率提升 3-5 倍
-
-### 行动建议
-
-**今天就可以做的**：
-1. 在你的项目中加一个 `AGENTS.md`
-2. 把一个新组件用 Tailwind + shadcn/ui 来写
-3. 用 v0.dev 生成一个页面原型
-
-**这周可以做的**：
-1. 把项目的 ESLint + Prettier 迁移到 Biome
-2. 用 Cursor 的 Composer 重构一个模块
-3. 配置 Playwright MCP
-
-**这个月可以做的**：
-1. 评估团队的技术栈 AI 友好性
-2. 制定渐进式迁移计划
-3. 在团队中推广 AI-Native 工作流
-
-### 最后一句话
-
-**大模型时代的前端开发，不是让 AI 替代你，而是让你选择正确的技术栈，让 AI 成为你最强大的队友。**
-
-**技术栈选对了，AI 帮你飞。选错了，AI 帮你挖坑。**
-
-感谢大家这 11 节课的陪伴。希望这些内容能帮助你们在 AI 时代走得更远。
-
-### Q&A
-
-现在我们有 20 分钟的 Q&A 时间。大家有什么问题都可以问。
-
----
-
-**演讲稿完成！**
-
-**总时长**: 约 2.5 小时
-- Opening: 10 min
-- Section 1: 30 min
-- Section 2: 50 min
-- Section 3: 25 min
-- Section 4: 25 min
-- Closing: 20 min
