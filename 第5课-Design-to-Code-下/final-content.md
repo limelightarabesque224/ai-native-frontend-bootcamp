@@ -270,6 +270,719 @@ export function PricingPage() {
 
 **一次生成，代码质量很高。** 使用了 shadcn/ui 组件、Tailwind 样式、响应式布局、月/年切换逻辑。
 
+### 实战 Prompt 示例 1：现代登录页
+
+好，刚才是定价页面，我们再来看几个更实际的例子。第一个，**登录页**——几乎每个项目都需要。
+
+```
+Prompt: "创建一个现代的登录页面。要求：
+1. 左右分栏布局：左边是品牌展示区（渐变背景 + Logo + 宣传语），右边是登录表单
+2. 表单包含：邮箱输入、密码输入（带显示/隐藏切换）、记住我复选框、忘记密码链接
+3. 社交登录：Google 和 GitHub 按钮，用分割线'或'隔开
+4. 底部有注册链接
+5. 使用 shadcn/ui 组件 + Tailwind CSS
+6. 支持暗色模式
+7. 移动端左边品牌区隐藏，只显示表单"
+```
+
+大家看这个 Prompt，我用了很多具体的描述。不是简单说"做个登录页"，而是把布局、组件、交互、响应式行为都说清楚了。v0.dev 生成的代码：
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Separator } from '@/components/ui/separator'
+import { Eye, EyeOff, Github } from 'lucide-react'
+
+export function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+
+  return (
+    <div className="flex min-h-screen">
+      {/* 左侧品牌区 - 移动端隐藏 */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 p-12 flex-col justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">YourBrand</h1>
+        </div>
+        <div>
+          <blockquote className="text-xl text-white/90 font-medium leading-relaxed">
+            "这个平台彻底改变了我们的工作方式，效率提升了 300%。"
+          </blockquote>
+          <p className="mt-4 text-white/70">—— 张伟，某科技公司 CTO</p>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-2 h-2 rounded-full bg-white/80" />
+          <div className="w-2 h-2 rounded-full bg-white/40" />
+          <div className="w-2 h-2 rounded-full bg-white/40" />
+        </div>
+      </div>
+
+      {/* 右侧登录表单 */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
+        <Card className="w-full max-w-md border-0 shadow-none lg:border lg:shadow-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">欢迎回来</CardTitle>
+            <CardDescription>输入你的账号信息登录</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* 社交登录 */}
+            <div className="grid grid-cols-2 gap-3">
+              <Button variant="outline" className="w-full">
+                <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Google
+              </Button>
+              <Button variant="outline" className="w-full">
+                <Github className="mr-2 h-4 w-4" />
+                GitHub
+              </Button>
+            </div>
+
+            <div className="relative">
+              <Separator />
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-2 text-xs text-muted-foreground">
+                或使用邮箱登录
+              </span>
+            </div>
+
+            {/* 邮箱密码表单 */}
+            <form className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">邮箱</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">密码</Label>
+                  <a href="/forgot-password" className="text-sm text-primary hover:underline">
+                    忘记密码？
+                  </a>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="输入密码"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="remember" />
+                <Label htmlFor="remember" className="text-sm font-normal">
+                  记住我
+                </Label>
+              </div>
+              <Button type="submit" className="w-full">
+                登录
+              </Button>
+            </form>
+
+            <p className="text-center text-sm text-muted-foreground">
+              还没有账号？{' '}
+              <a href="/register" className="text-primary hover:underline font-medium">
+                立即注册
+              </a>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}
+```
+
+大家注意看这段代码的几个亮点：
+- **左右分栏布局**：`hidden lg:flex` 实现了移动端自动隐藏左侧品牌区
+- **密码可见性切换**：用了 `useState` 控制 `type` 属性
+- **社交登录按钮**：Google 用了真实的 SVG Logo，GitHub 用了 Lucide 图标
+- **分割线的"或"文字**：用绝对定位实现的，很优雅
+- **语义化和可访问性**：Label 和 Input 都正确关联了
+
+这就是一个生产级的登录页面，拿来就能用。
+
+### 实战 Prompt 示例 2：数据仪表盘
+
+第二个例子，**数据仪表盘**——后台管理系统最常见的页面。
+
+```
+Prompt: "创建一个数据分析仪表盘页面。要求：
+1. 顶部：四个统计卡片（总收入、新用户、订单数、转化率），每个卡片显示数值、环比变化（绿色涨/红色跌）、小图标
+2. 中部：左边大图表区域（收入趋势折线图占位），右边是最近订单列表（5条，含用户头像、金额、状态Badge）
+3. 底部：热销商品 Top 5 表格（排名、商品名、销量、收入、同比增长）
+4. 使用 shadcn/ui 的 Card、Table、Badge、Avatar 组件
+5. 响应式：移动端统计卡片 2x2 网格，中部上下排列"
+```
+
+看这个 Prompt，我把页面拆成了三个区域，每个区域的内容和组件都描述清楚了。v0.dev 生成的代码：
+
+```tsx
+'use client'
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import {
+  DollarSign,
+  Users,
+  ShoppingCart,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+} from 'lucide-react'
+
+const stats = [
+  {
+    title: '总收入',
+    value: '¥128,430',
+    change: '+12.5%',
+    trend: 'up',
+    icon: DollarSign,
+  },
+  {
+    title: '新用户',
+    value: '2,340',
+    change: '+8.2%',
+    trend: 'up',
+    icon: Users,
+  },
+  {
+    title: '订单数',
+    value: '1,892',
+    change: '-3.1%',
+    trend: 'down',
+    icon: ShoppingCart,
+  },
+  {
+    title: '转化率',
+    value: '3.24%',
+    change: '+0.4%',
+    trend: 'up',
+    icon: TrendingUp,
+  },
+]
+
+const recentOrders = [
+  { id: '1', user: '张三', avatar: '/avatars/01.png', email: 'zhang@example.com', amount: '¥1,299', status: '已完成' },
+  { id: '2', user: '李四', avatar: '/avatars/02.png', email: 'li@example.com', amount: '¥899', status: '处理中' },
+  { id: '3', user: '王五', avatar: '/avatars/03.png', email: 'wang@example.com', amount: '¥2,499', status: '已完成' },
+  { id: '4', user: '赵六', avatar: '/avatars/04.png', email: 'zhao@example.com', amount: '¥599', status: '已取消' },
+  { id: '5', user: '孙七', avatar: '/avatars/05.png', email: 'sun@example.com', amount: '¥3,199', status: '已完成' },
+]
+
+const topProducts = [
+  { rank: 1, name: 'MacBook Pro 14"', sales: 1234, revenue: '¥18,510,000', growth: '+15.2%' },
+  { rank: 2, name: 'iPhone 16 Pro', sales: 2890, revenue: '¥23,120,000', growth: '+22.8%' },
+  { rank: 3, name: 'AirPods Pro 3', sales: 4521, revenue: '¥8,139,800', growth: '+8.6%' },
+  { rank: 4, name: 'iPad Air M3', sales: 987, revenue: '¥5,922,000', growth: '-2.1%' },
+  { rank: 5, name: 'Apple Watch Ultra', sales: 756, revenue: '¥4,536,000', growth: '+5.4%' },
+]
+
+function getStatusVariant(status: string) {
+  switch (status) {
+    case '已完成': return 'default'
+    case '处理中': return 'secondary'
+    case '已取消': return 'destructive'
+    default: return 'outline'
+  }
+}
+
+export function DashboardPage() {
+  return (
+    <div className="space-y-6 p-6">
+      {/* 统计卡片 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon
+          return (
+            <Card key={stat.title}>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  {stat.title}
+                </CardTitle>
+                <Icon className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+                <div className="flex items-center text-xs mt-1">
+                  {stat.trend === 'up' ? (
+                    <ArrowUpRight className="h-3 w-3 text-green-500 mr-1" />
+                  ) : (
+                    <ArrowDownRight className="h-3 w-3 text-red-500 mr-1" />
+                  )}
+                  <span className={stat.trend === 'up' ? 'text-green-500' : 'text-red-500'}>
+                    {stat.change}
+                  </span>
+                  <span className="text-muted-foreground ml-1">较上月</span>
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* 中部：图表 + 最近订单 */}
+      <div className="grid lg:grid-cols-7 gap-4">
+        {/* 收入趋势图表占位 */}
+        <Card className="lg:col-span-4">
+          <CardHeader>
+            <CardTitle>收入趋势</CardTitle>
+            <CardDescription>过去 6 个月的收入变化</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg text-muted-foreground">
+              图表区域 - 集成 Recharts 或 Chart.js
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 最近订单 */}
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>最近订单</CardTitle>
+            <CardDescription>最新的 5 笔交易</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentOrders.map((order) => (
+                <div key={order.id} className="flex items-center gap-3">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={order.avatar} alt={order.user} />
+                    <AvatarFallback>{order.user[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{order.user}</p>
+                    <p className="text-xs text-muted-foreground truncate">{order.email}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">{order.amount}</p>
+                    <Badge variant={getStatusVariant(order.status)} className="text-xs">
+                      {order.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 热销商品表格 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>热销商品 Top 5</CardTitle>
+          <CardDescription>本月销量排行榜</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16">排名</TableHead>
+                <TableHead>商品名称</TableHead>
+                <TableHead className="text-right">销量</TableHead>
+                <TableHead className="text-right">收入</TableHead>
+                <TableHead className="text-right">同比增长</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {topProducts.map((product) => (
+                <TableRow key={product.rank}>
+                  <TableCell className="font-medium">#{product.rank}</TableCell>
+                  <TableCell>{product.name}</TableCell>
+                  <TableCell className="text-right">{product.sales.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{product.revenue}</TableCell>
+                  <TableCell className="text-right">
+                    <span className={product.growth.startsWith('+') ? 'text-green-500' : 'text-red-500'}>
+                      {product.growth}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+```
+
+这个仪表盘的代码量不小，但 v0.dev 一次就生成了。大家看几个关键点：
+- **统计卡片**：用了动态图标映射（`const Icon = stat.icon`），非常 React 的写法
+- **环比变化**：绿色上升、红色下降，带箭头图标
+- **响应式布局**：`grid-cols-2 lg:grid-cols-4` 实现了移动端 2x2、桌面 4 列
+- **订单状态**：用函数映射不同状态到不同的 Badge variant
+- **图表占位**：留了占位区域，你可以后续集成 Recharts
+
+**这种代码，手写至少要半天。v0.dev 30 秒搞定。**
+
+### 实战 Prompt 示例 3：应用设置页
+
+第三个例子，**设置页面**——带侧边导航和多个设置面板的复杂页面。
+
+```
+Prompt: "创建一个应用设置页面。要求：
+1. 左侧：设置导航菜单（通用设置、外观、通知、安全、团队成员）
+2. 右侧：对应的设置面板
+3. 通用设置面板包含：应用名称输入框、时区选择、语言选择、自动保存开关
+4. 外观面板包含：主题切换（浅色/深色/系统）用 RadioGroup，强调色选择用色块按钮，字体大小用 Slider
+5. 通知面板包含：多个通知渠道（邮件/推送/短信）的开关列表，每个开关带描述文字
+6. 底部有保存和取消按钮
+7. 使用 shadcn/ui 组件
+8. 移动端导航变成顶部水平标签"
+```
+
+v0.dev 生成的代码：
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Slider } from '@/components/ui/slider'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Settings, Palette, Bell, Shield, UsersRound, Sun, Moon, Monitor } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+const navItems = [
+  { id: 'general', label: '通用设置', icon: Settings },
+  { id: 'appearance', label: '外观', icon: Palette },
+  { id: 'notifications', label: '通知', icon: Bell },
+  { id: 'security', label: '安全', icon: Shield },
+  { id: 'team', label: '团队成员', icon: UsersRound },
+]
+
+const accentColors = [
+  { name: '蓝色', value: 'blue', class: 'bg-blue-500' },
+  { name: '紫色', value: 'purple', class: 'bg-purple-500' },
+  { name: '绿色', value: 'green', class: 'bg-green-500' },
+  { name: '橙色', value: 'orange', class: 'bg-orange-500' },
+  { name: '红色', value: 'red', class: 'bg-red-500' },
+  { name: '粉色', value: 'pink', class: 'bg-pink-500' },
+]
+
+export function SettingsPage() {
+  const [activeTab, setActiveTab] = useState('general')
+  const [theme, setTheme] = useState('system')
+  const [accentColor, setAccentColor] = useState('blue')
+  const [fontSize, setFontSize] = useState([14])
+  const [autoSave, setAutoSave] = useState(true)
+  const [notifications, setNotifications] = useState({
+    emailMarketing: true,
+    emailSecurity: true,
+    pushMessages: false,
+    pushUpdates: true,
+    smsAlerts: false,
+  })
+
+  return (
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">设置</h1>
+        <p className="text-muted-foreground mt-1">管理你的应用设置和偏好</p>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* 侧边导航 - 移动端水平显示 */}
+        <nav className="md:w-56 shrink-0">
+          <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors',
+                    activeTab === item.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  {item.label}
+                </button>
+              )
+            })}
+          </div>
+        </nav>
+
+        {/* 设置面板 */}
+        <div className="flex-1 space-y-6">
+          {/* 通用设置 */}
+          {activeTab === 'general' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>通用设置</CardTitle>
+                <CardDescription>配置应用的基本信息和行为</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="appName">应用名称</Label>
+                  <Input id="appName" defaultValue="我的应用" />
+                </div>
+                <div className="space-y-2">
+                  <Label>时区</Label>
+                  <Select defaultValue="asia-shanghai">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="asia-shanghai">亚洲/上海 (UTC+8)</SelectItem>
+                      <SelectItem value="asia-tokyo">亚洲/东京 (UTC+9)</SelectItem>
+                      <SelectItem value="america-newyork">美洲/纽约 (UTC-5)</SelectItem>
+                      <SelectItem value="europe-london">欧洲/伦敦 (UTC+0)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>语言</Label>
+                  <Select defaultValue="zh-cn">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="zh-cn">简体中文</SelectItem>
+                      <SelectItem value="en-us">English (US)</SelectItem>
+                      <SelectItem value="ja-jp">日本語</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>自动保存</Label>
+                    <p className="text-sm text-muted-foreground">每 30 秒自动保存你的更改</p>
+                  </div>
+                  <Switch checked={autoSave} onCheckedChange={setAutoSave} />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 外观设置 */}
+          {activeTab === 'appearance' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>外观</CardTitle>
+                <CardDescription>自定义应用的视觉风格</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                <div className="space-y-3">
+                  <Label>主题</Label>
+                  <RadioGroup value={theme} onValueChange={setTheme} className="grid grid-cols-3 gap-4">
+                    {[
+                      { value: 'light', label: '浅色', icon: Sun },
+                      { value: 'dark', label: '深色', icon: Moon },
+                      { value: 'system', label: '跟随系统', icon: Monitor },
+                    ].map(({ value, label, icon: ThemeIcon }) => (
+                      <Label
+                        key={value}
+                        htmlFor={value}
+                        className={cn(
+                          'flex flex-col items-center gap-2 rounded-lg border-2 p-4 cursor-pointer transition-colors hover:bg-muted',
+                          theme === value ? 'border-primary bg-muted' : 'border-transparent'
+                        )}
+                      >
+                        <RadioGroupItem value={value} id={value} className="sr-only" />
+                        <ThemeIcon className="h-6 w-6" />
+                        <span className="text-sm font-medium">{label}</span>
+                      </Label>
+                    ))}
+                  </RadioGroup>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <Label>强调色</Label>
+                  <div className="flex gap-3">
+                    {accentColors.map((color) => (
+                      <button
+                        key={color.value}
+                        onClick={() => setAccentColor(color.value)}
+                        className={cn(
+                          'w-8 h-8 rounded-full transition-transform',
+                          color.class,
+                          accentColor === color.value && 'ring-2 ring-offset-2 ring-primary scale-110'
+                        )}
+                        title={color.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label>字体大小</Label>
+                    <span className="text-sm text-muted-foreground">{fontSize[0]}px</span>
+                  </div>
+                  <Slider
+                    value={fontSize}
+                    onValueChange={setFontSize}
+                    min={12}
+                    max={20}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>小</span>
+                    <span>默认</span>
+                    <span>大</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 通知设置 */}
+          {activeTab === 'notifications' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>通知设置</CardTitle>
+                <CardDescription>选择你想要接收的通知类型</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-semibold mb-4">邮件通知</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>营销邮件</Label>
+                        <p className="text-sm text-muted-foreground">接收产品更新和促销信息</p>
+                      </div>
+                      <Switch
+                        checked={notifications.emailMarketing}
+                        onCheckedChange={(v) => setNotifications(prev => ({...prev, emailMarketing: v}))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>安全通知</Label>
+                        <p className="text-sm text-muted-foreground">账号异常登录和安全警告</p>
+                      </div>
+                      <Switch
+                        checked={notifications.emailSecurity}
+                        onCheckedChange={(v) => setNotifications(prev => ({...prev, emailSecurity: v}))}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="text-sm font-semibold mb-4">推送通知</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>新消息</Label>
+                        <p className="text-sm text-muted-foreground">收到新消息时推送通知</p>
+                      </div>
+                      <Switch
+                        checked={notifications.pushMessages}
+                        onCheckedChange={(v) => setNotifications(prev => ({...prev, pushMessages: v}))}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>系统更新</Label>
+                        <p className="text-sm text-muted-foreground">应用有新版本时通知</p>
+                      </div>
+                      <Switch
+                        checked={notifications.pushUpdates}
+                        onCheckedChange={(v) => setNotifications(prev => ({...prev, pushUpdates: v}))}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <Separator />
+                <div>
+                  <h3 className="text-sm font-semibold mb-4">短信通知</h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>紧急警报</Label>
+                      <p className="text-sm text-muted-foreground">服务中断等紧急情况通过短信通知</p>
+                    </div>
+                    <Switch
+                      checked={notifications.smsAlerts}
+                      onCheckedChange={(v) => setNotifications(prev => ({...prev, smsAlerts: v}))}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* 保存/取消按钮 */}
+          <div className="flex justify-end gap-3">
+            <Button variant="outline">取消</Button>
+            <Button>保存更改</Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+```
+
+这个设置页面是最复杂的一个例子。v0.dev 一次生成了三个面板的完整代码。大家注意看：
+- **侧边导航响应式**：`flex md:flex-col` 让导航在移动端变成水平滚动
+- **主题选择**：用 RadioGroup 配合卡片样式，视觉效果很好
+- **色块按钮**：选中态用 `ring` 和 `scale` 效果，交互感强
+- **Slider 字体大小**：实时显示当前值
+- **通知列表**：每个开关都有标题和描述，信息架构清晰
+
+**三个 Prompt 示例做完，我想强调一个观点**：Prompt 的质量直接决定了生成代码的质量。你越具体，AI 给你的代码越好。模糊的 Prompt 只会得到模糊的代码。
+
 ---
 
 ## Section 3：横向对比其他 AI 生成工具（35 min）
