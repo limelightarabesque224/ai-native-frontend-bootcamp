@@ -98,7 +98,7 @@ export function LessonContent({ content }: { content: string }) {
     .trim()
 
   return (
-    <div className="relative">
+    <div className="relative xl:pr-64">
       <TableOfContents toc={toc} />
 
       <article className="prose prose-slate max-w-none prose-headings:scroll-mt-20">
