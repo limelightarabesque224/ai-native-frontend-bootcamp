@@ -997,10 +997,17 @@ export function SettingsPage() {
 - 实时预览
 - 一键部署
 
+Bolt.new 是 StackBlitz 团队做的，它最大的亮点是**浏览器里跑完整的 Node.js 环境**。什么意思呢？你不需要本地安装任何东西，在浏览器里就能跑 Next.js、装 npm 包、甚至连数据库都能跑。这个技术叫 WebContainers，是 StackBlitz 的核心技术。
+
+跟 v0.dev 最大的区别在于：v0.dev 只生成前端组件代码，你需要自己集成到项目里。而 Bolt.new 直接给你一个**完整的、可运行的全栈应用**。你在对话中描述需求，它帮你建项目、装依赖、写前后端代码、连数据库，全部一条龙。
+
+但它也有局限性。因为是在浏览器里运行，**性能有瓶颈**。复杂的构建可能会很慢，而且它对一些需要原生模块的 npm 包支持不好。另外，生成的代码结构有时候比较混乱，需要手动整理。
+
 **适用场景**：
 - 快速搭建全栈原型
 - 需要后端逻辑的项目
 - 演示和 POC
+- 黑客松或技术验证：两小时内需要一个能演示的完整应用
 
 **代码示例**：
 
@@ -1012,7 +1019,9 @@ Prompt: "创建一个待办事项应用，包含：
 使用 Next.js + Prisma + shadcn/ui"
 ```
 
-Bolt.new 会生成完整的全栈应用，包含前端、后端、数据库。
+Bolt.new 会生成完整的全栈应用，包含前端、后端、数据库。你在浏览器里就能看到效果，点击部署按钮就能上线。
+
+我给大家讲个真实案例。上个月我们团队参加一个内部黑客松，四个小时做一个产品原型。传统做法是本地搭环境、写代码、部署，四个小时根本不够。我们用 Bolt.new，一个小时就有了一个可运行的全栈应用，剩下三个小时全部用来打磨产品细节和准备演示。最后拿了第一名。
 
 ### Lovable
 
@@ -1024,10 +1033,19 @@ Bolt.new 会生成完整的全栈应用，包含前端、后端、数据库。
 - 自动部署
 - 支持协作编辑
 
+Lovable 以前叫 GPT Engineer，后来改名了。它的定位比 Bolt.new 更进一步——不只是给你生成代码，而是给你生成一个**完整的、部署好的应用**。
+
+它的技术栈是固定的：**React + Vite + Tailwind + Supabase**。为什么选这套？因为这套技术栈足够简单，AI 生成的成功率最高。Supabase 提供了认证、数据库、存储、实时订阅，一站式后端服务，不需要你写后端代码。
+
+Lovable 最适合的场景是**非技术人员或者初创团队快速做 MVP**。比如，你有一个产品想法，想在一天之内做出来给投资人看。传统做法可能需要一个团队干两周。用 Lovable，你一个人一天就能搞定。
+
+但它的局限性也很明显：**技术栈不可选择**、**复杂业务逻辑支持有限**、**生成的代码不太适合长期维护**。所以我的建议是，用它做原型和验证，验证通过后再用正规方式重写。
+
 **适用场景**：
 - 非技术人员快速搭建应用
-- MVP 快速验证
-- 内部工具
+- MVP 快速验证：一天之内做出可演示的产品
+- 内部工具：不需要长期维护的管理后台
+- 个人项目：快速把想法变成现实
 
 ### Screenshot to Code
 
@@ -1038,10 +1056,19 @@ Bolt.new 会生成完整的全栈应用，包含前端、后端、数据库。
 - 支持多种框架
 - 开源免费
 
+Screenshot to Code 是一个开源项目，GitHub 上有 6 万多 Star。它的原理很简单：**把截图发给 GPT-4 Vision，让 AI 分析图片中的 UI 元素，然后生成对应的代码**。
+
+它跟 v0.dev 的截图转代码有什么区别？主要两点：第一，**它是开源的**，你可以自己部署，不受 v0.dev 的免费额度限制。第二，**它支持多种输出格式**——HTML + Tailwind、React、Vue、Bootstrap，甚至 SVG。而 v0.dev 只输出 React + shadcn/ui。
+
+但代码质量上，说实话，**v0.dev 要好很多**。Screenshot to Code 生成的代码更像是"像素级还原"，用了大量硬编码的样式和位置。而 v0.dev 生成的是"语义化还原"，用组件和 Tailwind utility，代码可维护性更好。
+
 **适用场景**：
-- 快速还原设计稿
-- 竞品分析
-- 原型制作
+- 快速还原设计稿：特别是不需要长期维护的一次性页面
+- 竞品分析：快速把竞品页面变成代码，研究它的布局和交互
+- 原型制作：把手绘草图拍照上传，快速生成可交互的原型
+- 教学演示：向客户或领导展示"截图一秒变代码"的效果
+
+它还支持**录屏转代码**——你录一段操作视频，它能分析视频中的 UI 变化，生成带交互的代码。这个功能还在实验阶段，但已经非常惊艳了。
 
 ### Builder.io Visual Copilot
 
@@ -1052,9 +1079,17 @@ Bolt.new 会生成完整的全栈应用，包含前端、后端、数据库。
 - 生成多种框架的代码
 - 与设计工作流无缝集成
 
+Builder.io 的 Visual Copilot 跟前面几个工具不太一样。它不是一个独立的产品，而是一个 **Figma 插件**。你在 Figma 里选中一个 Frame 或组件，点一下插件按钮，它就帮你生成对应框架的代码。
+
+这意味着什么？意味着**设计师不需要离开 Figma**。设计完直接导出代码，不需要打开另一个网站、上传截图、粘贴 Prompt。工作流是最丝滑的。
+
+它支持的框架非常多：React、Vue、Angular、Svelte、Solid、Qwik，甚至 React Native 和 Flutter。而且它不只是生成静态代码，还能**映射到你项目中已有的组件库**。比如你告诉它"我的项目用 Ant Design"，它就会用 Ant Design 的组件来生成代码，而不是从零写 HTML。
+
 **适用场景**：
-- 设计师和开发者协作
-- Figma 重度用户
+- 设计师和开发者协作：设计师出稿的同时就能提供代码参考
+- Figma 重度用户：如果你的设计资产全在 Figma 里，这是最自然的选择
+- 需要多框架输出：同一个设计稿需要生成 React 和 Vue 两套代码
+- 企业级项目：需要与已有组件库对接的大型项目
 
 ### 对比表格
 
@@ -1118,6 +1153,456 @@ Prompt: "创建一个博客系统：
 - 还原度
 - 生成速度
 - 可维护性
+
+### 实战 4：从竞品截图到生产代码——完整工作流
+
+好，前面三个实战都是"单工具演示"。现在我来演示一个**真实的工作场景**：产品经理丢了一张竞品截图，我们怎么用 AI 工具从零到上线。
+
+假设产品经理发了一张某 SaaS 产品的"项目管理看板"截图，要求我们做一个类似的。传统做法要 3 天，我们用 AI 工具来加速。
+
+**Step 1：截图分析（5分钟）**
+
+先别急着丢给 AI。花 5 分钟分析截图里有什么：
+
+```
+竞品截图分析：
+- 布局：左侧边栏（项目列表）+ 右侧主内容区（看板视图）
+- 看板列：To Do、In Progress、In Review、Done（4列）
+- 卡片内容：标题、标签（Bug/Feature/Improvement）、负责人头像、优先级指示器、截止日期
+- 交互暗示：卡片可拖拽（有拖拽手柄图标）
+- 顶部：搜索框、筛选按钮、视图切换（看板/列表/日历）
+- 颜色方案：白色背景、灰色边框、彩色标签
+```
+
+为什么要先分析？因为**好的输入决定好的输出**。你直接丢截图给 AI，它可能遗漏一些细节。先分析，再写 Prompt，效果好得多。
+
+**Step 2：用 v0.dev 生成基础组件（10分钟）**
+
+我先用 v0.dev 生成看板的基础组件。注意，我不是一次性生成整个页面，而是**分步生成**：
+
+```
+Prompt 1（看板卡片）: "创建一个项目管理看板的任务卡片组件。要求：
+1. 显示任务标题、描述（可选，最多两行，溢出省略）
+2. 标签列表：用不同颜色的 Badge 显示（Bug-红色、Feature-蓝色、Improvement-绿色）
+3. 底部信息栏：负责人头像（Avatar）、优先级图标（高-红色箭头、中-黄色、低-灰色）、截止日期
+4. hover 时卡片微微上浮（translateY + shadow）
+5. 左边有一个拖拽手柄图标（GripVertical）
+6. 使用 shadcn/ui 的 Card、Badge、Avatar 组件"
+```
+
+v0.dev 生成的卡片组件代码：
+
+```tsx
+'use client'
+
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  GripVertical,
+  ArrowUp,
+  ArrowRight,
+  ArrowDown,
+  Calendar,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+interface TaskCardProps {
+  title: string
+  description?: string
+  tags: Array<{ label: string; type: 'bug' | 'feature' | 'improvement' }>
+  assignee: { name: string; avatar?: string }
+  priority: 'high' | 'medium' | 'low'
+  dueDate?: string
+}
+
+const tagColors = {
+  bug: 'bg-red-100 text-red-700 hover:bg-red-200',
+  feature: 'bg-blue-100 text-blue-700 hover:bg-blue-200',
+  improvement: 'bg-green-100 text-green-700 hover:bg-green-200',
+}
+
+const priorityConfig = {
+  high: { icon: ArrowUp, color: 'text-red-500', label: '高' },
+  medium: { icon: ArrowRight, color: 'text-yellow-500', label: '中' },
+  low: { icon: ArrowDown, color: 'text-gray-400', label: '低' },
+}
+
+export function TaskCard({ title, description, tags, assignee, priority, dueDate }: TaskCardProps) {
+  const PriorityIcon = priorityConfig[priority].icon
+
+  return (
+    <Card className="group cursor-grab active:cursor-grabbing transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+      <CardContent className="p-3">
+        <div className="flex gap-2">
+          {/* 拖拽手柄 */}
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity pt-0.5">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+
+          <div className="flex-1 min-w-0 space-y-2">
+            {/* 标题 */}
+            <h3 className="font-medium text-sm leading-tight">{title}</h3>
+
+            {/* 描述 */}
+            {description && (
+              <p className="text-xs text-muted-foreground line-clamp-2">{description}</p>
+            )}
+
+            {/* 标签 */}
+            <div className="flex flex-wrap gap-1">
+              {tags.map((tag) => (
+                <Badge
+                  key={tag.label}
+                  variant="secondary"
+                  className={cn('text-xs px-1.5 py-0', tagColors[tag.type])}
+                >
+                  {tag.label}
+                </Badge>
+              ))}
+            </div>
+
+            {/* 底部信息 */}
+            <div className="flex items-center justify-between pt-1">
+              <div className="flex items-center gap-2">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={assignee.avatar} alt={assignee.name} />
+                  <AvatarFallback className="text-[10px]">
+                    {assignee.name[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <PriorityIcon
+                  className={cn('h-3.5 w-3.5', priorityConfig[priority].color)}
+                  title={`优先级: ${priorityConfig[priority].label}`}
+                />
+              </div>
+              {dueDate && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  <span>{dueDate}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+**Step 3：生成看板列和整体布局（10分钟）**
+
+卡片组件有了，接下来生成看板列和整体布局：
+
+```
+Prompt 2（看板布局）: "创建一个看板布局组件。要求：
+1. 顶部工具栏：搜索输入框、筛选按钮（下拉菜单，按标签/优先级/负责人筛选）、三个视图切换按钮（看板/列表/日历，用 ToggleGroup）
+2. 看板区域：水平排列 4 个列（To Do、In Progress、In Review、Done）
+3. 每个列有标题、任务计数Badge、添加任务按钮
+4. 列之间等宽，水平滚动（移动端）
+5. 使用 shadcn/ui 组件"
+```
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Search, SlidersHorizontal, LayoutGrid, List, CalendarDays, Plus } from 'lucide-react'
+import { TaskCard } from './task-card'
+
+const columns = [
+  {
+    id: 'todo',
+    title: 'To Do',
+    color: 'bg-gray-400',
+    tasks: [
+      {
+        title: '设计用户注册流程',
+        description: '包含邮箱验证和手机号验证两种方式',
+        tags: [{ label: 'Feature', type: 'feature' as const }],
+        assignee: { name: '张三' },
+        priority: 'high' as const,
+        dueDate: '3/28',
+      },
+      {
+        title: '修复登录页面样式错位',
+        tags: [{ label: 'Bug', type: 'bug' as const }],
+        assignee: { name: '李四' },
+        priority: 'medium' as const,
+        dueDate: '3/27',
+      },
+    ],
+  },
+  {
+    id: 'in-progress',
+    title: 'In Progress',
+    color: 'bg-blue-400',
+    tasks: [
+      {
+        title: '实现支付集成',
+        description: '对接支付宝和微信支付 SDK',
+        tags: [{ label: 'Feature', type: 'feature' as const }],
+        assignee: { name: '王五' },
+        priority: 'high' as const,
+        dueDate: '3/30',
+      },
+    ],
+  },
+  {
+    id: 'in-review',
+    title: 'In Review',
+    color: 'bg-yellow-400',
+    tasks: [
+      {
+        title: '优化首页加载性能',
+        description: '使用 React.lazy 和 Suspense 实现代码分割',
+        tags: [{ label: 'Improvement', type: 'improvement' as const }],
+        assignee: { name: '赵六' },
+        priority: 'medium' as const,
+      },
+    ],
+  },
+  {
+    id: 'done',
+    title: 'Done',
+    color: 'bg-green-400',
+    tasks: [
+      {
+        title: '搭建 CI/CD 流水线',
+        tags: [{ label: 'Improvement', type: 'improvement' as const }],
+        assignee: { name: '孙七' },
+        priority: 'low' as const,
+      },
+    ],
+  },
+]
+
+export function KanbanBoard() {
+  const [view, setView] = useState('board')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  return (
+    <div className="h-screen flex flex-col">
+      {/* 顶部工具栏 */}
+      <div className="border-b px-6 py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 flex-1">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="搜索任务..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                筛选
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuLabel>按标签</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem checked>Bug</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked>Feature</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked>Improvement</DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>按优先级</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem checked>高</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked>中</DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked>低</DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <ToggleGroup type="single" value={view} onValueChange={(v) => v && setView(v)}>
+          <ToggleGroupItem value="board" aria-label="看板视图">
+            <LayoutGrid className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="list" aria-label="列表视图">
+            <List className="h-4 w-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="calendar" aria-label="日历视图">
+            <CalendarDays className="h-4 w-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+
+      {/* 看板区域 */}
+      <ScrollArea className="flex-1">
+        <div className="flex gap-4 p-6 min-w-max">
+          {columns.map((column) => (
+            <div key={column.id} className="w-72 shrink-0 flex flex-col">
+              {/* 列头 */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className={cn('w-2 h-2 rounded-full', column.color)} />
+                  <h2 className="font-semibold text-sm">{column.title}</h2>
+                  <Badge variant="secondary" className="text-xs">
+                    {column.tasks.length}
+                  </Badge>
+                </div>
+                <Button variant="ghost" size="icon" className="h-6 w-6">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* 任务卡片列表 */}
+              <div className="space-y-2 flex-1">
+                {column.tasks.map((task, index) => (
+                  <TaskCard key={index} {...task} />
+                ))}
+              </div>
+
+              {/* 添加任务按钮 */}
+              <Button
+                variant="ghost"
+                className="w-full mt-2 justify-start text-muted-foreground"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                添加任务
+              </Button>
+            </div>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
+    </div>
+  )
+}
+```
+
+**Step 4：审查和优化代码（15分钟）**
+
+AI 生成的代码虽然质量高，但还需要人工审查和优化。这是最关键的一步。
+
+```
+审查清单：
+
+1. ✅ TypeScript 类型 → 接口定义完整，属性都有类型
+2. ✅ shadcn/ui 组件 → 使用了 Card、Badge、Avatar、Input、Button 等
+3. ✅ Tailwind 样式 → 没有内联 style 或自定义 CSS
+4. ✅ 响应式 → ScrollArea 实现了移动端水平滚动
+5. ⚠️ 可访问性 → 需要补充 aria-label 和键盘导航
+6. ⚠️ 拖拽功能 → 只有视觉效果，需要集成 @dnd-kit
+7. ⚠️ 状态管理 → 需要把硬编码数据改为动态状态
+8. ⚠️ API 集成 → 需要对接后端接口
+```
+
+需要手动优化的部分，比如集成拖拽库：
+
+```tsx
+// 集成 @dnd-kit 实现真正的拖拽
+import {
+  DndContext,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+
+// 将 TaskCard 包装成可排序的
+function SortableTaskCard({ task, id }: { task: TaskCardProps; id: string }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <TaskCard {...task} />
+    </div>
+  )
+}
+```
+
+**Step 5：集成到项目并验证（10分钟）**
+
+最后，把组件集成到现有项目：
+
+```bash
+# 1. 确保依赖已安装
+pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
+
+# 2. 把组件文件放到正确的目录
+# components/kanban/task-card.tsx
+# components/kanban/kanban-board.tsx
+
+# 3. 在页面中使用
+# app/projects/[id]/page.tsx
+```
+
+```tsx
+// app/projects/[id]/page.tsx
+import { KanbanBoard } from '@/components/kanban/kanban-board'
+
+export default function ProjectPage({ params }: { params: { id: string } }) {
+  return (
+    <div className="h-screen">
+      <KanbanBoard projectId={params.id} />
+    </div>
+  )
+}
+```
+
+**总结一下这个实战流程**：
+
+```
+从竞品截图到生产代码的 5 步工作流：
+┌──────────────────────────────────────────┐
+│ Step 1：截图分析（5分钟）                   │
+│   → 提取 UI 元素、布局、交互、颜色           │
+├──────────────────────────────────────────┤
+│ Step 2：分步生成组件（10分钟）               │
+│   → 用 v0.dev 先生成小组件，再组合           │
+├──────────────────────────────────────────┤
+│ Step 3：生成整体布局（10分钟）               │
+│   → 把组件组合成完整页面                     │
+├──────────────────────────────────────────┤
+│ Step 4：审查和优化（15分钟）                 │
+│   → TypeScript、可访问性、状态管理、API 集成  │
+├──────────────────────────────────────────┤
+│ Step 5：集成到项目并验证（10分钟）            │
+│   → 安装依赖、放置文件、页面引用              │
+└──────────────────────────────────────────┘
+总计：约 50 分钟（传统做法 2-3 天）
+```
+
+**这就是 AI 代码生成工具带来的效率提升。不是 10% 的提升，是 10 倍的提升。**
 
 ---
 
