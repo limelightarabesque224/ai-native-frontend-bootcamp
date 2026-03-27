@@ -44,21 +44,26 @@
 
 ## Section 1（30 min）：全链路工作流串联
 
-### 1.1 全链路总览：AI-Native 开发的八个关键节点
+### 1.1 全链路总览：AI-Native 开发的九个关键节点
 
 好，我们先来看一张全景图。
 
-一个完整的 AI-Native 前端开发工作流，从头到尾包含八个关键节点。我把它画出来，大家看一下：
+一个完整的 AI-Native 前端开发工作流，从头到尾包含九个关键节点。我把它画出来，大家看一下：
 
 ```
-设计 → 转码 → 开发 → 组件 → AI功能 → 测试 → CI/CD → 部署
- │       │      │      │       │        │       │       │
-Figma   v0    Cursor  shadcn  Vercel  Playwright GitHub  Vercel
- AI    .dev    AI     /ui +   AI SDK    MCP    Actions  Platform
-              Copilot Tailwind
+设计（Figma AI）
+  → D2C（v0.dev）
+    → 开发（Cursor + .cursorrules）
+      → 组件（shadcn/ui + Radix + Tailwind v4）
+        → 数据层（Supabase：数据库 + Auth + 实时 + Vector）
+          → AI 功能（Vercel AI SDK + Supabase Vector）
+            → 测试（Playwright MCP）
+              → CI/CD → 部署
 ```
 
-这八个节点，覆盖了前端开发的完整生命周期。传统工作流里，每个节点之间都有大量的人工衔接成本。而在 AI-Native 工作流里，这些衔接成本被大幅压缩，甚至接近于零。
+注意看，这里和大家之前认知里的链路相比，多了一个关键节点——数据层。我们加入了 Supabase。为什么？因为一个真正能上线的应用，光有前端 UI 是不够的，你需要数据库、需要用户认证、需要实时更新、需要文件存储。Supabase 把这些能力全部打包在一起，开箱即用，而且和我们的 AI 工作流完美契合——它内置的 Vector 支持可以直接配合 Vercel AI SDK 做语义搜索。后面我会详细展开讲。
+
+这九个节点，覆盖了前端开发的完整生命周期。传统工作流里，每个节点之间都有大量的人工衔接成本。而在 AI-Native 工作流里，这些衔接成本被大幅压缩，甚至接近于零。
 
 让我逐一给大家拆解。
 
@@ -441,7 +446,7 @@ Vercel Platform 负责部署和托管。它提供了开箱即用的 Preview Depl
 
 ### 1.9 全链路的核心价值
 
-好，八个节点我们都过了一遍。现在我想让大家思考一个问题：这条全链路的核心价值到底是什么？
+好，九个节点我们都过了一遍。现在我想让大家思考一个问题：这条全链路的核心价值到底是什么？
 
 不是速度快。速度快只是表象。
 
@@ -451,6 +456,55 @@ Vercel Platform 负责部署和托管。它提供了开箱即用的 Preview Depl
 
 这才是真正的范式转变。
 
-好，理论部分讲完了。接下来，我们进入今天的重头戏——完整项目实战。
+好，理论部分讲完了。在进入项目实战之前，我要先展开讲讲数据层的选型——也就是为什么我们选择 Supabase。
+
+### 1.10 数据层选型：为什么是 Supabase？
+
+很多同学在做全栈项目的时候，第一反应可能是用 Prisma + SQLite，或者 Prisma + PostgreSQL，再配一个 NextAuth 做认证。这套方案没有问题，但你仔细想想，你需要做多少事情？
+
+你要配置 Prisma schema，要写 migration，要部署数据库实例，要配置 NextAuth 的各种 provider，要自己实现实时更新的 WebSocket 层，要找一个文件存储方案……每一项都是额外的工作量，每一项都可能出问题。
+
+而 Supabase 呢？它把这些全部打包好了，一个平台搞定。
+
+我来给大家列一下，为什么在 AI-Native 全链路中，Supabase 是更优的选择：
+
+**第一，开箱即用。** Auth、数据库、实时订阅、Storage，全部内置。你不需要自己搭后端服务，不需要自己管理基础设施。创建一个 Supabase 项目，两分钟之内你就有了一个完整的后端。
+
+**第二，不需要部署后端服务。** 这一点对前端工程师来说太重要了。Supabase 提供的是 BaaS（Backend as a Service），你的 Next.js 应用直接通过客户端 SDK 和 Supabase 通信，不需要额外的 Express 或 Fastify 服务器。
+
+**第三，内置 Vector 支持。** 这是 Supabase 和其他 BaaS 方案的关键区别。Supabase 基于 PostgreSQL，通过 pgvector 扩展原生支持向量存储和检索。这意味着你可以直接用 Supabase 做 AI 语义搜索，不需要额外接入 Pinecone 或 Weaviate。配合 Vercel AI SDK，几行代码就能实现 RAG（检索增强生成）。
+
+**第四，免费额度够用。** Supabase 的免费套餐给了你 500MB 数据库空间、1GB 文件存储、50000 月活用户的 Auth 额度。对于训练营的项目、个人项目、甚至小型创业项目来说，绰绰有余。
+
+#### Supabase 在全链路中的角色
+
+让我具体拆解一下 Supabase 在我们全链路中承担的角色：
+
+- **数据库**：存储所有业务数据——用户反馈、分析结果、配置信息。基于 PostgreSQL，支持复杂查询、JSON 字段、全文搜索。
+- **Auth**：用户认证和授权。支持邮箱密码、OAuth（GitHub、Google）、Magic Link。配合 Row Level Security（RLS），可以在数据库层面控制数据访问权限。
+- **Realtime**：实时数据更新。当有新的反馈提交时，所有在线用户的界面自动刷新，不需要轮询。底层基于 PostgreSQL 的 LISTEN/NOTIFY 机制。
+- **Vector**：AI 语义搜索的基础。把用户反馈转成向量存储在 Supabase 中，然后就能做\"找到和这条反馈类似的所有反馈\"这样的语义搜索。
+- **Storage**：文件上传和管理。用户上传的截图、附件，直接存到 Supabase Storage，自动生成 CDN 链接。
+- **Edge Functions**：自定义后端逻辑。需要做一些敏感操作（比如调用 AI API、发送邮件）？写一个 Edge Function 就行，Deno 运行时，TypeScript 友好。
+
+#### 代码实战：接入 Supabase
+
+接入 Supabase 非常简单。首先是初始化客户端：
+
+```ts
+// lib/supabase.ts
+import { createClient } from '@supabase/supabase-js'
+
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+```
+
+就这么几行代码，你就拿到了一个可以操作数据库、认证、存储的客户端。然后在你的组件里直接用就行了——查询数据、插入数据、订阅实时变更，全部通过这个客户端完成。
+
+大家注意，Supabase 的接入成本几乎为零。它的 SDK 设计得非常符合前端工程师的直觉，如果你用过 Firebase，会觉得非常熟悉，但 Supabase 比 Firebase 更好的地方在于——它是基于 PostgreSQL 的，是真正的关系型数据库，而不是 NoSQL。这意味着你的数据建模更灵活，查询能力更强大。
+
+好，数据层讲完了。接下来，我们进入今天的重头戏——完整项目实战。
 
 ---
