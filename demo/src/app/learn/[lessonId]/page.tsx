@@ -55,7 +55,7 @@ export default async function LessonPage({
   const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null
 
   return (
-    <div className="max-w-4xl mx-auto px-8 py-12">
+    <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12">
       {/* 课程头部 */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
@@ -65,7 +65,7 @@ export default async function LessonPage({
           <span>/</span>
           <span>第 {lesson.number} 课</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight mb-2">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2">
           第 {lesson.number} 课：{lesson.title}
         </h1>
         <p className="text-lg text-muted-foreground mb-4">{lesson.subtitle}</p>
@@ -102,7 +102,7 @@ export default async function LessonPage({
             className="group flex flex-col items-start"
           >
             <span className="text-xs text-muted-foreground mb-1">上一课</span>
-            <span className="text-sm font-medium group-hover:text-primary transition-colors">
+            <span className="text-xs md:text-sm font-medium group-hover:text-primary transition-colors">
               ← 第 {prevLesson.number} 课：{prevLesson.title}
             </span>
           </Link>
@@ -115,7 +115,7 @@ export default async function LessonPage({
             className="group flex flex-col items-end"
           >
             <span className="text-xs text-muted-foreground mb-1">下一课</span>
-            <span className="text-sm font-medium group-hover:text-primary transition-colors">
+            <span className="text-xs md:text-sm font-medium group-hover:text-primary transition-colors">
               第 {nextLesson.number} 课：{nextLesson.title} →
             </span>
           </Link>
