@@ -41,7 +41,7 @@ export default function Home() {
           大模型时代的前端开发
         </h1>
         <p className="text-lg text-muted-foreground">
-          AI-Native 技术栈演示项目 — 科大讯飞前端中级训练营
+          AI-Native 技术栈演示项目
         </p>
       </div>
 
