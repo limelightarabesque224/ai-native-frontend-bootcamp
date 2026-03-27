@@ -281,7 +281,9 @@ export async function POST(request: Request) {
     "react-hook-form": "^7.53.0",
     "zod": "^3.23.0",
     "@hookform/resolvers": "^3.9.0",
-    "ai": "^4.0.0"
+    "ai": "^4.0.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "@supabase/ssr": "^0.5.0"
   },
   "devDependencies": {
     "typescript": "^5.6.0",
