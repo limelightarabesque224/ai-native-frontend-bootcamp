@@ -55,7 +55,7 @@ export default async function LessonPage({
   const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null
 
   return (
-    <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12">
+    <div className="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12">
       {/* 课程头部 */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">

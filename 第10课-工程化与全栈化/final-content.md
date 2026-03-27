@@ -4,6 +4,16 @@
 **演讲时长**: 2.5 小时
 **风格**: 故事开场 + 技术深度 + 实践建议
 
+**课程大纲**:
+- Opening Hook: 10 min
+- Section 1: AI 驱动的 CI/CD: 20 min
+- Section 2: 项目配置与规范化: 25 min ⭐ 新增
+- Section 3: 代码质量工具 (Biome): 30 min
+- Section 4: 前端全栈化趋势: 40 min
+- Section 5: 常用 Skills 和 MCP 工具: 20 min
+- Section 6: 技术选型决策框架: 20 min
+- Closing: 15 min
+
 ---
 
 ## Opening Hook（10 min）
@@ -349,7 +359,375 @@ pnpm turbo run test --filter='...[origin/main...HEAD]' --cache-dir=.turbo
 
 ---
 
-## Section 2：代码质量工具（30 min）
+## Section 2：项目配置与规范化（25 min）
+
+在讲代码质量工具之前，我想先和大家聊聊一个经常被忽视的话题：**项目配置文件**。
+
+很多同学写代码的时候，只关注业务逻辑，觉得配置文件是"杂活"。但在 AI 时代，这些配置文件的重要性被大大提升了。为什么？因为 **AI 需要通过这些配置文件来理解你的项目规范**。
+
+### 为什么配置文件对 AI 很重要
+
+传统开发中，团队规范靠的是口口相传、文档、Code Review。但 AI 不会读你的飞书文档，它只能读代码和配置文件。
+
+一个配置完善的项目，AI 能做到：
+- 生成符合团队规范的代码（通过 `.editorconfig`、`biome.json`）
+- 自动遵循提交规范（通过 `commitlint.config.js`）
+- 理解项目结构和依赖关系（通过 `package.json`、`.npmrc`）
+- 知道哪些文件该忽略（通过 `.gitignore`、`.prettierignore`）
+
+### 必备的项目配置文件清单
+
+我给大家列一个现代前端项目的配置文件清单。这些文件看起来多，但每个都有明确的作用：
+
+#### 1. 包管理配置
+
+**`.npmrc`** - npm/pnpm 配置
+
+```ini
+# 使用 pnpm 作为包管理器
+package-manager=pnpm
+
+# 严格的 peer dependencies 检查
+strict-peer-dependencies=false
+auto-install-peers=true
+
+# 保存精确版本号（避免版本漂移）
+save-exact=true
+
+# 提升幽灵依赖
+shamefully-hoist=false
+
+# 公共提升模式（某些工具需要）
+public-hoist-pattern[]=*eslint*
+public-hoist-pattern[]=*prettier*
+```
+
+**为什么重要**：AI 生成 `package.json` 时会参考这个配置，确保依赖安装行为一致。
+
+**`.nvmrc`** - Node.js 版本锁定
+
+```
+20.18.0
+```
+
+一行代码，但能避免"在我机器上能跑"的问题。团队所有人、CI/CD、AI 都用同一个 Node 版本。
+
+#### 2. 编辑器配置
+
+**`.editorconfig`** - 跨编辑器的统一配置
+
+```ini
+root = true
+
+[*]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.{js,jsx,ts,tsx,json,css,md}]
+indent_style = space
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+```
+
+**为什么重要**：AI 生成的代码会自动遵循这些格式规则。不同编辑器（VS Code、Cursor、Windsurf）都能识别。
+
+**`.vscode/settings.json`** - VS Code 工作区配置
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ]
+}
+```
+
+**为什么重要**：保存时自动格式化、自动排序 import，AI 和人类都能享受一致的开发体验。
+
+**`.vscode/extensions.json`** - 推荐扩展
+
+```json
+{
+  "recommendations": [
+    "biomejs.biome",
+    "bradlc.vscode-tailwindcss",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense"
+  ]
+}
+```
+
+新成员打开项目，VS Code 会提示安装这些扩展。
+
+#### 3. Git 配置
+
+**`.gitattributes`** - Git 文件属性
+
+```
+* text=auto
+
+*.js text eol=lf
+*.ts text eol=lf
+*.json text eol=lf
+
+*.png binary
+*.jpg binary
+```
+
+**为什么重要**：确保 Windows、Mac、Linux 上的换行符一致，避免无意义的 diff。
+
+**`.gitignore`** - 忽略文件
+
+```
+node_modules
+.next
+out
+dist
+*.log
+.env
+.env.local
+.DS_Store
+*.tsbuildinfo
+```
+
+这个大家都熟悉，但要注意：AI 生成代码时也会参考这个文件，不会把 `node_modules` 的内容当作项目代码。
+
+#### 4. 提交规范
+
+**`commitlint.config.js`** - 提交信息规范
+
+```js
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'type-enum': [
+      2,
+      'always',
+      [
+        'feat',     // 新功能
+        'fix',      // 修复 bug
+        'docs',     // 文档变更
+        'style',    // 代码格式
+        'refactor', // 重构
+        'perf',     // 性能优化
+        'test',     // 测试
+        'chore',    // 构建/工具变动
+      ],
+    ],
+    'subject-empty': [2, 'never'],
+    'header-max-length': [2, 'always', 100],
+  },
+}
+```
+
+**`.husky/commit-msg`** - Git Hook
+
+```bash
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx --no -- commitlint --edit ${1}
+```
+
+**为什么重要**：强制团队遵循提交规范，生成的 CHANGELOG 才有意义。AI 也会学习这个规范来生成提交信息。
+
+#### 5. 文档文件
+
+**`README.md`** - 项目说明
+
+```markdown
+# 项目名称
+
+> 简短描述
+
+## 快速开始
+
+\`\`\`bash
+pnpm install
+pnpm dev
+\`\`\`
+
+## 技术栈
+
+- Next.js 15
+- Tailwind CSS v4
+- shadcn/ui
+- ...
+
+## 项目结构
+
+\`\`\`
+src/
+├── app/
+├── components/
+└── lib/
+\`\`\`
+```
+
+**`CHANGELOG.md`** - 变更日志
+
+```markdown
+# Changelog
+
+## [Unreleased]
+
+### Added
+- 初始化项目
+
+## [0.1.0] - 2026-03-27
+
+### Added
+- 项目初始化
+```
+
+**`CONTRIBUTING.md`** - 贡献指南
+
+告诉团队成员和 AI 如何参与项目开发。
+
+**为什么重要**：AI 会读这些文档来理解项目背景、技术栈、开发流程。一个好的 README 能让 AI 生成更符合项目风格的代码。
+
+#### 6. GitHub 模板
+
+**`.github/ISSUE_TEMPLATE/bug_report.md`** - Bug 报告模板
+
+```markdown
+---
+name: Bug 报告
+title: '[BUG] '
+labels: bug
+---
+
+## Bug 描述
+<!-- 清晰简洁地描述这个 bug -->
+
+## 复现步骤
+1. 访问 '...'
+2. 点击 '...'
+
+## 期望行为
+<!-- 描述你期望发生什么 -->
+
+## 环境信息
+- 浏览器: [例如 Chrome 120]
+- Node.js 版本: [例如 20.18.0]
+```
+
+**`.github/PULL_REQUEST_TEMPLATE.md`** - PR 模板
+
+```markdown
+## 摘要
+<!-- 简要描述这个 PR 做了什么 -->
+
+## 变更类型
+- [ ] 🎉 新功能
+- [ ] 🐛 Bug 修复
+- [ ] 📝 文档更新
+
+## 测试计划
+- [ ] 本地测试通过
+- [ ] Lint 检查通过
+```
+
+**为什么重要**：规范化 Issue 和 PR，AI Code Review 工具能更好地理解变更内容。
+
+### 配置文件的 AI 友好性设计原则
+
+好，文件列完了。现在我想讲讲设计这些配置文件时的原则：
+
+**原则一：单一真相源（Single Source of Truth）**
+
+不要在多个地方重复配置。比如 Node 版本，只在 `.nvmrc` 和 `package.json` 的 `engines` 字段里定义，不要在 README 里再写一遍。AI 会困惑。
+
+**原则二：显式优于隐式**
+
+```json
+// ❌ 不好：依赖默认行为
+{
+  "scripts": {
+    "build": "next build"
+  }
+}
+
+// ✅ 好：显式声明环境
+{
+  "scripts": {
+    "build": "NODE_ENV=production next build"
+  },
+  "engines": {
+    "node": ">=20.18.0",
+    "pnpm": ">=9.0.0"
+  }
+}
+```
+
+**原则三：注释要写清楚"为什么"**
+
+```js
+// ❌ 不好
+{
+  "shamefully-hoist": false
+}
+
+// ✅ 好
+{
+  // 不提升幽灵依赖，避免隐式依赖问题
+  "shamefully-hoist": false
+}
+```
+
+AI 能读懂注释，会根据注释理解配置的意图。
+
+### 快速初始化项目配置
+
+最后，我给大家一个快速初始化这些配置的方法。不需要手动创建每个文件：
+
+```bash
+# 1. 初始化 package.json
+pnpm init
+
+# 2. 安装开发依赖
+pnpm add -D @biomejs/biome husky @commitlint/cli @commitlint/config-conventional
+
+# 3. 初始化 Biome
+pnpm biome init
+
+# 4. 初始化 Git Hooks
+pnpm exec husky init
+
+# 5. 创建配置文件（可以用 AI 生成）
+# 在 Cursor 里输入：
+# "帮我创建一套完整的项目配置文件，包括 .editorconfig、.npmrc、
+#  commitlint.config.js、README.md、CHANGELOG.md"
+```
+
+AI 会根据你的项目类型（Next.js、React、Vue）生成对应的配置文件。
+
+### 配置文件的维护
+
+配置文件不是一次性的，需要持续维护：
+
+1. **定期审查**：每个季度检查一次，删除过时的配置
+2. **版本更新**：依赖升级时，同步更新配置（比如 Biome 的 schema 版本）
+3. **团队同步**：配置变更要通知团队，最好在 CHANGELOG 里记录
+4. **AI 辅助**：让 AI 帮你检查配置是否有冲突或过时的部分
+
+好，项目配置讲完了。接下来我们进入代码质量工具的部分。
+
+---
+
+## Section 3：代码质量工具（30 min）
 
 ### Biome vs ESLint + Prettier
 
@@ -850,7 +1228,7 @@ jobs:
 
 ---
 
-## Section 3：前端全栈化趋势（40 min）
+## Section 4：前端全栈化趋势（40 min）
 
 ### 为什么全栈化是趋势
 
@@ -1869,7 +2247,7 @@ Next.js 15 (App Router)
 
 ---
 
-## Section 4：常用 Skills 和 MCP 工具（20 min）
+## Section 5：常用 Skills 和 MCP 工具（20 min）
 
 除了代码质量和全栈化，还有一些工具可以提升 AI 开发效率：
 
@@ -1885,7 +2263,7 @@ Next.js 15 (App Router)
 
 ---
 
-## Section 5：技术选型决策框架（20 min）
+## Section 6：技术选型决策框架（20 min）
 
 ### AI 友好性评估矩阵
 
@@ -2043,23 +2421,34 @@ styled-components:
 
 ---
 
-## Closing（20 min）
+## Closing（15 min）
 
 ### 今天的核心要点
 
-1. **Biome > ESLint + Prettier**：更快、更简单、更 AI 友好
-2. **TypeScript 严格模式**：帮助 AI 理解类型
-3. **前端全栈化是趋势**：Server Actions + tRPC + Prisma + Supabase
-4. **全栈化对 AI 友好**：一个代码库，完整数据流
-5. **Supabase 是 AI 友好的 BaaS**：自动 API + 内置 Vector + MCP Server
+1. **项目配置是 AI 的"说明书"**：完善的配置文件让 AI 理解项目规范
+2. **必备配置清单**：`.npmrc`、`.editorconfig`、`commitlint.config.js`、`.gitattributes` 等
+3. **Biome > ESLint + Prettier**：更快、更简单、更 AI 友好
+4. **TypeScript 严格模式**：帮助 AI 理解类型
+5. **前端全栈化是趋势**：Server Actions + tRPC + Prisma + Supabase
+6. **全栈化对 AI 友好**：一个代码库，完整数据流
+7. **Supabase 是 AI 友好的 BaaS**：自动 API + 内置 Vector + MCP Server
 
 ### 行动建议
 
-1. 把项目的 ESLint + Prettier 迁移到 Biome
-2. 开启 TypeScript 严格模式
-3. 在新项目中尝试 Server Actions
-4. 快速原型项目试试 Supabase，体验 AI 友好的 BaaS
-5. 用评估矩阵评估你的技术栈
+1. **立即行动**：
+   - 为现有项目补充缺失的配置文件（`.editorconfig`、`.npmrc`、`CHANGELOG.md`）
+   - 设置 Git Hooks 强制提交规范
+   - 创建 GitHub Issue/PR 模板
+
+2. **本周尝试**：
+   - 把项目的 ESLint + Prettier 迁移到 Biome
+   - 开启 TypeScript 严格模式
+   - 更新 README 和 CONTRIBUTING 文档
+
+3. **下个项目**：
+   - 使用完整的配置文件模板初始化项目
+   - 尝试 Server Actions 或 Supabase
+   - 用评估矩阵做技术选型
 
 ### 下节课预告
 
@@ -2067,7 +2456,7 @@ styled-components:
 
 ### Q&A
 
-现在我们有 20 分钟的 Q&A 时间。
+现在我们有 15 分钟的 Q&A 时间。
 
 ---
 
@@ -2075,9 +2464,10 @@ styled-components:
 
 **总时长**: 约 2.5 小时
 - Opening: 10 min
-- Section 1: 20 min
-- Section 2: 30 min
-- Section 3: 40 min
-- Section 4: 20 min
-- Section 5: 20 min
-- Closing: 20 min
+- Section 1 (AI 驱动的 CI/CD): 20 min
+- Section 2 (项目配置与规范化): 25 min ⭐ 新增
+- Section 3 (代码质量工具): 30 min
+- Section 4 (前端全栈化趋势): 40 min
+- Section 5 (常用 Skills 和 MCP 工具): 20 min
+- Section 6 (技术选型决策框架): 20 min
+- Closing: 15 min

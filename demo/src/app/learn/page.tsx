@@ -3,15 +3,15 @@ import { lessons } from '@/lib/lessons'
 
 export default function LearnPage() {
   return (
-    <div className="max-w-4xl mx-auto px-8 py-12">
+    <div className="max-w-4xl mx-auto px-4 md:px-8 py-8 md:py-12">
       <div className="mb-12">
-        <h1 className="text-4xl font-bold tracking-tight mb-4">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
           大模型时代的前端开发
         </h1>
-        <p className="text-lg text-muted-foreground mb-6">
+        <p className="text-base md:text-lg text-muted-foreground mb-6">
           不是教"如何用 AI 写代码"，而是教"如何构建 AI-Native 的前端技术栈和工作流"
         </p>
-        <div className="flex gap-6 text-sm text-muted-foreground">
+        <div className="flex gap-4 md:gap-6 text-sm text-muted-foreground">
           <span>12 节课</span>
           <span>27 小时</span>
           <span>3-5 年中高级前端</span>
@@ -49,14 +49,14 @@ export default function LearnPage() {
           <Link
             key={lesson.id}
             href={`/learn/${lesson.id}`}
-            className="group flex items-center gap-4 rounded-xl border p-5 hover:border-primary hover:shadow-md transition-all"
+            className="group flex items-center gap-3 md:gap-4 rounded-xl border p-4 md:p-5 hover:border-primary hover:shadow-md transition-all"
           >
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground text-lg font-bold">
+            <span className="flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground text-base md:text-lg font-bold">
               {lesson.number}
             </span>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold group-hover:text-primary transition-colors">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-semibold text-sm md:text-base group-hover:text-primary transition-colors">
                   第 {lesson.number} 课：{lesson.title}
                 </h3>
                 <span className="text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded">
@@ -64,7 +64,7 @@ export default function LearnPage() {
                 </span>
               </div>
               <p className="text-sm text-muted-foreground mt-1">{lesson.subtitle}</p>
-              <div className="flex gap-1.5 mt-2">
+              <div className="flex flex-wrap gap-1.5 mt-2">
                 {lesson.tags.map((tag) => (
                   <span
                     key={tag}
@@ -75,7 +75,7 @@ export default function LearnPage() {
                 ))}
               </div>
             </div>
-            <span className="text-muted-foreground group-hover:text-primary transition-colors">
+            <span className="hidden sm:inline text-muted-foreground group-hover:text-primary transition-colors">
               →
             </span>
           </Link>

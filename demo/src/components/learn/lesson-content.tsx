@@ -57,7 +57,7 @@ function TableOfContents({ toc }: { toc: TocItem[] }) {
   if (toc.length === 0) return null
 
   return (
-    <nav className="hidden xl:block sticky top-24 w-56 shrink-0 max-h-[calc(100vh-120px)] overflow-y-auto text-sm self-start">
+    <nav className="hidden xl:block fixed right-8 top-24 w-56 max-h-[calc(100vh-120px)] overflow-y-auto text-sm">
       <div className="font-medium text-muted-foreground mb-3 text-xs uppercase tracking-wider">
         目录
       </div>
@@ -98,8 +98,10 @@ export function LessonContent({ content }: { content: string }) {
     .trim()
 
   return (
-    <div className="relative flex gap-8">
-      <article className="prose prose-slate max-w-none prose-headings:scroll-mt-20 min-w-0 flex-1">
+    <div className="relative xl:pr-64">
+      <TableOfContents toc={toc} />
+
+      <article className="prose prose-slate max-w-none prose-headings:scroll-mt-20">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{

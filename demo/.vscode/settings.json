@@ -1,0 +1,46 @@
+{
+  // 编辑器配置
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+
+  // 文件配置
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // TypeScript 配置
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  // Tailwind CSS 配置
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+
+  // 文件关联
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+
+  // 排除文件
+  "files.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/out": true,
+    "**/*.tsbuildinfo": true
+  },
+
+  // 搜索排除
+  "search.exclude": {
+    "**/.next": true,
+    "**/node_modules": true,
+    "**/pnpm-lock.yaml": true,
+    "**/out": true
+  }
+}
