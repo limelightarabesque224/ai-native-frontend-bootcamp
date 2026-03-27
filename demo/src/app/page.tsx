@@ -36,6 +36,25 @@ const demos = [
 export default function Home() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
+      <div className="mb-8 text-sm text-muted-foreground">
+        <span>@trsoliu · </span>
+        <a
+          href="https://github.com/trsoliu"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-primary transition-colors"
+        >
+          GitHub
+        </a>
+        <span> · </span>
+        <a
+          href="mailto:trsoliu@gmail.com"
+          className="hover:text-primary transition-colors"
+        >
+          邮箱
+        </a>
+      </div>
+
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight mb-4">
           大模型时代的前端开发

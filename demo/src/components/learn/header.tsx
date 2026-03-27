@@ -53,7 +53,9 @@ export function Header() {
             </svg>
             <div>
               <div className="font-semibold text-sm">大模型时代的前端开发</div>
-              <div className="text-xs text-muted-foreground hidden sm:block">AI-Native 前端训练营</div>
+              <div className="text-xs text-muted-foreground hidden sm:block">
+                AI-Native 前端训练营 · @trsoliu
+              </div>
             </div>
           </Link>
         </div>
