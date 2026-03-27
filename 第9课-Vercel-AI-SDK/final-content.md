@@ -1273,6 +1273,156 @@ export function AISearchInterface() {
 
 **这就是 AI 搜索的威力：理解用户意图，而不是简单的关键词匹配。**
 
+### 实战 4：Supabase + Vercel AI SDK 构建 RAG 应用
+
+好，最后一个实战，我们来做一个很多人都想做、但不知道怎么下手的东西——**RAG 应用**。
+
+#### 什么是 RAG？
+
+RAG，全称 Retrieval-Augmented Generation，翻译过来就是「检索增强生成」。听起来很学术，但其实概念很简单。
+
+你们有没有这样的体验：你问 ChatGPT 一个关于你们公司内部文档的问题，它回答不了，因为它没见过你们的数据。
+
+RAG 解决的就是这个问题——**让 AI 基于你的私有数据来回答问题**。
+
+核心思路是：
+- **不需要训练模型**。训练模型成本高、周期长，而且你的数据可能天天在变。
+- **只需要 Vector 检索**。用户提问的时候，先在你的知识库里搜索相关文档，然后把这些文档作为上下文传给 AI，让 AI 基于这些文档来回答。
+
+打个比方：这就像开卷考试。AI 不需要把所有知识都背下来，只需要在回答前快速翻阅相关资料，然后组织语言回答。
+
+#### 技术方案
+
+我们今天用的技术栈是：
+
+1. **Supabase** —— 存储文档和 Vector Embeddings。Supabase 是一个开源的 Firebase 替代品，它底层是 PostgreSQL，天然支持 pgvector 扩展。
+2. **Vercel AI SDK** —— 处理对话和流式响应，这个我们前面已经很熟悉了。
+3. **pgvector** —— PostgreSQL 的向量搜索扩展，用来做语义搜索。
+
+整个流程是这样的：
+
+```
+用户提问 → 生成查询向量 → 在 Supabase 中搜索相似文档 → 将文档作为上下文 → AI 生成回答
+```
+
+为什么不用专门的向量数据库，比如 Pinecone、Weaviate？因为 Supabase 的 pgvector 已经够用了，而且你的业务数据本来就在 Supabase 里，不需要再维护一个额外的服务。少一个服务，少一份运维成本。
+
+#### Step 1：数据库 Schema
+
+首先，我们在 Supabase 里创建文档表和搜索函数。打开 Supabase 的 SQL Editor，执行下面的 SQL：
+
+```sql
+-- 启用 pgvector 扩展
+create extension if not exists vector;
+
+-- 创建文档表
+create table documents (
+  id bigserial primary key,
+  content text,
+  embedding vector(1536),
+  metadata jsonb
+);
+
+-- 创建语义搜索函数
+create or replace function match_documents(
+  query_embedding vector(1536),
+  match_threshold float,
+  match_count int
+) returns table (
+  id bigint,
+  content text,
+  similarity float
+) language sql as $$
+  select id, content, 1 - (embedding <=> query_embedding) as similarity
+  from documents
+  where 1 - (embedding <=> query_embedding) > match_threshold
+  order by embedding <=> query_embedding
+  limit match_count;
+$$;
+```
+
+这里解释一下几个关键点：
+
+- `vector(1536)` —— 这是 OpenAI `text-embedding-3-small` 模型生成的向量维度。每段文本会被转换成一个 1536 维的向量。
+- `<=>` —— 这是 pgvector 的余弦距离运算符。两个向量越相似，距离越小。
+- `match_threshold` —— 相似度阈值。设成 0.7 意味着只返回相似度大于 70% 的结果。
+- `metadata` —— 用 JSONB 存储文档的元信息，比如来源、分类、创建时间等。
+
+#### Step 2：创建 RAG API Route
+
+接下来是核心部分——API Route。这段代码把 Supabase 检索和 Vercel AI SDK 的流式响应串联起来：
+
+```typescript
+// app/api/chat/route.ts
+import { streamText } from 'ai'
+import { openai } from '@ai-sdk/openai'
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_KEY!
+)
+
+export async function POST(req: Request) {
+  const { messages } = await req.json()
+  const lastMessage = messages[messages.length - 1].content
+
+  // 1. 生成查询向量
+  const embeddingResponse = await openai.embeddings.create({
+    model: 'text-embedding-3-small',
+    input: lastMessage,
+  })
+  const queryEmbedding = embeddingResponse.data[0].embedding
+
+  // 2. 在 Supabase 中搜索相关文档
+  const { data: docs } = await supabase.rpc('match_documents', {
+    query_embedding: queryEmbedding,
+    match_threshold: 0.7,
+    match_count: 5,
+  })
+
+  // 3. 将相关文档作为上下文
+  const context = docs?.map(d => d.content).join('\n\n') || ''
+
+  // 4. 用 AI 生成回答
+  const result = streamText({
+    model: openai('gpt-4o'),
+    messages,
+    system: `基于以下知识库回答用户问题：\n\n${context}`,
+  })
+
+  return result.toDataStreamResponse()
+}
+```
+
+我来逐步拆解这段代码：
+
+**第一步：生成查询向量。** 用户输入一段文字，我们先用 OpenAI 的 Embedding 模型把它转成向量。这个向量代表了这段话的「语义」。
+
+**第二步：语义搜索。** 用 `supabase.rpc` 调用我们刚才创建的 `match_documents` 函数，在文档表里搜索和用户问题语义最相似的 5 篇文档。
+
+**第三步：构建上下文。** 把搜索到的文档内容拼接在一起，作为 AI 的上下文。
+
+**第四步：流式生成回答。** 用 Vercel AI SDK 的 `streamText`，把上下文通过 `system` 参数传给 AI，让它基于这些文档来回答用户的问题。
+
+前端部分完全不需要改，继续用 `useChat` 就行。前端并不关心后端是怎么拼装上下文的，它只负责展示流式回答。
+
+#### 为什么 Supabase 特别适合做 RAG？
+
+最后说一下为什么我推荐用 Supabase 来做 RAG，而不是用专门的向量数据库：
+
+1. **pgvector 原生支持**。Supabase 底层是 PostgreSQL，pgvector 是 Postgres 的扩展，一行 SQL 就能启用。不需要额外部署和维护一个向量数据库服务。
+
+2. **SQL 查询语义搜索**。你已经会写 SQL 了，向量搜索也是 SQL，学习成本几乎为零。不需要学一套新的查询语法。
+
+3. **与 Next.js + Vercel AI SDK 无缝集成**。Supabase 有官方的 JavaScript SDK，在 Next.js 的 API Route 里直接调用，代码量很少。整个 RAG 的核心逻辑就这几十行代码。
+
+4. **免费额度足够个人项目使用**。Supabase 的免费套餐包含 500MB 数据库、50,000 次 Embedding 存储，对于个人项目和 MVP 来说完全够用。
+
+所以如果你想做一个基于自己数据的 AI 问答系统——比如公司内部知识库、产品文档助手、客户 FAQ 机器人——Supabase + Vercel AI SDK 是目前最简单、最经济的方案。
+
+**这就是 RAG 的威力：让 AI 从「只会聊天」变成「真正懂你的业务」。**
+
 ---
 
 ## Closing（25 min）
