@@ -1,0 +1,30 @@
+# Cursor AI 规则配置
+
+## 技术栈
+- Next.js 15 App Router + TypeScript strict
+- Tailwind CSS v4
+- shadcn/ui + Radix UI
+- Zustand + TanStack Query
+- React Hook Form + Zod
+- Biome (not ESLint)
+
+## 代码生成规则
+- 函数式组件 + TypeScript
+- Props 用 interface
+- 命名导出
+- 样式只用 Tailwind utility classes
+- 优先使用 shadcn/ui 组件
+- 用 cn() 合并类名
+
+## 文件路径
+- UI 组件: components/ui/
+- 业务组件: components/features/
+- Hooks: hooks/
+- Utils: lib/
+- Types: types/
+
+## 禁止
+- 不用 any
+- 不写内联样式
+- 不用 CSS-in-JS
+- 不用 useEffect 做数据请求
