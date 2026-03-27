@@ -57,7 +57,7 @@ function TableOfContents({ toc }: { toc: TocItem[] }) {
   if (toc.length === 0) return null
 
   return (
-    <nav className="hidden xl:block fixed right-8 top-24 w-56 max-h-[calc(100vh-120px)] overflow-y-auto text-sm">
+    <nav className="hidden xl:block sticky top-24 w-56 shrink-0 max-h-[calc(100vh-120px)] overflow-y-auto text-sm self-start">
       <div className="font-medium text-muted-foreground mb-3 text-xs uppercase tracking-wider">
         目录
       </div>
@@ -98,10 +98,8 @@ export function LessonContent({ content }: { content: string }) {
     .trim()
 
   return (
-    <div className="relative xl:pr-64">
-      <TableOfContents toc={toc} />
-
-      <article className="prose prose-slate max-w-none prose-headings:scroll-mt-20">
+    <div className="relative flex gap-8">
+      <article className="prose prose-slate max-w-none prose-headings:scroll-mt-20 min-w-0 flex-1">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -155,7 +153,7 @@ export function LessonContent({ content }: { content: string }) {
                     <div className="absolute right-3 top-3 text-xs text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
                       {lang}
                     </div>
-                    <code className="block bg-[#1e1e2e] text-[#cdd6f4] rounded-lg p-4 text-sm overflow-x-auto leading-6" {...props}>
+                    <code className="block bg-[#1e1e2e] text-[#cdd6f4] rounded-lg p-3 md:p-4 text-xs md:text-sm overflow-x-auto leading-6" {...props}>
                       {children}
                     </code>
                   </div>
@@ -227,6 +225,7 @@ export function LessonContent({ content }: { content: string }) {
           {processedContent}
         </ReactMarkdown>
       </article>
+      <TableOfContents toc={toc} />
     </div>
   )
 }
