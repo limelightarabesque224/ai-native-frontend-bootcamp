@@ -4,6 +4,9 @@ import './globals.css'
 export const metadata: Metadata = {
   title: '大模型时代的前端开发 - Demo',
   description: 'AI-Native 前端技术栈演示项目',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({

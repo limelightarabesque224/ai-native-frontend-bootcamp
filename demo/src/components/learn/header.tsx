@@ -40,9 +40,17 @@ export function Header() {
           </button>
 
           <Link href="/learn" className="flex items-center gap-2 md:gap-3">
-            <span className="flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-xs md:text-sm font-bold">
-              AI
-            </span>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+              <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{stopColor: '#3b82f6', stopOpacity: 1}} />
+                  <stop offset="100%" style={{stopColor: '#8b5cf6', stopOpacity: 1}} />
+                </linearGradient>
+              </defs>
+              <path d="M 10 12 L 6 16 L 10 20" stroke="url(#grad)" strokeWidth="2" strokeLinecap="round" fill="none"/>
+              <path d="M 22 12 L 26 16 L 22 20" stroke="url(#grad)" strokeWidth="2" strokeLinecap="round" fill="none"/>
+              <path d="M 16 9 L 14 16 L 18 16 L 16 23" stroke="url(#grad)" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+            </svg>
             <div>
               <div className="font-semibold text-sm">大模型时代的前端开发</div>
               <div className="text-xs text-muted-foreground hidden sm:block">科大讯飞 · 前端中级训练营</div>
