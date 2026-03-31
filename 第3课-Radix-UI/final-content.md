@@ -1,6 +1,6 @@
 # 无头组件的底层逻辑：Radix UI 深度剖析
 
-> **课程时长**: 2.5 小时 | **难度**: 中高级 | **风格**: 故事开场 + 技术深度 + 实践建议
+> **课程时长**: 2.5-3 小时 | **难度**: 中高级 | **风格**: 故事开场 + 技术深度 + 实践指导
 
 ---
 
@@ -11,13 +11,16 @@
 │  🎯 核心观点：Headless UI 是 AI 时代组件库的最佳底层架构        │
 ├─────────────────────────────────────────────────────────────────┤
 │  📚 你将学到：                                                   │
-│    • 理解 Headless UI 的核心思想：逻辑与样式分离                │
-│    • 掌握 Radix UI 的 Composition 模式和 asChild 魔法           │
-│    • 深入理解可访问性原语（ARIA、焦点管理、键盘导航）           │
-│    • 学会 shadcn/ui 如何基于 Radix 构建完整组件库               │
+│    • 理解 Radix 的设计愿景：可访问、无样式、开放                │
+│    • 掌握 Composition 模式和 asChild 的工作原理                 │
+│    • 深入可访问性原语（WAI-ARIA、焦点管理、键盘导航）           │
+│    • 学习 2025 新原语（PasswordToggleField、OneTimePassword）   │
+│    • 掌握 radix-ui 统一包和增量采用策略                         │
 │    • 横向对比 Radix / Headless UI / React Aria / Ark UI        │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+> 💡 **2025 最新**: 新增 `radix-ui` 统一包、PasswordToggleField、OneTimePasswordField、Form 原语（Preview）、React 19/RSC 完整支持
 
 ---
 
@@ -149,7 +152,34 @@ import { Modal } from 'antd'
 
 > ⚠️ **核心矛盾**：传统组件库给了你便利，但也限制了你的自由
 
-### 1.2 Headless UI 的核心思想
+### 1.2 Radix Primitives 的设计愿景（官方）
+
+> **官方定义**：Radix Primitives is a low-level UI component library with a focus on **accessibility**, **customization** and **developer experience**.
+
+#### Radix 六大核心特性
+
+```mermaid
+graph TB
+    subgraph Features["Radix Primitives 核心特性"]
+        F1["♿ Accessible<br/>遵循 WAI-ARIA 规范"]
+        F2["🎨 Unstyled<br/>完全控制外观"]
+        F3["🔓 Opened<br/>开放的组件架构"]
+        F4["⚡ Uncontrolled<br/>默认非受控，可选受控"]
+        F5["🛠️ Developer Experience<br/>类型安全，API 一致"]
+        F6["📦 Incremental Adoption<br/>增量采用，按需引入"]
+    end
+```
+
+| 特性 | 官方说明 | 实际意义 |
+|------|---------|---------|
+| **Accessible** | 遵循 WAI-ARIA 设计模式，处理 aria/role 属性、焦点管理、键盘导航 | 开箱即可访问 |
+| **Unstyled** | 不提供样式，完全控制外观 | 与任何样式方案兼容 |
+| **Opened** | 开放组件架构，可访问每个部分 | 可包装、添加事件、props、refs |
+| **Uncontrolled** | 默认非受控，可选受控模式 | 快速上手，无需本地状态 |
+| **Developer Experience** | 完全类型化 API，一致的 API 设计，asChild 支持 | 可预测的开发体验 |
+| **Incremental Adoption** | 推荐使用 `radix-ui` 统一包 | Tree-shakeable，避免版本冲突 |
+
+### 1.3 Headless UI 的核心思想
 
 ```mermaid
 graph TB
@@ -1801,6 +1831,110 @@ function CommandPalette() {
 }
 ```
 
+### 6.8 2025 新增原语（Preview）
+
+> 💡 **最新更新**：Radix UI 在 2025 年新增了多个实用原语，目前处于 Preview 阶段。
+
+#### PasswordToggleField（2025 年 5 月）
+
+```tsx
+import { unstable_PasswordToggleField as PasswordToggleField } from "radix-ui"
+import { EyeOpenIcon, EyeClosedIcon } from "@radix-ui/react-icons"
+
+function PasswordField() {
+  return (
+    <PasswordToggleField.Root>
+      <PasswordToggleField.Input 
+        placeholder="输入密码"
+        className="px-3 py-2 border rounded"
+      />
+      <PasswordToggleField.Toggle className="absolute right-2 top-1/2 -translate-y-1/2">
+        <PasswordToggleField.Icon
+          visible={<EyeOpenIcon />}
+          hidden={<EyeClosedIcon />}
+        />
+      </PasswordToggleField.Toggle>
+    </PasswordToggleField.Root>
+  )
+}
+```
+
+**PasswordToggleField 特性：**
+
+| 特性 | 说明 |
+|------|------|
+| **焦点管理** | 指针切换时返回输入框焦点，键盘切换时保持焦点 |
+| **自动重置** | 表单提交后自动隐藏密码，防止意外存储 |
+| **无障碍标签** | 图标按钮自动提供无障碍标签 |
+
+#### OneTimePasswordField（2025 年 4 月）
+
+```tsx
+import { unstable_OneTimePasswordField as OneTimePasswordField } from "radix-ui"
+
+function OTPVerify() {
+  return (
+    <OneTimePasswordField.Root 
+      onComplete={(value) => console.log('OTP:', value)}
+    >
+      <div className="flex gap-2">
+        <OneTimePasswordField.Input className="w-12 h-12 text-center border rounded" />
+        <OneTimePasswordField.Input className="w-12 h-12 text-center border rounded" />
+        <OneTimePasswordField.Input className="w-12 h-12 text-center border rounded" />
+        <span className="flex items-center">-</span>
+        <OneTimePasswordField.Input className="w-12 h-12 text-center border rounded" />
+        <OneTimePasswordField.Input className="w-12 h-12 text-center border rounded" />
+        <OneTimePasswordField.Input className="w-12 h-12 text-center border rounded" />
+      </div>
+      <OneTimePasswordField.HiddenInput name="otp" />
+    </OneTimePasswordField.Root>
+  )
+}
+```
+
+**OneTimePasswordField 特性：**
+
+| 特性 | 说明 |
+|------|------|
+| **键盘导航** | 行为模拟单个输入框 |
+| **粘贴支持** | 粘贴时自动覆盖值 |
+| **密码管理器** | 支持自动填充 |
+| **输入验证** | 支持数字/字母数字验证 |
+| **自动提交** | 完成时自动提交 |
+| **隐藏输入** | 提供单一值给表单数据 |
+
+### 6.9 radix-ui 统一包（推荐）
+
+> **2025 年 1 月新增**：推荐使用 `radix-ui` 统一包代替单独安装。
+
+```bash
+# 推荐：统一包（Tree-shakeable）
+npm install radix-ui
+
+# 不再推荐：单独安装
+npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu
+```
+
+**使用方式对比：**
+
+```tsx
+// ✅ 推荐：从统一包导入
+import { Dialog, DropdownMenu, Tooltip } from "radix-ui"
+
+// ⚠️ 旧方式：仍然支持，但不推荐
+import * as Dialog from "@radix-ui/react-dialog"
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
+```
+
+**统一包优势：**
+
+| 优势 | 说明 |
+|------|------|
+| **防止版本冲突** | 所有原语版本统一 |
+| **减少重复依赖** | 共享依赖只安装一次 |
+| **更新方便** | 一次更新所有原语 |
+| **Tree-shakeable** | 只打包使用的组件 |
+
 ---
 
 ## 📖 Section 7：Headless UI 横向对比
@@ -1826,11 +1960,12 @@ graph TB
 | **组件数量** | 30+ | 10+ | 40+ | 25+ |
 | **Composition 模式** | ✅ 强 | ⚠️ 中 | ✅ 强 | ✅ 强 |
 | **可访问性** | WCAG 2.1 AA | WCAG 2.1 AA | WCAG 2.1 AAA | WCAG 2.1 AA |
-| **动画支持** | 需自行实现 | 内置 transition | 需自行实现 | 需自行实现 |
+| **动画支持** | data-state + CSS | 内置 Transition | 需自行实现 | 需自行实现 |
 | **文档质量** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **维护者** | Modulz | Tailwind Labs | Adobe | Chakra UI 团队 |
-| **GitHub Stars** | 15k+ | 25k+ | 12k+ | 3k+ |
-| **Bundle Size** | ~50kb | ~30kb | ~80kb | ~60kb |
+| **维护者** | WorkOS | Tailwind Labs | Adobe | Chakra UI 团队 |
+| **React 19 支持** | ✅ 完整 | ✅ 完整 | ✅ 完整 | ✅ 完整 |
+| **RSC 支持** | ✅ 完整 | ⚠️ 部分 | ✅ 完整 | ⚠️ 部分 |
+| **统一包** | ✅ radix-ui | ❌ | ❌ | ❌ |
 
 ### 7.3 各库优劣势分析
 

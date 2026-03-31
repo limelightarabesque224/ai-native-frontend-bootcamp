@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import 'highlight.js/styles/github-dark.css';
 
 @theme {
   --color-background: hsl(0 0% 100%);
@@ -22,4 +23,35 @@
 body {
   background: var(--color-background);
   color: var(--color-foreground);
+}
+
+/* 确保 pre 内的 code 不会被行内代码样式覆盖 */
+pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+}
+
+/* prose 样式重置：仅对 prose 直接子元素的 pre 生效，不影响 not-prose 内部 */
+.prose :where(:not(.not-prose, .not-prose *)) pre {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  border: none;
+}
+
+.prose code::before,
+.prose code::after {
+  content: none;
+}
+
+.prose table {
+  margin: 0;
+}
+
+.prose img {
+  margin: 0;
 }

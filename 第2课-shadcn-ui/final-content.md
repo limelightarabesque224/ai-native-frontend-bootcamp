@@ -1,6 +1,6 @@
-# 组件库范式转移：shadcn/ui 的 Copy-Paste 哲学
+# 组件库范式转移：shadcn/ui 的 Open Code 哲学
 
-> **课程时长**: 2.5 小时 | **难度**: 中级 | **风格**: 故事开场 + 技术深度 + 实践建议
+> **课程时长**: 2.5-3 小时 | **难度**: 中级 | **风格**: 故事开场 + 技术深度 + 实践指导
 
 ---
 
@@ -8,18 +8,20 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  🎯 核心观点：Copy-Paste 哲学是 AI 时代组件库的新范式           │
+│  🎯 核心观点：shadcn/ui 不是组件库，是代码分发平台               │
 ├─────────────────────────────────────────────────────────────────┤
 │  📚 你将学到：                                                   │
-│    • 理解传统组件库在 AI 时代的困境（黑盒依赖、过度封装）        │
-│    • 掌握 shadcn/ui 的 Copy-Paste 哲学和 CLI 工作流             │
-│    • 深入理解 Registry 系统和组件架构                            │
-│    • 了解 shadcn/ui 生态工具（magic-ui、TweakCN、v0.dev）       │
+│    • 理解 Open Code 哲学：为什么"开放代码"优于"安装依赖"       │
+│    • 掌握 CLI 工具、Skills 和 MCP Server 的使用方法              │
+│    • 深入 Registry 系统和新组件（Field、Item、Input Group 等）   │
+│    • 了解 shadcn/ui 生态工具（magic-ui、TweakCN、v0.dev）        │
 │    • 学会横向对比各类组件库，做出正确的技术选型                  │
 │    • 实战：初始化项目、添加组件、用 AI 定制组件                  │
-│    • 掌握创建自定义 Registry 的方法                              │
+│    • 掌握创建自定义 Registry 和 AI 集成的方法                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+> 💡 **2025 最新特性**: Skills（AI 技能）、MCP Server（AI 工具协议）、Registry Index（注册表索引）、新组件（Field、Item、Button Group、Input Group、Spinner、Kbd、Empty）
 
 ### 课程结构导航
 
@@ -255,9 +257,38 @@ flowchart TB
 
 ---
 
-## 📖 Section 2：shadcn/ui 的 Copy-Paste 哲学
+## 📖 Section 2：shadcn/ui 的 Open Code 哲学
 
-### 2.1 核心理念：不是 npm 包，是代码片段
+> **官方定义**：shadcn/ui is a set of beautifully-designed, accessible components and **a code distribution platform**. This is not a component library. It is how you build your component library.
+
+### 2.1 五大核心原则（官方）
+
+```mermaid
+graph TB
+    subgraph Principles["shadcn/ui 五大核心原则"]
+        P1["🔓 Open Code<br/>代码顶层开放可修改"]
+        P2["🧩 Composition<br/>通用可组合接口"]
+        P3["📦 Distribution<br/>扁平文件 Schema + CLI"]
+        P4["🎨 Beautiful Defaults<br/>精心设计的默认样式"]
+        P5["🤖 AI-Ready<br/>代码对 LLM 可读可理解"]
+    end
+    
+    P1 --> Result["完全定制化的组件库"]
+    P2 --> Result
+    P3 --> Result
+    P4 --> Result
+    P5 --> Result
+```
+
+| 原则 | 说明 | 实际意义 |
+|------|------|---------|
+| **Open Code** | 组件代码顶层开放，可直接修改 | 不是"覆盖"，而是"拥有"代码 |
+| **Composition** | 所有组件共享通用的可组合接口 | 对团队和 AI 都可预测 |
+| **Distribution** | Schema 定义 + CLI 分发 | 跨项目、跨框架分发组件 |
+| **Beautiful Defaults** | 精心设计的默认样式 | 开箱即用，风格统一 |
+| **AI-Ready** | 代码对 LLM 可读、可理解、可改进 | AI 可以学习并生成新组件 |
+
+### 2.2 核心理念：代码在你手里
 
 ```mermaid
 flowchart LR
@@ -287,7 +318,7 @@ components/
     button.tsx  ← 完整的源码，在你的项目里，你可以随意修改
 ```
 
-### 2.2 Button 组件源码解析
+### 2.3 Button 组件源码解析
 
 ```tsx
 import * as React from "react"
@@ -963,23 +994,143 @@ function ThemeToggle() {
 flowchart TB
     subgraph Ecosystem["shadcn/ui 生态"]
         Core["shadcn/ui<br/>基础组件库"]
+        TwentyFirst["21st.dev<br/>组件发现与分发"]
         Magic["magic-ui<br/>动画组件库"]
         Aceternity["aceternity-ui<br/>现代UI组件"]
         Tweak["TweakCN<br/>AI主题编辑器"]
         V0["v0.dev<br/>AI代码生成"]
     end
     
+    Core --> TwentyFirst
     Core --> Magic
     Core --> Aceternity
     Core --> Tweak
     Core --> V0
 ```
 
-### 3.1 magic-ui：动画组件库
+### 3.1 先建立生态地图：这些工具分别解决什么问题
+
+很多人接触 `shadcn/ui` 生态时，会有一种“工具很多，但分不清谁负责什么”的感觉。
+
+我建议大家不要把它们都当成“组件库”，而是分成四层来理解：
+
+```text
+第 1 层：基础层
+  shadcn/ui
+  负责：可控、可改、可复制的基础组件
+
+第 2 层：发现与分发层
+  21st.dev / Registry / 自定义 Registry
+  负责：找组件、复用组件、分发组件
+
+第 3 层：视觉增强层
+  magic-ui / aceternity-ui
+  负责：动效、视觉冲击、营销感
+
+第 4 层：AI 加速层
+  TweakCN / v0.dev
+  负责：主题探索、代码生成
+```
+
+这套划分非常适合教学。因为它告诉学员：
+
+- `shadcn/ui` 不是一个孤立产品
+- 它已经形成了围绕“Open Code + Copy-Paste”展开的完整生态
+- 这些工具不是互相替代，而是分工协作
+
+### 3.2 21st.dev：组件发现与生态入口
+
+> 🔗 官网：https://21st.dev
+
+如果说 `shadcn/ui` 解决的是“组件怎么进项目”，那 `21st.dev` 解决的是“我去哪里找值得拿来用的组件”。
+
+这类平台的重要性，在 AI 时代被明显放大了。
+
+为什么？
+
+因为过去我们找组件的方式通常是：
+
+- Google 搜博客
+- GitHub 上翻仓库
+- 复制别人的 demo
+- 自己再改一遍
+
+这个流程不仅慢，而且质量参差不齐。
+
+`21st.dev` 这类平台的价值在于，它把基于 `shadcn/ui`、Tailwind、现代 React 工作流的组件做了集中展示和发现。你可以把它理解为：
+
+**shadcn 生态的“组件搜索引擎 + 灵感库 + 分发入口”。**
+
+#### 它适合什么场景
+
+- 你知道自己要做一个 UI 模块，但不想从零写
+- 你想找“更像现代 SaaS”的组件表达
+- 你需要给 AI 一个更明确的参考对象
+- 你希望团队先挑一个成熟模式，再落代码
+
+#### 正确的使用姿势
+
+不要把 `21st.dev` 当成“复制粘贴网站”，而应该把它当成：
+
+1. **参考源**
+   先看别人是怎么组织结构、命名和交互的
+
+2. **模式库**
+   你不是只拿一个按钮，而是在学一个“仪表盘卡片”“命令面板”“pricing section”的成熟模式
+
+3. **AI 上下文增强器**
+   当你让 Cursor 或 v0.dev 生成某个模块时，你可以先在 `21st.dev` 找到相似案例，再把结构语言描述得更准确
+
+比如你想做一个 Command Menu，不要只说：
+
+```text
+Create a command menu.
+```
+
+你可以先看生态里常见的实现，再写成：
+
+```text
+Create a command menu similar to modern shadcn-style patterns:
+search input on top, grouped actions, keyboard shortcut hints,
+hover and active states, compact spacing, dark-mode friendly.
+```
+
+这种 Prompt 的质量会高很多。
+
+#### 它和 Registry 的关系
+
+这里也要讲清楚，避免大家混淆：
+
+- `Registry` 更偏“分发机制”
+- `21st.dev` 更偏“发现入口”
+
+前者解决“怎么拉到项目里”，后者解决“我先找到什么值得拉”。
+
+### 3.3 magic-ui：动画组件库
 
 > 🔗 官网：https://magicui.design
 
 **特点：** 专注于炫酷的动画效果，完全兼容 shadcn/ui 工作流
+
+如果你觉得 `shadcn/ui` 默认组件“很好用，但有点素”，那 `magic-ui` 就是在补这一块。
+
+它最适合的不是后台 CRUD，而是：
+
+- Landing Page
+- Hero 区
+- 产品能力展示
+- 数据流、流程感、品牌氛围强化
+
+换句话说，`magic-ui` 解决的是“组件已经够用了，但页面还不够有记忆点”的问题。
+
+#### 为什么它在生态里重要
+
+因为很多团队会陷入一个误区：
+
+- 用 `shadcn/ui` 很稳
+- 但页面容易“像后台模板”
+
+这时你不一定需要换组件库，你更需要的是**少量高质量的视觉增强组件**。`magic-ui` 非常适合扮演这个角色。
 
 **安装方式：**
 ```bash
@@ -1009,11 +1160,40 @@ export function MarqueeDemo() {
 }
 ```
 
-### 3.2 aceternity-ui：现代 UI 组件
+#### 使用建议
+
+我建议课堂上把 `magic-ui` 定位成“加分层”，而不是“基础层”：
+
+- 基础交互先用 `shadcn/ui`
+- 真正需要视觉亮点的局部，再引入 `magic-ui`
+
+否则很容易把页面做得过度动画化，最后变成“看起来很酷，但不耐用”。
+
+### 3.4 aceternity-ui：现代 UI 组件
 
 > 🔗 官网：https://ui.aceternity.com
 
 **特点：** 3D 效果、视觉冲击，适合营销页面、落地页
+
+如果说 `magic-ui` 更偏“动效增强”，那 `aceternity-ui` 更偏“视觉表达升级”。
+
+它的特点不是“更标准”，而是“更抓眼球”：
+
+- 更强的空间感
+- 更明显的品牌感
+- 更适合宣传页、概念展示、产品首页
+
+它不太适合做什么？
+
+- 企业后台主工作流
+- 信息密度很高的业务表单
+- 要求强一致、强可维护的中后台页面
+
+也就是说，它特别适合讲给学员一个判断标准：
+
+**不是所有好看的组件都适合放进业务核心路径。**
+
+生态工具的关键，不只是会不会用，而是知道该放在哪里用。
 
 **示例组件：**
 
@@ -1043,9 +1223,46 @@ export function ThreeDCardDemo() {
 }
 ```
 
-### 3.3 TweakCN：AI 主题编辑器
+#### 如何跟 shadcn/ui 结合
 
-> 🔗 GitHub：https://github.com/tweakcn/tweakcn (20K+ stars)
+最好的用法通常不是“全站都用 aceternity-ui”，而是：
+
+- `shadcn/ui` 负责信息结构和交互骨架
+- `aceternity-ui` 负责首页、空状态、品牌展示区域的视觉高光
+
+这样既能保证工程稳定性，又能有足够强的视觉辨识度。
+
+### 3.5 TweakCN：从“换主题”升级到“主题工作流”
+
+> 🔗 GitHub：https://github.com/tweakcn/tweakcn
+
+很多同学第一次看到 `TweakCN`，会把它理解成“一个 shadcn/ui 配色生成器”。这也太低估它了。
+
+如果从课程视角来讲，`TweakCN` 最重要的价值不是“帮你挑颜色”，而是它把下面这件事做得非常简单：
+
+**把抽象的品牌感觉，快速落成一套可运行的 CSS Variables 主题。**
+
+这件事为什么重要？
+
+因为在 `shadcn/ui` 工作流里，组件本身只是骨架，真正决定整体风格的是：
+
+- `--background`
+- `--foreground`
+- `--primary`
+- `--secondary`
+- `--accent`
+- `--muted`
+- `--border`
+- `--ring`
+- `--radius`
+
+也就是说，`shadcn/ui` 的生态不是“找一堆组件来拼”，而是：
+
+```text
+组件源码 + Radix 原语 + Tailwind utility + CSS Variables 主题
+```
+
+而 `TweakCN` 刚好卡在这个链路的关键位置上。它不是替代组件库，而是帮助你更快地完成**主题系统设计**。
 
 ```mermaid
 flowchart LR
@@ -1085,7 +1302,175 @@ flowchart LR
 }
 ```
 
-### 3.4 v0.dev：AI 代码生成
+#### 它到底解决了什么问题
+
+传统主题定制的问题是这样的：
+
+1. 设计师说“我想要更科技感一点、偏紫色、暗一点”
+2. 开发者打开 `globals.css`
+3. 一条条改 HSL 变量
+4. 改完刷新页面
+5. 再回去继续试
+
+这个过程的问题不是“麻烦”，而是**没有反馈闭环**。你改的是变量，不是结果；你看到的是结果，但不知道该回到哪个变量继续调。
+
+`TweakCN` 的优势就在于：
+
+- 它把“主题变量”和“组件预览”放到一起
+- 它让你可以从视觉结果反推变量组合
+- 它降低了非设计师、非资深前端调主题的门槛
+
+所以它适合的不是“设计系统专家”，而是：
+
+- 想快速试品牌风格的前端
+- 想做白标/多品牌产品的团队
+- 想用 AI 辅助主题探索的开发者
+
+#### 怎么把 TweakCN 正确用到项目里
+
+我建议大家用下面这套流程，而不是“生成一份主题就直接贴进去”。
+
+**第一步：先定语义，不先定颜色**
+
+不要一上来就说“我要一个紫色主题”，而是先明确：
+
+- 主品牌色是什么
+- 主要强调操作是什么
+- 页面背景是偏冷还是偏暖
+- 卡片要不要和页面背景拉开层次
+- 暗色模式是纯黑路线还是深灰路线
+
+这是因为 `TweakCN` 输出的是变量值，但你要先想清楚变量背后的语义。
+
+**第二步：用自然语言快速探索**
+
+例如：
+
+```text
+Create a dark B2B dashboard theme with indigo primary,
+subtle violet accent, low-saturation background,
+clear card hierarchy, and accessible contrast.
+```
+
+这一步的目标不是“一次成功”，而是快速试 3 到 5 轮，找到比较接近的方向。
+
+**第三步：把输出映射回 Design Token 体系**
+
+很多团队这里会犯一个错：把 `TweakCN` 输出直接当最终答案。
+
+正确做法应该是：
+
+- 看它生成的 `--primary`、`--accent`、`--muted` 是否符合品牌
+- 看 `--border`、`--ring` 是否满足交互和焦点态需求
+- 看亮暗模式下语义是否稳定
+- 把最终确认的变量纳入你自己的 Token 文档
+
+也就是说，`TweakCN` 更像“探索器”，而不是“真理机”。
+
+#### 实际接入步骤
+
+最常见的落地方式是：
+
+1. 在 `TweakCN` 中生成主题
+2. 复制变量配置
+3. 放进项目的 `app/globals.css` 或主题文件
+4. 用现有的 shadcn/ui 组件直接预览
+5. 再做局部微调
+
+示例：
+
+```css
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
+    --accent: 270 95% 75%;
+    --accent-foreground: 224 71% 4%;
+    --border: 220 13% 91%;
+    --ring: 262 83% 58%;
+    --radius: 0.75rem;
+  }
+}
+```
+
+然后你原来的按钮、卡片、输入框，不改组件源码，视觉就会整体变化：
+
+```tsx
+<Button>保存设置</Button>
+<Card>
+  <CardHeader>
+    <CardTitle>团队空间</CardTitle>
+  </CardHeader>
+</Card>
+```
+
+这就是它最强的地方：
+
+**不需要重写组件，只需要重写主题变量。**
+
+#### TweakCN 和 v0.dev、Cursor、Design Token 的关系
+
+这里一定要讲透，因为这正是 AI 时代它的价值所在。
+
+`TweakCN` 不负责生成业务页面，`v0.dev` 才负责；
+`TweakCN` 也不负责管理所有设计资产，设计系统和 Token 文档才负责。
+
+它更像是中间层：
+
+```text
+品牌/设计感觉
+   ↓
+TweakCN 快速探索主题变量
+   ↓
+沉淀为 Design Token / CSS Variables
+   ↓
+v0.dev / Cursor / 本地开发继续生成和修改组件
+```
+
+所以它最适合的使用时机有三个：
+
+1. **项目初始化时**：快速找到第一版主题
+2. **品牌升级时**：低成本试多套视觉方向
+3. **AI 生成代码前**：先把主题基线定好，减少后续硬编码颜色
+
+#### 这类生态工具怎么分类理解
+
+你刚看到 `TweakCN` 的时候，可能会觉得它和 `magic-ui`、`v0.dev` 都是“生态工具”。但它们解决的问题完全不同：
+
+| 工具类型 | 代表工具 | 解决的问题 |
+|------|------|------|
+| **主题探索工具** | TweakCN | 生成和调试主题变量 |
+| **视觉增强组件库** | magic-ui / aceternity-ui | 提供炫酷组件和动效 |
+| **代码生成工具** | v0.dev | 生成页面和组件代码 |
+| **设计系统工具** | shadcn/ui registry | 分发和维护组件源码 |
+
+这个分类很重要。否则团队很容易把所有“AI UI 工具”混成一类，结果是：
+
+- 该用 `TweakCN` 的时候去问 v0.dev 配色
+- 该用设计 Token 的时候直接写死颜色
+- 该统一主题的时候却在一个个组件里微调 className
+
+#### 使用建议
+
+最后给大家几个非常实用的建议：
+
+1. **先定主题，再批量生成页面**
+   先用 `TweakCN` 把变量体系定下来，再让 AI 生成页面，整体风格会稳很多。
+
+2. **保留一份“品牌基线主题”**
+   不要每次都从零试，把你们确认过的主题版本沉淀到代码库和文档里。
+
+3. **不要把 TweakCN 输出原封不动上线**
+   一定要结合无障碍对比度、品牌规范和业务场景再 review 一遍。
+
+4. **把它当探索工具，不要当设计系统本身**
+   它擅长生成方向，不擅长替你做长期治理。
+
+### 3.6 v0.dev：AI 代码生成
 
 > 🔗 官网：https://v0.dev（Vercel 出品）
 
@@ -1140,17 +1525,19 @@ export function UserProfileCard() {
 }
 ```
 
-### 3.5 生态工具对比表
+### 3.7 生态工具对比表
 
 | 工具 | 定位 | 特点 | 使用场景 | GitHub Stars |
 |------|------|------|----------|--------------|
 | **shadcn/ui** | 基础组件库 | Copy-Paste 哲学 | 所有项目 | 80K+ |
+| **21st.dev** | 组件发现平台 | 找模式、找灵感、找实现 | 组件探索、AI 上下文增强 | 平台型产品 |
 | **magic-ui** | 动画组件库 | 炫酷动画效果 | 营销页面、落地页 | 10K+ |
 | **aceternity-ui** | 现代 UI 组件 | 3D 效果、视觉冲击 | 创意项目、展示页 | 15K+ |
-| **TweakCN** | AI 主题编辑器 | 自然语言生成主题 | 快速定制主题 | 20K+ |
+| **TweakCN** | AI 主题编辑器 | 自然语言生成主题 | 快速定制主题 | GitHub 项目 |
 | **v0.dev** | AI 代码生成 | 描述生成组件 | 快速原型开发 | Vercel 产品 |
 
-> 💡 **共同点**：都基于 Copy-Paste 哲学，不是 npm 包，而是代码片段
+> 💡 **课堂上最好这样总结**：
+> `shadcn/ui` 提供骨架，`21st.dev` 帮你找模式，`magic-ui/aceternity-ui` 帮你做视觉增强，`TweakCN` 帮你定主题，`v0.dev` 帮你快速生成页面。
 
 ---
 
@@ -1537,6 +1924,143 @@ import { Drawer } from "vaul"
     {/* 移动端友好的内容 */}
   </Drawer.Content>
 </Drawer.Root>
+```
+
+### 6.7 2025 新特性：Skills 和 MCP Server
+
+> 💡 **最新更新**：shadcn/ui 已全面拥抱 AI 原生开发，新增 Skills 和 MCP Server 功能。
+
+#### Skills：给 AI 助手赋能
+
+```mermaid
+flowchart LR
+    subgraph Skills["Skills 功能"]
+        S1["项目配置感知"]
+        S2["组件模式知识"]
+        S3["CLI 命令参考"]
+        S4["主题定制指南"]
+    end
+    
+    AI["AI 助手<br/>Claude / Cursor"] --> Skills
+    Skills --> Result["生成正确代码"]
+```
+
+**安装 Skills：**
+
+```bash
+pnpm dlx skills add shadcn/ui
+```
+
+**使用场景示例：**
+
+| Prompt | AI 行为 |
+|--------|---------|
+| "Add a login form with email and password" | 使用 Field、Input、Button 组件 |
+| "Create a settings page" | 使用 Tabs、Card、Form 组件 |
+| "Build a dashboard with sidebar" | 使用 Sidebar、Chart、Table 组件 |
+
+#### MCP Server：AI 直接访问注册表
+
+> **MCP (Model Context Protocol)** 是 AI 助手安全连接外部工具的开放协议。
+
+```mermaid
+flowchart LR
+    AI["AI 助手"] --> MCP["MCP Server"]
+    MCP --> Registry["组件注册表"]
+    MCP --> CLI["shadcn CLI"]
+    
+    Registry --> Actions["浏览/搜索/安装组件"]
+```
+
+**配置 MCP（Claude Code）：**
+
+```json
+// .mcp.json
+{
+  "mcpServers": {
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    }
+  }
+}
+```
+
+**自然语言使用示例：**
+
+```
+# 你可以直接对 AI 说：
+"Show me all available components in the shadcn registry"
+"Add the button, dialog and card components to my project"
+"Find me a login form from the shadcn registry"
+"Build a landing page using components from the acme registry"
+```
+
+### 6.8 October 2025 新组件
+
+> **最新组件**：Field、Item、Button Group、Input Group、Spinner、Kbd、Empty
+
+```mermaid
+graph TB
+    subgraph NewComponents["2025 年 10 月新组件"]
+        Spinner["Spinner<br/>加载指示器"]
+        Kbd["Kbd<br/>键盘按键显示"]
+        ButtonGroup["Button Group<br/>按钮组"]
+        InputGroup["Input Group<br/>输入框组合"]
+        Field["Field<br/>表单字段"]
+        Item["Item<br/>列表项"]
+        Empty["Empty<br/>空状态"]
+    end
+```
+
+#### Field 组件：表单新范式
+
+```tsx
+import { Field, FieldLabel, FieldDescription, FieldError } from "@/components/ui/field"
+
+<Field>
+  <FieldLabel htmlFor="username">Username</FieldLabel>
+  <Input id="username" placeholder="Max Leiter" />
+  <FieldDescription>Choose a unique username.</FieldDescription>
+  <FieldError>Username is already taken.</FieldError>
+</Field>
+```
+
+**Field 支持的表单库：**
+
+| 表单库 | 支持 | 说明 |
+|--------|------|------|
+| React Hook Form | ✅ | 完整集成 |
+| TanStack Form | ✅ | 完整集成 |
+| Server Actions | ✅ | 原生支持 |
+| 自定义 | ✅ | 灵活适配 |
+
+#### Input Group：输入框组合
+
+```tsx
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
+
+<InputGroup>
+  <InputGroupAddon>https://</InputGroupAddon>
+  <InputGroupInput placeholder="your-domain" />
+  <InputGroupAddon>.com</InputGroupAddon>
+</InputGroup>
+```
+
+#### Item 组件：列表项抽象
+
+```tsx
+import { Item, ItemContent, ItemTitle, ItemDescription, ItemMedia } from "@/components/ui/item"
+
+<Item>
+  <ItemMedia variant="icon">
+    <HomeIcon />
+  </ItemMedia>
+  <ItemContent>
+    <ItemTitle>Dashboard</ItemTitle>
+    <ItemDescription>Overview of your account.</ItemDescription>
+  </ItemContent>
+</Item>
 ```
 
 ---

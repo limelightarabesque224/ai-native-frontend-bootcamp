@@ -33,6 +33,7 @@
 | 文档 | 说明 |
 |------|------|
 | [课程设计文档.md](课程设计文档.md) | 完整的课程设计方案、技术地图、参考资料 |
+| [Design-to-Code-与-shadcn-生态总图.md](Design-to-Code-与-shadcn-生态总图.md) | 串联第 2、4、5 课的总图文档，适合备课与课程导读 |
 | [AI-Native项目配置模板.md](AI-Native项目配置模板.md) | 可直接使用的项目配置（AGENTS.md、.cursorrules、biome.json 等） |
 | [演讲大纲.md](演讲大纲.md) | 11 节课的演讲大纲概要 |
 

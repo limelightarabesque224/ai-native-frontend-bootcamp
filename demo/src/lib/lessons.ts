@@ -30,7 +30,7 @@ export const lessons: Lesson[] = [
     title: 'shadcn/ui',
     subtitle: '组件库范式转移',
     duration: '2.5h',
-    tags: ['shadcn/ui', 'Copy-Paste', 'Registry'],
+    tags: ['shadcn/ui', '21st.dev', 'TweakCN', 'magic-ui'],
   },
   {
     id: 'lesson-3',
@@ -46,7 +46,7 @@ export const lessons: Lesson[] = [
     title: 'Design to Code（上）',
     subtitle: '设计工具的 AI 革命',
     duration: '2.5h',
-    tags: ['Figma AI', 'Penpot', 'Pencil.dev'],
+    tags: ['Figma AI', 'Semi Design', 'Design Token', 'Penpot'],
   },
   {
     id: 'lesson-5',
@@ -54,7 +54,7 @@ export const lessons: Lesson[] = [
     title: 'Design to Code（下）',
     subtitle: 'AI 代码生成工具',
     duration: '2.5h',
-    tags: ['v0.dev', 'Bolt.new', 'Lovable'],
+    tags: ['v0.dev', 'Bolt.new', 'Lucide', 'Tabler Icons'],
   },
   {
     id: 'lesson-6',

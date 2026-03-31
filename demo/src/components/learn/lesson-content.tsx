@@ -1,9 +1,17 @@
 'use client'
 
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { useState, useEffect, useRef } from 'react'
+import {
+  type TocItem,
+  buildProcessedLessonContent,
+  extractTextContent,
+  generateToc,
+  slugifyHeading,
+} from '@/lib/lesson-markdown'
 import mermaid from 'mermaid'
+import { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
+import rehypeHighlight from 'rehype-highlight'
+import remarkGfm from 'remark-gfm'
 
 // 生成唯一 ID
 let mermaidId = 0
@@ -51,37 +59,11 @@ function MermaidBlock({ code }: { code: string }) {
   return (
     <div
       ref={containerRef}
-      className="my-4 flex justify-center overflow-x-auto rounded-lg border bg-white p-4"
+      className="my-3 flex justify-center overflow-x-auto rounded-lg border bg-white p-4"
+      /* biome-ignore lint/security/noDangerouslySetInnerHtml: Mermaid renders trusted SVG from local lesson markdown. */
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   )
-}
-
-interface TocItem {
-  id: string
-  text: string
-  level: number
-}
-
-function generateToc(content: string): TocItem[] {
-  const headingRegex = /^(#{1,3})\s+(.+)$/gm
-  const toc: TocItem[] = []
-  let match: RegExpExecArray | null = headingRegex.exec(content)
-
-  while (match !== null) {
-    const level = match[1].length
-    const text = match[2].replace(/[`*_~]/g, '').trim()
-    const id = text
-      .toLowerCase()
-      .replace(/[^\w\u4e00-\u9fff]+/g, '-')
-      .replace(/^-|-$/g, '')
-
-    if (level <= 3) {
-      toc.push({ id, text, level })
-    }
-    match = headingRegex.exec(content)
-  }
-  return toc
 }
 
 function TableOfContents({ toc }: { toc: TocItem[] }) {
@@ -129,9 +111,7 @@ function TableOfContents({ toc }: { toc: TocItem[] }) {
                     : 'text-muted-foreground hover:text-foreground hover:border-border border-transparent'
                 }`}
               >
-                {item.text.length > 30
-                  ? `${item.text.slice(0, 30)}...`
-                  : item.text}
+                {item.text.length > 30 ? `${item.text.slice(0, 30)}...` : item.text}
               </a>
             </li>
           ))}
@@ -141,138 +121,169 @@ function TableOfContents({ toc }: { toc: TocItem[] }) {
 }
 
 export function LessonContent({ content }: { content: string }) {
-  const toc = generateToc(content)
+  const processedContent = buildProcessedLessonContent(content)
+  const toc = generateToc(processedContent)
+  let headingIndex = 0
 
-  // 去掉第一个标题（已在页面头部显示）和副标题行
-  const processedContent = content
-    .replace(/^#\s+.+\n/, '')
-    .replace(/^##\s+最终版演讲稿.+\n/, '')
-    .replace(/^\*\*演讲时长\*\*:.+\n/m, '')
-    .replace(/^\*\*风格\*\*:.+\n/m, '')
-    .replace(/^>\s+.+\n/m, '')
-    .trim()
+  const getHeadingId = (level: number, children: React.ReactNode, fallbackText: string): string => {
+    const nextHeading = toc[headingIndex]
+
+    if (nextHeading && nextHeading.level === level && nextHeading.text === fallbackText) {
+      headingIndex += 1
+      return nextHeading.id
+    }
+
+    return slugifyHeading(fallbackText)
+  }
 
   return (
     <div className="relative xl:pr-64">
       <TableOfContents toc={toc} />
 
-      <article className="prose prose-slate prose-headings:scroll-mt-20 max-w-none">
+      <article className="prose prose-slate max-w-none">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
+          rehypePlugins={[[rehypeHighlight, { detect: true }]]}
           components={{
             h1: ({ children, ...props }) => {
-              const text = String(children)
-              const id = text
-                .toLowerCase()
-                .replace(/[^\w\u4e00-\u9fff]+/g, '-')
-                .replace(/^-|-$/g, '')
+              const text = extractTextContent(children)
+              const id = getHeadingId(1, children, text)
               return (
                 <h1
-                  id={id}
-                  className="mb-6 mt-12 border-b pb-3 text-2xl font-bold"
                   {...props}
+                  id={id}
+                  className="scroll-mt-[64px] md:scroll-mt-[72px] mb-6 mt-12 border-b pb-3 text-2xl font-bold"
                 >
                   {children}
                 </h1>
               )
             },
             h2: ({ children, ...props }) => {
-              const text = String(children)
-              const id = text
-                .toLowerCase()
-                .replace(/[^\w\u4e00-\u9fff]+/g, '-')
-                .replace(/^-|-$/g, '')
+              const text = extractTextContent(children)
+              const id = getHeadingId(2, children, text)
               return (
                 <h2
-                  id={id}
-                  className="mb-4 mt-10 border-b pb-2 text-xl font-semibold"
                   {...props}
+                  id={id}
+                  className="scroll-mt-[64px] md:scroll-mt-[72px] mb-4 mt-10 border-b pb-2 text-xl font-semibold"
                 >
                   {children}
                 </h2>
               )
             },
             h3: ({ children, ...props }) => {
-              const text = String(children)
-              const id = text
-                .toLowerCase()
-                .replace(/[^\w\u4e00-\u9fff]+/g, '-')
-                .replace(/^-|-$/g, '')
+              const text = extractTextContent(children)
+              const id = getHeadingId(3, children, text)
               return (
                 <h3
-                  id={id}
-                  className="mb-3 mt-8 text-lg font-semibold"
                   {...props}
+                  id={id}
+                  className="scroll-mt-[64px] md:scroll-mt-[72px] mb-3 mt-8 text-lg font-semibold"
                 >
                   {children}
                 </h3>
               )
             },
             p: ({ children, ...props }) => (
-              <p
-                className="text-foreground/90 mb-4 text-base leading-7"
-                {...props}
-              >
+              <p className="text-foreground/90 mb-4 text-base leading-7" {...props}>
                 {children}
               </p>
             ),
             code: ({ className, children, ...props }) => {
-              const isBlock = className?.includes('language-')
+              // 有 language- 或 hljs class 说明是块级代码（由 pre 处理容器样式）
+              const isBlock = className?.includes('language-') || className?.includes('hljs')
+
               if (isBlock) {
-                const lang = className?.replace('language-', '') || ''
-                const codeContent = String(children).replace(/\n$/, '')
+                const langMatch = className?.match(/language-(\w+)/)
+                const lang = langMatch?.[1] || ''
 
                 // Mermaid 图表渲染
                 if (lang === 'mermaid') {
+                  const codeContent = String(children).replace(/\n$/, '')
                   return <MermaidBlock code={codeContent} />
                 }
 
+                // 块级代码：透传 children，保留 rehype-highlight 的语法高亮 span 元素
                 return (
-                  <div className="group relative my-4">
-                    <div className="text-muted-foreground bg-secondary/80 absolute right-3 top-3 rounded px-2 py-0.5 text-xs opacity-0 transition-opacity group-hover:opacity-100">
-                      {lang}
-                    </div>
-                    <code
-                      className="block overflow-x-auto rounded-lg bg-[#1e1e2e] p-3 text-xs leading-6 text-[#cdd6f4] md:p-4 md:text-sm"
-                      {...props}
-                    >
-                      {children}
-                    </code>
-                  </div>
+                  <code className={`${className || ''}`} {...props}>
+                    {children}
+                  </code>
                 )
               }
+
+              // 没有 className 的情况：可能是行内代码，也可能是无语言标记的块级代码
+              // 无语言标记的块级代码会被 pre 包裹（pre 组件会处理），这里的样式通过 CSS pre code 重置
+              // 行内代码不在 pre 内，CSS 重置不会影响
               return (
                 <code
-                  className="bg-secondary text-primary rounded px-1.5 py-0.5 font-mono text-sm"
+                  className="not-prose rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-[0.85em] text-slate-800"
                   {...props}
                 >
                   {children}
                 </code>
               )
             },
-            pre: ({ children }) => <>{children}</>,
+            pre: ({ children, ...props }) => {
+              const codeElement = children as React.ReactElement<{
+                className?: string
+              }>
+              const className = codeElement?.props?.className || ''
+              const langMatch = className.match(/language-(\w+)/)
+              const lang = langMatch?.[1] || ''
+
+              // Mermaid 由 code 组件处理
+              if (lang === 'mermaid') {
+                return <>{children}</>
+              }
+
+              return (
+                <div className="not-prose group relative my-4">
+                  {lang && (
+                    <div className="absolute right-3 top-3 rounded bg-slate-700 px-2 py-0.5 text-xs text-slate-400 opacity-0 transition-opacity group-hover:opacity-100">
+                      {lang}
+                    </div>
+                  )}
+                  <pre
+                    className="overflow-x-auto rounded-lg bg-[#0d1117] p-4 text-sm leading-6 text-[#e6edf3]"
+                    {...props}
+                  >
+                    {children}
+                  </pre>
+                </div>
+              )
+            },
             table: ({ children, ...props }) => (
-              <div className="my-6 overflow-x-auto rounded-lg border">
+              <div className="not-prose my-6 overflow-x-auto rounded-lg border border-slate-200">
                 <table className="w-full text-sm" {...props}>
                   {children}
                 </table>
               </div>
             ),
             thead: ({ children, ...props }) => (
-              <thead className="bg-secondary" {...props}>
+              <thead className="border-b border-slate-200 bg-slate-50" {...props}>
                 {children}
               </thead>
             ),
+            tbody: ({ children, ...props }) => (
+              <tbody className="divide-y divide-slate-200" {...props}>
+                {children}
+              </tbody>
+            ),
+            tr: ({ children, ...props }) => (
+              <tr className="transition-colors hover:bg-slate-50/50" {...props}>
+                {children}
+              </tr>
+            ),
             th: ({ children, ...props }) => (
               <th
-                className="text-muted-foreground px-4 py-3 text-left font-medium"
+                className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600"
                 {...props}
               >
                 {children}
               </th>
             ),
             td: ({ children, ...props }) => (
-              <td className="border-t px-4 py-3" {...props}>
+              <td className="px-4 py-3 text-slate-700" {...props}>
                 {children}
               </td>
             ),
@@ -286,7 +297,7 @@ export function LessonContent({ content }: { content: string }) {
             ),
             ul: ({ children, ...props }) => (
               <ul
-                className="text-foreground/90 mb-4 list-inside list-disc space-y-1"
+                className="text-foreground/90 mb-4 list-outside list-disc space-y-1 pl-6"
                 {...props}
               >
                 {children}
@@ -294,11 +305,16 @@ export function LessonContent({ content }: { content: string }) {
             ),
             ol: ({ children, ...props }) => (
               <ol
-                className="text-foreground/90 mb-4 list-inside list-decimal space-y-1"
+                className="text-foreground/90 mb-4 list-outside list-decimal space-y-1 pl-6"
                 {...props}
               >
                 {children}
               </ol>
+            ),
+            li: ({ children, ...props }) => (
+              <li className="pl-1 [&>ol]:mt-2 [&>ul]:mt-2" {...props}>
+                {children}
+              </li>
             ),
             hr: () => <hr className="border-border my-8" />,
             strong: ({ children, ...props }) => (
@@ -306,23 +322,27 @@ export function LessonContent({ content }: { content: string }) {
                 {children}
               </strong>
             ),
-            a: ({ children, href, ...props }) => (
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-                {...props}
-              >
-                {children}
-              </a>
-            ),
+            a: ({ children, href, ...props }) => {
+              const isAnchor = href?.startsWith('#')
+              return (
+                <a
+                  href={href}
+                  {...(!isAnchor && {
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                  })}
+                  className="text-primary hover:underline"
+                  {...props}
+                >
+                  {children}
+                </a>
+              )
+            },
           }}
         >
           {processedContent}
         </ReactMarkdown>
       </article>
-      <TableOfContents toc={toc} />
     </div>
   )
 }
