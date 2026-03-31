@@ -2,7 +2,60 @@
 
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import mermaid from 'mermaid'
+
+// 生成唯一 ID
+let mermaidId = 0
+const generateId = () => `mermaid-${++mermaidId}`
+
+// Mermaid 渲染组件
+function MermaidBlock({ code }: { code: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [svg, setSvg] = useState<string>('')
+  const [error, setError] = useState<string>('')
+
+  useEffect(() => {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      securityLevel: 'loose',
+      fontFamily: 'ui-sans-serif, system-ui, sans-serif',
+    })
+  }, [])
+
+  useEffect(() => {
+    const renderDiagram = async () => {
+      const id = generateId()
+      try {
+        const { svg: renderedSvg } = await mermaid.render(id, code.trim())
+        setSvg(renderedSvg)
+        setError('')
+      } catch (err) {
+        console.error('Mermaid render error:', err)
+        setError(String(err))
+      }
+    }
+    renderDiagram()
+  }, [code])
+
+  if (error) {
+    return (
+      <div className="my-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="mb-2 font-medium">Mermaid 图表渲染错误</div>
+        <pre className="overflow-auto text-xs">{code}</pre>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="my-4 flex justify-center overflow-x-auto rounded-lg border bg-white p-4"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  )
+}
 
 interface TocItem {
   id: string
@@ -57,8 +110,8 @@ function TableOfContents({ toc }: { toc: TocItem[] }) {
   if (toc.length === 0) return null
 
   return (
-    <nav className="hidden xl:block fixed right-8 top-24 w-56 max-h-[calc(100vh-120px)] overflow-y-auto text-sm">
-      <div className="font-medium text-muted-foreground mb-3 text-xs uppercase tracking-wider">
+    <nav className="fixed right-8 top-24 hidden max-h-[calc(100vh-120px)] w-56 overflow-y-auto text-sm xl:block">
+      <div className="text-muted-foreground mb-3 text-xs font-medium uppercase tracking-wider">
         目录
       </div>
       <ul className="space-y-1">
@@ -68,15 +121,17 @@ function TableOfContents({ toc }: { toc: TocItem[] }) {
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
-                className={`block py-1 transition-colors border-l-2 ${
+                className={`block border-l-2 py-1 transition-colors ${
                   item.level === 1 ? 'pl-3' : 'pl-5'
                 } ${
                   activeId === item.id
                     ? 'border-primary text-primary font-medium'
-                    : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                    : 'text-muted-foreground hover:text-foreground hover:border-border border-transparent'
                 }`}
               >
-                {item.text.length > 30 ? `${item.text.slice(0, 30)}...` : item.text}
+                {item.text.length > 30
+                  ? `${item.text.slice(0, 30)}...`
+                  : item.text}
               </a>
             </li>
           ))}
@@ -101,7 +156,7 @@ export function LessonContent({ content }: { content: string }) {
     <div className="relative xl:pr-64">
       <TableOfContents toc={toc} />
 
-      <article className="prose prose-slate max-w-none prose-headings:scroll-mt-20">
+      <article className="prose prose-slate prose-headings:scroll-mt-20 max-w-none">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -112,7 +167,11 @@ export function LessonContent({ content }: { content: string }) {
                 .replace(/[^\w\u4e00-\u9fff]+/g, '-')
                 .replace(/^-|-$/g, '')
               return (
-                <h1 id={id} className="text-2xl font-bold mt-12 mb-6 pb-3 border-b" {...props}>
+                <h1
+                  id={id}
+                  className="mb-6 mt-12 border-b pb-3 text-2xl font-bold"
+                  {...props}
+                >
                   {children}
                 </h1>
               )
@@ -124,7 +183,11 @@ export function LessonContent({ content }: { content: string }) {
                 .replace(/[^\w\u4e00-\u9fff]+/g, '-')
                 .replace(/^-|-$/g, '')
               return (
-                <h2 id={id} className="text-xl font-semibold mt-10 mb-4 pb-2 border-b" {...props}>
+                <h2
+                  id={id}
+                  className="mb-4 mt-10 border-b pb-2 text-xl font-semibold"
+                  {...props}
+                >
                   {children}
                 </h2>
               )
@@ -136,13 +199,20 @@ export function LessonContent({ content }: { content: string }) {
                 .replace(/[^\w\u4e00-\u9fff]+/g, '-')
                 .replace(/^-|-$/g, '')
               return (
-                <h3 id={id} className="text-lg font-semibold mt-8 mb-3" {...props}>
+                <h3
+                  id={id}
+                  className="mb-3 mt-8 text-lg font-semibold"
+                  {...props}
+                >
                   {children}
                 </h3>
               )
             },
             p: ({ children, ...props }) => (
-              <p className="text-base leading-7 mb-4 text-foreground/90" {...props}>
+              <p
+                className="text-foreground/90 mb-4 text-base leading-7"
+                {...props}
+              >
                 {children}
               </p>
             ),
@@ -150,19 +220,32 @@ export function LessonContent({ content }: { content: string }) {
               const isBlock = className?.includes('language-')
               if (isBlock) {
                 const lang = className?.replace('language-', '') || ''
+                const codeContent = String(children).replace(/\n$/, '')
+
+                // Mermaid 图表渲染
+                if (lang === 'mermaid') {
+                  return <MermaidBlock code={codeContent} />
+                }
+
                 return (
-                  <div className="relative group my-4">
-                    <div className="absolute right-3 top-3 text-xs text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="group relative my-4">
+                    <div className="text-muted-foreground bg-secondary/80 absolute right-3 top-3 rounded px-2 py-0.5 text-xs opacity-0 transition-opacity group-hover:opacity-100">
                       {lang}
                     </div>
-                    <code className="block bg-[#1e1e2e] text-[#cdd6f4] rounded-lg p-3 md:p-4 text-xs md:text-sm overflow-x-auto leading-6" {...props}>
+                    <code
+                      className="block overflow-x-auto rounded-lg bg-[#1e1e2e] p-3 text-xs leading-6 text-[#cdd6f4] md:p-4 md:text-sm"
+                      {...props}
+                    >
                       {children}
                     </code>
                   </div>
                 )
               }
               return (
-                <code className="bg-secondary text-primary px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                <code
+                  className="bg-secondary text-primary rounded px-1.5 py-0.5 font-mono text-sm"
+                  {...props}
+                >
                   {children}
                 </code>
               )
@@ -181,33 +264,45 @@ export function LessonContent({ content }: { content: string }) {
               </thead>
             ),
             th: ({ children, ...props }) => (
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground" {...props}>
+              <th
+                className="text-muted-foreground px-4 py-3 text-left font-medium"
+                {...props}
+              >
                 {children}
               </th>
             ),
             td: ({ children, ...props }) => (
-              <td className="px-4 py-3 border-t" {...props}>
+              <td className="border-t px-4 py-3" {...props}>
                 {children}
               </td>
             ),
             blockquote: ({ children, ...props }) => (
-              <blockquote className="border-l-4 border-primary/30 bg-primary/5 rounded-r-lg px-4 py-3 my-4 text-sm" {...props}>
+              <blockquote
+                className="border-primary/30 bg-primary/5 my-4 rounded-r-lg border-l-4 px-4 py-3 text-sm"
+                {...props}
+              >
                 {children}
               </blockquote>
             ),
             ul: ({ children, ...props }) => (
-              <ul className="list-disc list-inside space-y-1 mb-4 text-foreground/90" {...props}>
+              <ul
+                className="text-foreground/90 mb-4 list-inside list-disc space-y-1"
+                {...props}
+              >
                 {children}
               </ul>
             ),
             ol: ({ children, ...props }) => (
-              <ol className="list-decimal list-inside space-y-1 mb-4 text-foreground/90" {...props}>
+              <ol
+                className="text-foreground/90 mb-4 list-inside list-decimal space-y-1"
+                {...props}
+              >
                 {children}
               </ol>
             ),
-            hr: () => <hr className="my-8 border-border" />,
+            hr: () => <hr className="border-border my-8" />,
             strong: ({ children, ...props }) => (
-              <strong className="font-semibold text-foreground" {...props}>
+              <strong className="text-foreground font-semibold" {...props}>
                 {children}
               </strong>
             ),
