@@ -1,24 +1,34 @@
-# 第 3 课：无头组件的底层逻辑 — Radix UI 深度剖析
+# 无头组件的底层逻辑：Radix UI 深度剖析
 
-> 讲师演讲稿 | 时长：2.5 小时
-> 受众：3-5 年中高级前端工程师
-> 风格：故事开场 + 技术深度 + 实践建议
+> **课程时长**: 2.5 小时 | **难度**: 中高级 | **风格**: 故事开场 + 技术深度 + 实践建议
 
 ---
 
-## Opening Hook（10 min）
+## 📋 本课概览
 
-各位好，欢迎来到第三课。
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 核心观点：Headless UI 是 AI 时代组件库的最佳底层架构        │
+├─────────────────────────────────────────────────────────────────┤
+│  📚 你将学到：                                                   │
+│    • 理解 Headless UI 的核心思想：逻辑与样式分离                │
+│    • 掌握 Radix UI 的 Composition 模式和 asChild 魔法           │
+│    • 深入理解可访问性原语（ARIA、焦点管理、键盘导航）           │
+│    • 学会 shadcn/ui 如何基于 Radix 构建完整组件库               │
+│    • 横向对比 Radix / Headless UI / React Aria / Ark UI        │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-在正式开始之前，我想先问大家一个问题——一个我自己曾经非常困惑的问题。
+---
 
-2023 年，有一个项目横空出世，叫 shadcn/ui。它在 GitHub 上的增长速度极其惊人，短短几个月就拿到了几万颗星。到今天，它已经是 React 生态中最受欢迎的 UI 方案之一。
+## 🎬 Opening：一个有趣的发现
 
-但如果你仔细看过 shadcn/ui 的源码，你会发现一件有意思的事情：它自己几乎没有实现任何组件逻辑。
+### shadcn/ui 的秘密
 
-你打开一个 Dialog 组件的代码，核心就这么几行：
+> 如果你仔细看过 shadcn/ui 的源码，你会发现一件有意思的事情：**它自己几乎没有实现任何组件逻辑**。
 
 ```tsx
+// shadcn/ui 的 Dialog 组件核心代码
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 
 const Dialog = DialogPrimitive.Root
@@ -28,31 +38,93 @@ const DialogContent = DialogPrimitive.Content
 export { Dialog, DialogTrigger, DialogContent }
 ```
 
-就这样。没有状态管理，没有事件处理，没有可访问性逻辑。所有的核心能力，全部来自 `@radix-ui/react-dialog`。
+> 就这样。没有状态管理，没有事件处理，没有可访问性逻辑。**所有的核心能力，全部来自 Radix UI。**
 
-这就引出了今天的核心问题：**为什么 shadcn/ui 选择 Radix，而不是自己实现？**
+```mermaid
+flowchart TB
+    subgraph Shadcn["shadcn/ui"]
+        S1["Tailwind 样式"]
+        S2["CVA 变体"]
+        S3["cn() 合并"]
+    end
+    
+    subgraph Radix["Radix UI"]
+        R1["状态管理"]
+        R2["事件处理"]
+        R3["可访问性"]
+        R4["键盘导航"]
+        R5["焦点管理"]
+    end
+    
+    Radix -->|"提供核心能力"| Shadcn
+    Shadcn -->|"添加样式"| Final["完整组件"]
+    
+    style Radix fill:#3b82f6,color:#fff
+```
 
-是因为 shadcn 的作者偷懒吗？显然不是。
+### 今天要搞清楚的三件事
 
-是因为 Radix 做了什么特别的事情吗？是的。
+```mermaid
+graph LR
+    Q1["1️⃣ 什么是 Headless UI<br/>为什么对 AI 特别重要"]
+    Q2["2️⃣ Radix 的 Composition 模式<br/>是如何设计的"]
+    Q3["3️⃣ shadcn/ui 如何基于 Radix<br/>构建完整组件库"]
+    
+    Q1 --> Q2 --> Q3
+```
 
-今天这节课，我们就要深入 Radix UI 的底层，搞清楚三件事：
+### 📍 课程结构导航
 
-1. 什么是 Headless UI，为什么它对 AI 时代特别重要
-2. Radix 的 Composition 模式是如何设计的
-3. shadcn/ui 如何基于 Radix 构建出完整的组件库
-
-好，我们开始。
+```mermaid
+flowchart TB
+    subgraph Part1["🎯 理论基础"]
+        S1["Section 1<br/>Headless UI 核心思想"]
+        S2["Section 2<br/>Composition 模式"]
+    end
+    
+    subgraph Part2["🔧 深度技术"]
+        S3["Section 3<br/>可访问性原语"]
+        S4["Section 4<br/>核心技术深度解析"]
+    end
+    
+    subgraph Part3["🚀 实践应用"]
+        S5["Section 5<br/>shadcn/ui 构建分析"]
+        S6["Section 6<br/>常用组件实战"]
+    end
+    
+    subgraph Part4["📊 选型参考"]
+        S7["Section 7<br/>Headless UI 横向对比"]
+        S8["Section 8<br/>常见问题 FAQ"]
+    end
+    
+    Part1 --> Part2 --> Part3 --> Part4
+```
 
 ---
 
-## Section 1：什么是 Headless UI（20 min）
+## 📖 Section 1：什么是 Headless UI
 
 ### 1.1 传统组件库的问题
 
-在讲 Headless UI 之前，我们先回顾一下传统组件库是怎么做的。
+```mermaid
+flowchart TB
+    subgraph Traditional["传统组件库（如 Ant Design）"]
+        T1["Modal 组件"]
+        T2["内置样式"]
+        T3["固定行为"]
+        T4["可访问性黑盒"]
+    end
+    
+    subgraph Problems["❌ 问题"]
+        P1["想改样式？覆盖 CSS"]
+        P2["想改行为？找对应 prop"]
+        P3["想调焦点管理？基本不可能"]
+    end
+    
+    Traditional --> Problems
+```
 
-假设你要用 Ant Design 的 Modal 组件：
+**示例：Ant Design Modal**
 
 ```tsx
 import { Modal } from 'antd'
@@ -67,26 +139,43 @@ import { Modal } from 'antd'
 </Modal>
 ```
 
-看起来很简单对吧？但问题来了：
+**问题分析：**
 
-**问题 1：样式耦合**
-你想改 Modal 的样式？对不起，你得覆盖 Ant Design 的 CSS 类名。你想改动画？对不起，你得深入研究它的 transition 实现。
+| 问题 | 表现 | 影响 |
+|------|------|------|
+| **样式耦合** | 想改 Modal 样式需覆盖 Ant Design CSS | 维护困难 |
+| **行为固定** | 点击外部关闭等行为需找对应 prop | 灵活性差 |
+| **可访问性黑盒** | 焦点管理、键盘导航无法调整 | 无法定制 |
 
-**问题 2：行为固定**
-你想让 Modal 点击外部不关闭？你得找到对应的 prop。你想自定义关闭逻辑？你得研究它的生命周期。
-
-**问题 3：可访问性黑盒**
-Ant Design 确实做了可访问性，但你不知道它做了什么。你想调整焦点管理？你想改键盘导航？基本上很难。
-
-这就是传统组件库的核心矛盾：**它给了你便利，但也限制了你的自由。**
+> ⚠️ **核心矛盾**：传统组件库给了你便利，但也限制了你的自由
 
 ### 1.2 Headless UI 的核心思想
 
-Headless UI 的思路完全不同。它说：
+```mermaid
+graph TB
+    subgraph Headless["Headless UI 的理念"]
+        H1["我只给你逻辑和行为"]
+        H2["样式你自己决定"]
+    end
+    
+    subgraph Provides["✅ 提供"]
+        P1["状态管理"]
+        P2["事件处理"]
+        P3["可访问性"]
+        P4["键盘导航"]
+    end
+    
+    subgraph NotProvide["❌ 不提供"]
+        N1["样式"]
+        N2["动画"]
+        N3["主题"]
+    end
+    
+    Headless --> Provides
+    Headless --> NotProvide
+```
 
-> 我只给你逻辑和行为，样式你自己决定。
-
-什么意思？我们看一个 Radix Dialog 的例子：
+**Radix Dialog 示例：**
 
 ```tsx
 import * as Dialog from '@radix-ui/react-dialog'
@@ -115,107 +204,84 @@ import * as Dialog from '@radix-ui/react-dialog'
 </Dialog.Root>
 ```
 
-注意看，Radix 做了什么：
+**Radix 做了什么 vs 没做什么：**
 
-1. **状态管理**：`open` 和 `onOpenChange` 帮你管理开关状态
-2. **Portal 渲染**：`Dialog.Portal` 自动把内容渲染到 body 下
-3. **焦点管理**：打开时自动聚焦，关闭时恢复焦点
-4. **键盘导航**：按 ESC 自动关闭
-5. **ARIA 属性**：自动添加 `role="dialog"`、`aria-labelledby` 等
+| ✅ Radix 做了 | ❌ Radix 没做 |
+|--------------|--------------|
+| 状态管理（open/onOpenChange） | 样式（className 由你控制） |
+| Portal 渲染（自动到 body） | 动画（用 Framer Motion 等） |
+| 焦点管理（打开聚焦，关闭恢复） | 主题（没有 primary/secondary） |
+| 键盘导航（ESC 关闭） | |
+| ARIA 属性（role="dialog" 等） | |
 
-但 Radix 没有做什么：
+### 1.3 为什么 Headless UI 对 AI 更友好
 
-1. **没有样式**：`className` 完全由你控制
-2. **没有动画**：你可以用 Framer Motion、CSS transition，随便你
-3. **没有主题**：没有 primary、secondary 这些概念
+```mermaid
+flowchart LR
+    subgraph AI_Challenge["AI 面对传统组件库"]
+        A1["需要理解复杂样式系统"]
+        A2["CSS 覆盖经常不生效"]
+        A3["样式优先级难以调试"]
+    end
+    
+    subgraph AI_Advantage["AI 面对 Headless UI"]
+        B1["只需组合原语"]
+        B2["Tailwind 类名原子化"]
+        B3["结构清晰可预测"]
+    end
+    
+    AI_Challenge -->|"困难"| Result1["❌ 低准确率"]
+    AI_Advantage -->|"简单"| Result2["✅ 高准确率"]
+    
+    style Result2 fill:#10b981,color:#fff
+```
 
-这就是 Headless UI 的核心：**分离逻辑与样式。**
+**AI 生成 Radix + Tailwind 组件的思考过程：**
 
-### 1.3 为什么对 AI 更友好？
+```
+1. Dialog.Root 管理状态
+2. Dialog.Trigger 触发打开
+3. Dialog.Portal 渲染到 body
+4. Dialog.Overlay 作为遮罩
+5. Dialog.Content 作为内容容器
+6. Dialog.Title/Description 提供语义
+7. Dialog.Close 关闭
+```
 
-这里我要讲一个很多人没意识到的点：Headless UI 对 AI 特别友好。
-
-为什么？因为 AI 擅长的是**组合和定制**，而不是**理解复杂的样式系统**。
-
-举个例子，你让 AI 帮你写一个 Ant Design 的 Modal：
-AI 会给你生成一堆 `className` 覆盖，但很可能不生效，因为 Ant Design 的样式优先级很复杂。
-
-但如果你让 AI 帮你写一个 Radix + Tailwind 的 Dialog：
-
-AI 只需要组合 Radix 的原语，然后加上 Tailwind 类名。这对 AI 来说非常简单，因为：
-
-1. **结构清晰**：`Dialog.Root`、`Dialog.Trigger`、`Dialog.Content` 语义明确
-2. **样式独立**：Tailwind 类名是原子化的，AI 很容易理解
-3. **可组合**：AI 可以自由组合不同的部分
-
-这就是为什么 shadcn/ui 这种基于 Headless UI 的方案，在 AI 时代特别有优势。
-
-好，第一部分讲完了。我们总结一下：
-
-**Headless UI = 逻辑 + 行为 + 可访问性，但不包含样式。**
-
-它对 AI 友好，因为它把复杂的逻辑封装起来，但把灵活的样式留给开发者（或 AI）。
+> 💡 这个思考过程非常线性，AI 很容易生成正确的代码
 
 ---
 
-## Section 2：Radix UI 的 Composition 模式（30 min）
+## 📖 Section 2：Radix UI 的 Composition 模式
 
-### 2.1 为什么不是单一组件？
+### 2.1 为什么拆成这么多部分？
 
-现在我们深入 Radix 的设计。
-
-你可能会问：为什么 Radix 要把一个 Dialog 拆成这么多部分？
-
-```tsx
-Dialog.Root
-Dialog.Trigger
-Dialog.Portal
-Dialog.Overlay
-Dialog.Content
-Dialog.Title
-Dialog.Description
-Dialog.Close
+```mermaid
+graph TB
+    subgraph Single["❌ 单一组件模式"]
+        S1["<Dialog<br/>  trigger={...}<br/>  overlayClassName={...}<br/>  contentClassName={...}<br/>  titleIcon={...}<br/>  closeButtonPosition={...}<br/>/>"]
+    end
+    
+    subgraph Composition["✅ Composition 模式"]
+        C1["Dialog.Root"]
+        C2["Dialog.Trigger"]
+        C3["Dialog.Portal"]
+        C4["Dialog.Overlay"]
+        C5["Dialog.Content"]
+        C6["Dialog.Title"]
+        C7["Dialog.Description"]
+        C8["Dialog.Close"]
+    end
+    
+    Single -->|"问题"| Problems["Props 爆炸<br/>灵活性受限<br/>维护困难"]
+    Composition -->|"优势"| Advantages["自由组合<br/>完全定制<br/>灵活布局"]
+    
+    style Advantages fill:#10b981,color:#fff
 ```
 
-为什么不直接一个 `<Dialog>` 组件搞定？
+### 2.2 Composition 模式的威力
 
-答案是：**灵活性。**
-
-我们看一个实际场景。假设你要做一个确认删除的对话框，但你希望：
-
-1. 触发按钮是一个红色的危险按钮
-2. 遮罩层要有模糊效果
-3. 内容区域要有圆角和阴影
-4. 标题要加一个警告图标
-5. 关闭按钮要放在右上角
-
-如果是单一组件，你得这样写：
-
-```tsx
-<Dialog
-  trigger={<Button danger>删除</Button>}
-  overlayClassName="backdrop-blur-sm"
-  contentClassName="rounded-lg shadow-xl"
-  titleIcon={<WarningIcon />}
-  closeButtonPosition="top-right"
->
-  ...
-</Dialog>
-```
-
-这样的问题是：
-
-1. **Props 爆炸**：每个定制需求都要加一个 prop
-2. **灵活性受限**：如果你想在标题和描述之间加一个图片呢？没有对应的 prop
-3. **维护困难**：组件库要维护所有可能的定制需求
-
-Radix 的 Composition 模式完全不同。它说：
-
-> 我给你一堆原语（primitives），你自己组合。
-
-### 2.2 Composition 模式的核心
-
-我们看一个完整的例子：
+**完整示例：自定义删除确认对话框**
 
 ```tsx
 import * as Dialog from '@radix-ui/react-dialog'
@@ -233,13 +299,13 @@ function DeleteConfirmDialog() {
         </button>
       </Dialog.Trigger>
 
-      {/* Portal：渲染到 body */}
       <Dialog.Portal>
-        {/* 遮罩层：完全自定义 */}
+        {/* 遮罩层：完全自定义样式 */}
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
 
-        {/* 内容区域：完全自定义 */}
+        {/* 内容区域：完全自定义布局 */}
         <Dialog.Content className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-[400px]">
+          
           {/* 标题：可以加任何内容 */}
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="text-red-500" />
@@ -248,31 +314,23 @@ function DeleteConfirmDialog() {
             </Dialog.Title>
           </div>
 
-          {/* 描述 */}
           <Dialog.Description className="text-gray-600 mb-6">
             此操作不可撤销。确定要删除这条记录吗？
           </Dialog.Description>
 
           {/* 自定义内容：可以加任何东西 */}
           <div className="bg-yellow-50 border border-yellow-200 rounded p-3 mb-6">
-            <p className="text-sm text-yellow-800">
-              警告：删除后将无法恢复
-            </p>
+            <p className="text-sm text-yellow-800">警告：删除后将无法恢复</p>
           </div>
 
           {/* 按钮组 */}
           <div className="flex justify-end gap-3">
             <Dialog.Close asChild>
-              <button className="px-4 py-2 border rounded">
-                取消
-              </button>
+              <button className="px-4 py-2 border rounded">取消</button>
             </Dialog.Close>
             <button 
               className="px-4 py-2 bg-red-500 text-white rounded"
-              onClick={() => {
-                // 执行删除
-                setOpen(false)
-              }}
+              onClick={() => { handleDelete(); setOpen(false); }}
             >
               确认删除
             </button>
@@ -291,123 +349,93 @@ function DeleteConfirmDialog() {
 }
 ```
 
-看到了吗？每个部分都是独立的，你可以：
+**Composition 模式的优势：**
 
-1. **自由组合**：在标题和描述之间加警告框
-2. **完全定制**：每个部分的样式完全由你控制
-3. **灵活布局**：关闭按钮可以放在任何位置
-
-这就是 Composition 模式的威力。
+| 优势 | 说明 |
+|------|------|
+| **自由组合** | 在标题和描述之间加警告框 |
+| **完全定制** | 每个部分的样式完全由你控制 |
+| **灵活布局** | 关闭按钮可以放在任何位置 |
 
 ### 2.3 asChild 的魔法
 
-这里有一个很重要的细节：`asChild` prop。
-
-你注意到了吗？很多地方都用了 `asChild`：
-
-```tsx
-<Dialog.Trigger asChild>
-  <button>删除</button>
-</Dialog.Trigger>
-
-<Dialog.Close asChild>
-  <button>×</button>
-</Dialog.Close>
+```mermaid
+flowchart TB
+    subgraph Without["❌ 没有 asChild"]
+        W1["Dialog.Trigger"]
+        W2["button"]
+        W3["渲染结果：<br/><button><br/>  <button>删除</button><br/></button>"]
+    end
+    
+    subgraph With["✅ 有 asChild"]
+        A1["Dialog.Trigger asChild"]
+        A2["button"]
+        A3["渲染结果：<br/><button>删除</button>"]
+    end
+    
+    Without --> Problem["❌ 两层 button，语义错误"]
+    With --> Solution["✅ 一层 button，完美"]
+    
+    style Solution fill:#10b981,color:#fff
 ```
 
-为什么要这样写？为什么不直接：
-
-```tsx
-<Dialog.Trigger>删除</Dialog.Trigger>
-```
-
-答案是：**避免额外的 DOM 节点。**
-
-如果没有 `asChild`，Radix 会渲染成这样：
-
-```html
-<button data-radix-trigger>
-  <button>删除</button>
-</button>
-```
-
-两层 button，这在语义上是错误的。
-
-但有了 `asChild`，Radix 会把属性和事件合并到子元素上：
-
-```html
-<button data-radix-trigger>删除</button>
-```
-
-只有一层 button，完美。
-
-这个技术叫做 **Slot Pattern**，Radix 用的是 `@radix-ui/react-slot` 这个包实现的。
-
-核心代码很简单：
+**asChild 的工作原理：**
 
 ```tsx
 // 简化版的 Slot 实现
 function Slot({ children, ...props }) {
   if (React.isValidElement(children)) {
     return React.cloneElement(children, {
-      ...props,
-      ...children.props,
+      ...props,           // 父组件的 props
+      ...children.props,  // 子组件的 props
     })
   }
   return null
 }
 ```
 
-就是用 `cloneElement` 把 props 合并到子元素上。
+> 💡 就是用 `cloneElement` 把 props 合并到子元素上，避免额外的 DOM 节点
 
-### 2.4 AI 如何理解这种结构？
+### 2.4 AI 如何理解 Composition 模式
 
-现在回到 AI 的话题。
-
-Composition 模式对 AI 特别友好，因为：
-
-1. **语义清晰**：`Dialog.Title` 一看就知道是标题
-2. **结构明确**：Root → Trigger → Portal → Content，层级关系一目了然
-3. **可预测**：每个部分的职责单一，AI 很容易推理
-
-举个例子，你让 AI 帮你写一个 Dialog，AI 会这样思考：
-
+```mermaid
+flowchart LR
+    subgraph Structure["结构清晰"]
+        S1["Dialog.Root"]
+        S2["Dialog.Trigger"]
+        S3["Dialog.Portal"]
+        S4["Dialog.Content"]
+    end
+    
+    subgraph AI["AI 的理解"]
+        A1["语义清晰<br/>Title 就是标题"]
+        A2["层级明确<br/>Root → Portal → Content"]
+        A3["可预测<br/>职责单一"]
+    end
+    
+    Structure --> AI --> Result["✅ AI 容易生成正确代码"]
 ```
-1. 需要一个 Dialog.Root 来管理状态
-2. 需要一个 Dialog.Trigger 来触发
-3. 需要一个 Dialog.Portal 来渲染到 body
-4. 需要一个 Dialog.Overlay 作为遮罩
-5. 需要一个 Dialog.Content 作为内容容器
-6. 需要 Dialog.Title 和 Dialog.Description 提供语义
-7. 需要 Dialog.Close 来关闭
-```
-
-这个思考过程非常线性，AI 很容易生成正确的代码。
-
-相比之下，如果是单一组件，AI 需要记住所有的 props，还要理解它们之间的关系，容易出错。
 
 ---
 
-## Section 3：可访问性原语（25 min）
+## 📖 Section 3：可访问性原语
 
-### 3.1 为什么可访问性这么重要？
+### 3.1 为什么可访问性这么重要
 
-好，现在我们讲 Radix 最核心的价值：可访问性。
-
-很多人觉得可访问性是一个"nice to have"的特性，但实际上：
-
-1. **法律要求**：很多国家有无障碍法规（如美国的 ADA、欧盟的 EAA）
-2. **用户体验**：不只是残障人士，键盘用户、老年人都受益
-3. **SEO**：搜索引擎会考虑可访问性
-4. **技术债务**：后期补可访问性成本极高
-
-但可访问性很难做对。我们看一个例子。
+```mermaid
+graph TB
+    subgraph Reasons["可访问性的重要性"]
+        R1["⚖️ 法律要求<br/>ADA、EAA 等法规"]
+        R2["👥 用户体验<br/>键盘用户、老年人"]
+        R3["🔍 SEO<br/>搜索引擎考虑"]
+        R4["💰 技术债务<br/>后期补成本极高"]
+    end
+```
 
 ### 3.2 手写 Dialog 的可访问性陷阱
 
-假设你要手写一个 Dialog，你可能会这样写：
-
 ```tsx
+// ❌ 一个看起来"能用"但有问题的 Dialog
 function MyDialog({ open, onClose, children }) {
   if (!open) return null
 
@@ -421,55 +449,51 @@ function MyDialog({ open, onClose, children }) {
 }
 ```
 
-看起来没问题对吧？但实际上有一堆可访问性问题：
+**问题清单：**
 
-**问题 1：没有 ARIA 属性**
-- 缺少 `role="dialog"`
-- 缺少 `aria-modal="true"`
-- 缺少 `aria-labelledby` 和 `aria-describedby`
-
-**问题 2：焦点管理混乱**
-- 打开时焦点没有移到 Dialog 内
-- 关闭时焦点没有恢复到触发元素
-- 焦点可以跑到 Dialog 外面
-
-**问题 3：键盘导航不完整**
-- 按 ESC 不能关闭
-- Tab 键可以跳出 Dialog
-- 没有焦点陷阱（focus trap）
-
-**问题 4：屏幕阅读器支持差**
-- 打开时没有通知用户
-- 背景内容没有被隐藏（aria-hidden）
-
-这些问题，每一个都需要大量代码来解决。
-
-### 3.3 Radix 如何自动处理可访问性？
-
-现在我们看 Radix 是怎么做的。
-
-同样的 Dialog，用 Radix 写：
-
-```tsx
-<Dialog.Root open={open} onOpenChange={setOpen}>
-  <Dialog.Trigger>打开</Dialog.Trigger>
-  <Dialog.Portal>
-    <Dialog.Overlay />
-    <Dialog.Content>
-      <Dialog.Title>标题</Dialog.Title>
-      <Dialog.Description>描述</Dialog.Description>
-      <Dialog.Close>关闭</Dialog.Close>
-    </Dialog.Content>
-  </Dialog.Portal>
-</Dialog.Root>
+```mermaid
+graph TB
+    subgraph Problems["❌ 可访问性问题"]
+        P1["问题1：没有 ARIA 属性<br/>缺少 role='dialog'<br/>缺少 aria-modal='true'<br/>缺少 aria-labelledby"]
+        
+        P2["问题2：焦点管理混乱<br/>打开时焦点没移到 Dialog<br/>关闭时焦点没恢复<br/>焦点可以跑到 Dialog 外"]
+        
+        P3["问题3：键盘导航不完整<br/>ESC 不能关闭<br/>Tab 键可以跳出<br/>没有焦点陷阱"]
+        
+        P4["问题4：屏幕阅读器支持差<br/>打开时没有通知用户<br/>背景内容没被隐藏"]
+    end
 ```
 
-Radix 会自动：
+### 3.3 Radix 如何自动处理可访问性
 
-**1. 注入 ARIA 属性**
+```mermaid
+flowchart TB
+    subgraph Radix["Radix 自动处理"]
+        R1["ARIA 属性注入"]
+        R2["焦点管理"]
+        R3["焦点陷阱"]
+        R4["键盘导航"]
+        R5["背景内容隐藏"]
+    end
+    
+    subgraph Result["你写的代码"]
+        Code["<Dialog.Root>...</Dialog.Root>"]
+    end
+    
+    Result -->|"自动获得"| Radix
+```
 
-渲染出来的 HTML：
+#### 1. ARIA 属性自动注入
 
+**你写的代码：**
+```tsx
+<Dialog.Content>
+  <Dialog.Title>标题</Dialog.Title>
+  <Dialog.Description>描述</Dialog.Description>
+</Dialog.Content>
+```
+
+**渲染出来的 HTML：**
 ```html
 <div 
   role="dialog" 
@@ -482,34 +506,23 @@ Radix 会自动：
 </div>
 ```
 
-注意：
-- `role="dialog"` 告诉屏幕阅读器这是一个对话框
-- `aria-modal="true"` 表示这是模态的
-- `aria-labelledby` 和 `aria-describedby` 自动关联标题和描述
-
-**2. 焦点管理**
+#### 2. 焦点管理
 
 ```tsx
 // Radix 内部的焦点管理逻辑（简化版）
 useEffect(() => {
   if (open) {
-    // 保存当前焦点
-    const previousFocus = document.activeElement
-    
-    // 移动焦点到 Dialog
-    contentRef.current?.focus()
+    const previousFocus = document.activeElement  // 保存当前焦点
+    contentRef.current?.focus()                   // 移动焦点到 Dialog
     
     return () => {
-      // 恢复焦点
-      previousFocus?.focus()
+      previousFocus?.focus()                      // 恢复焦点
     }
   }
 }, [open])
 ```
 
-**3. 焦点陷阱（Focus Trap）**
-
-Radix 会确保 Tab 键只在 Dialog 内循环：
+#### 3. 焦点陷阱 (Focus Trap)
 
 ```tsx
 // 简化版的焦点陷阱逻辑
@@ -524,16 +537,16 @@ function handleKeyDown(e) {
     
     if (e.shiftKey && document.activeElement === first) {
       e.preventDefault()
-      last.focus()
+      last.focus()  // Shift+Tab 在第一个元素时，跳到最后一个
     } else if (!e.shiftKey && document.activeElement === last) {
       e.preventDefault()
-      first.focus()
+      first.focus() // Tab 在最后一个元素时，跳到第一个
     }
   }
 }
 ```
 
-**4. 键盘导航**
+#### 4. 键盘导航
 
 ```tsx
 // ESC 关闭
@@ -544,142 +557,635 @@ function handleKeyDown(e) {
 }
 ```
 
-**5. 背景内容隐藏**
+### 3.4 可访问性测试清单
 
-```tsx
-// 打开时隐藏背景内容
-useEffect(() => {
-  if (open) {
-    document.body.setAttribute('aria-hidden', 'true')
-    return () => {
-      document.body.removeAttribute('aria-hidden')
-    }
-  }
-}, [open])
-```
+| 测试项 | 方法 | 预期结果 |
+|--------|------|---------|
+| **Tab 导航** | 按 Tab 键 | 焦点在 Dialog 内循环 ✓ |
+| **ESC 关闭** | 按 ESC 键 | Dialog 关闭 ✓ |
+| **焦点恢复** | 关闭 Dialog | 焦点回到触发按钮 ✓ |
+| **屏幕阅读器** | 打开 VoiceOver/NVDA | 读出"对话框，标题，描述" ✓ |
 
-所有这些，你一行代码都不用写，Radix 全部帮你搞定。
-
-### 3.4 实际测试
-
-我们来实际测试一下。打开一个用 Radix 做的 Dialog，然后：
-
-**键盘测试：**
-- 按 Tab：焦点在 Dialog 内循环 ✓
-- 按 ESC：Dialog 关闭 ✓
-- 关闭后：焦点回到触发按钮 ✓
-
-**屏幕阅读器测试：**
-- 打开 VoiceOver（Mac）或 NVDA（Windows）
-- 打开 Dialog：会读出"对话框，标题，描述" ✓
-- Tab 导航：会读出每个元素的作用 ✓
-
-这就是 Radix 的价值：**你不需要成为可访问性专家，就能做出符合标准的组件。**
-
+> 💡 **Radix 的价值**：你不需要成为可访问性专家，就能做出符合标准的组件
 
 ---
 
-## Section 4：shadcn/ui 如何基于 Radix 构建（20 min）
+## 📖 Section 4：核心技术深度解析
 
-### 4.1 shadcn/ui 的核心思路
+### 4.1 Slot/asChild 源码深度解析
 
-好，现在我们终于可以讲 shadcn/ui 了。
+> `asChild` 是 Radix 最精妙的设计之一，让我们深入看看它的实现原理。
 
-shadcn/ui 的核心思路非常简单：
-
-**shadcn/ui = Radix 原语 + Tailwind 样式 + 复制粘贴**
-
-什么意思？
-
-传统的组件库，你是这样用的：
-
-```bash
-npm install antd
-```
+#### Slot 的核心实现
 
 ```tsx
-import { Button } from 'antd'
-```
+// @radix-ui/react-slot 简化版源码
+import * as React from 'react'
 
-但 shadcn/ui 不是这样。它没有 npm 包，你不能 `npm install shadcn/ui`。
+interface SlotProps extends React.HTMLAttributes<HTMLElement> {
+  children?: React.ReactNode
+}
 
-你是这样用的：
+const Slot = React.forwardRef<HTMLElement, SlotProps>(
+  (props, forwardedRef) => {
+    const { children, ...slotProps } = props
+    const childrenArray = React.Children.toArray(children)
+    const slottable = childrenArray.find(isSlottable)
 
-```bash
-npx shadcn-ui@latest add button
-```
+    if (slottable) {
+      // 如果子元素是 Slottable，特殊处理
+      const newElement = slottable.props.children as React.ReactNode
+      const newChildren = childrenArray.map((child) => {
+        if (child === slottable) {
+          // 替换 Slottable 的内容
+          if (React.Children.count(newElement) > 1) {
+            return React.Children.only(null)
+          }
+          return React.isValidElement(newElement)
+            ? (newElement.props.children as React.ReactNode)
+            : null
+        }
+        return child
+      })
 
-这个命令会做什么？它会把 Button 组件的源码直接复制到你的项目里：
+      return (
+        <SlotClone {...slotProps} ref={forwardedRef}>
+          {React.isValidElement(newElement)
+            ? React.cloneElement(newElement, undefined, newChildren)
+            : null}
+        </SlotClone>
+      )
+    }
 
-```
-src/
-  components/
-    ui/
-      button.tsx  ← 源码直接在你的项目里
-```
-
-为什么要这样做？
-
-**优势 1：完全可定制**
-代码在你的项目里，你想怎么改就怎么改。不喜欢默认样式？直接改。想加新功能？直接加。
-
-**优势 2：没有版本依赖**
-不会出现"升级组件库导致整个项目崩溃"的情况。每个组件都是独立的。
-
-**优势 3：按需使用**
-只复制你需要的组件，不会有多余的代码。
-
-**优势 4：学习成本低**
-代码就在你面前，你可以直接看实现，学习如何用 Radix + Tailwind 构建组件。
-
-### 4.2 代码走读：Button
-
-我们看一个最简单的例子：Button。
-
-shadcn/ui 的 Button 源码：
-
-```tsx
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
-
-const buttonVariants = cva(
-  // 基础样式
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+    // 正常情况：合并 props 到子元素
+    return (
+      <SlotClone {...slotProps} ref={forwardedRef}>
+        {children}
+      </SlotClone>
+    )
   }
 )
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+// SlotClone 核心逻辑
+const SlotClone = React.forwardRef<any, SlotCloneProps>(
+  (props, forwardedRef) => {
+    const { children, ...slotProps } = props
+
+    if (React.isValidElement(children)) {
+      // 🔑 核心：使用 cloneElement 合并 props
+      return React.cloneElement(children, {
+        ...mergeProps(slotProps, children.props),
+        ref: forwardedRef
+          ? composeRefs(forwardedRef, (children as any).ref)
+          : (children as any).ref,
+      })
+    }
+
+    return React.Children.count(children) > 1 
+      ? React.Children.only(null) 
+      : null
+  }
+)
+```
+
+#### Props 合并策略
+
+```tsx
+// mergeProps 的实现逻辑
+function mergeProps(slotProps: AnyProps, childProps: AnyProps) {
+  const overrideProps = { ...childProps }
+
+  for (const propName in childProps) {
+    const slotPropValue = slotProps[propName]
+    const childPropValue = childProps[propName]
+
+    const isHandler = /^on[A-Z]/.test(propName)
+    
+    if (isHandler) {
+      // 🟡 事件处理器：两个都调用
+      if (slotPropValue && childPropValue) {
+        overrideProps[propName] = (...args: unknown[]) => {
+          childPropValue(...args)
+          slotPropValue(...args)
+        }
+      } else if (slotPropValue) {
+        overrideProps[propName] = slotPropValue
+      }
+    } else if (propName === 'style') {
+      // 🟢 style：深度合并
+      overrideProps[propName] = { ...slotPropValue, ...childPropValue }
+    } else if (propName === 'className') {
+      // 🔵 className：拼接
+      overrideProps[propName] = [slotPropValue, childPropValue]
+        .filter(Boolean)
+        .join(' ')
+    }
+  }
+
+  return { ...slotProps, ...overrideProps }
 }
+```
+
+**Props 合并规则表：**
+
+| Props 类型 | 合并策略 | 示例 |
+|-----------|---------|------|
+| **事件处理器** (`on*`) | 两个都调用，子元素优先 | `onClick` 两个都触发 |
+| **style** | 深度合并，子元素覆盖 | `{...parent, ...child}` |
+| **className** | 拼接 | `"parent-class child-class"` |
+| **其他 props** | 子元素覆盖父元素 | `aria-label` 用子元素的 |
+
+#### Ref 组合
+
+```tsx
+// composeRefs 实现
+function composeRefs<T>(...refs: React.Ref<T>[]) {
+  return (node: T) => {
+    refs.forEach((ref) => {
+      if (typeof ref === 'function') {
+        ref(node)
+      } else if (ref !== null) {
+        (ref as React.MutableRefObject<T>).current = node
+      }
+    })
+  }
+}
+
+// 使用场景
+<Dialog.Trigger asChild>
+  <Button ref={myButtonRef}>  {/* 两个 ref 都会生效 */}
+    点击我
+  </Button>
+</Dialog.Trigger>
+```
+
+### 4.2 Radix 状态管理机制
+
+#### 受控与非受控模式
+
+```mermaid
+flowchart TB
+    subgraph Uncontrolled["非受控模式"]
+        U1["Dialog.Root"]
+        U2["defaultOpen={false}"]
+        U3["内部 useState 管理"]
+        U1 --> U2 --> U3
+    end
+    
+    subgraph Controlled["受控模式"]
+        C1["Dialog.Root"]
+        C2["open={isOpen}"]
+        C3["onOpenChange={setIsOpen}"]
+        C4["外部状态管理"]
+        C1 --> C2 --> C3 --> C4
+    end
+    
+    Uncontrolled -->|"简单场景"| Use1["快速原型"]
+    Controlled -->|"复杂场景"| Use2["业务集成"]
+```
+
+**useControllableState Hook 实现：**
+
+```tsx
+// Radix 的核心 Hook，支持受控和非受控
+function useControllableState<T>({
+  prop,
+  defaultProp,
+  onChange = () => {},
+}: UseControllableStateParams<T>) {
+  // 非受控状态
+  const [uncontrolledProp, setUncontrolledProp] = useUncontrolledState({
+    defaultProp,
+    onChange,
+  })
+  
+  // 判断是否受控
+  const isControlled = prop !== undefined
+  const value = isControlled ? prop : uncontrolledProp
+  
+  const handleChange = useCallbackRef(onChange)
+
+  const setValue: React.Dispatch<React.SetStateAction<T | undefined>> = 
+    React.useCallback(
+      (nextValue) => {
+        if (isControlled) {
+          // 受控模式：调用 onChange
+          const setter = nextValue as SetStateFn<T>
+          const value = typeof nextValue === 'function' 
+            ? setter(prop) 
+            : nextValue
+          if (value !== prop) handleChange(value as T)
+        } else {
+          // 非受控模式：更新内部状态
+          setUncontrolledProp(nextValue)
+        }
+      },
+      [isControlled, prop, setUncontrolledProp, handleChange]
+    )
+
+  return [value, setValue] as const
+}
+```
+
+**使用示例：**
+
+```tsx
+// 非受控：内部管理状态
+<Dialog.Root defaultOpen={false}>
+  {/* ... */}
+</Dialog.Root>
+
+// 受控：外部管理状态
+const [open, setOpen] = useState(false)
+<Dialog.Root open={open} onOpenChange={setOpen}>
+  {/* ... */}
+</Dialog.Root>
+
+// 混合：外部监听，内部管理
+<Dialog.Root 
+  defaultOpen={false} 
+  onOpenChange={(open) => {
+    console.log('Dialog state changed:', open)
+    analytics.track('dialog_toggled', { open })
+  }}
+>
+  {/* ... */}
+</Dialog.Root>
+```
+
+### 4.3 Context 分层架构
+
+```mermaid
+graph TB
+    subgraph DialogContexts["Dialog Context 分层"]
+        Root["DialogContext<br/>open, onOpenChange"]
+        Content["DialogContentContext<br/>contentId, titleId"]
+        Portal["PortalContext<br/>container"]
+    end
+    
+    Root --> Content --> Portal
+    
+    subgraph Components["Components"]
+        C1["Dialog.Root"]
+        C2["Dialog.Content"]
+        C3["Dialog.Title"]
+        C4["Dialog.Description"]
+    end
+    
+    C1 -->|provides| Root
+    C2 -->|provides| Content
+    C3 -->|consumes| Content
+    C4 -->|consumes| Content
+```
+
+**Context 实现代码：**
+
+```tsx
+// 创建类型安全的 Context
+interface DialogContextValue {
+  triggerRef: React.RefObject<HTMLButtonElement>
+  contentId: string
+  titleId: string
+  descriptionId: string
+  open: boolean
+  onOpenChange(open: boolean): void
+  onOpenToggle(): void
+  modal: boolean
+}
+
+const [DialogProvider, useDialogContext] = 
+  createContext<DialogContextValue>('Dialog')
+
+// Root 组件提供 Context
+function DialogRoot({ children, open, onOpenChange, modal = true }) {
+  const [_open, setOpen] = useControllableState({
+    prop: open,
+    defaultProp: false,
+    onChange: onOpenChange,
+  })
+  
+  return (
+    <DialogProvider
+      open={_open}
+      onOpenChange={setOpen}
+      onOpenToggle={() => setOpen(prev => !prev)}
+      modal={modal}
+      triggerRef={triggerRef}
+      contentId={useId()}
+      titleId={useId()}
+      descriptionId={useId()}
+    >
+      {children}
+    </DialogProvider>
+  )
+}
+
+// Trigger 消费 Context
+function DialogTrigger({ asChild, children, ...props }) {
+  const context = useDialogContext('DialogTrigger')
+  const Comp = asChild ? Slot : 'button'
+  
+  return (
+    <Comp
+      type="button"
+      aria-haspopup="dialog"
+      aria-expanded={context.open}
+      aria-controls={context.contentId}
+      onClick={() => context.onOpenToggle()}
+      ref={context.triggerRef}
+      {...props}
+    >
+      {children}
+    </Comp>
+  )
+}
+```
+
+### 4.4 Portal 实现原理
+
+```mermaid
+flowchart LR
+    subgraph ReactTree["原始 React 树"]
+        App --> Page --> Dialog
+        Dialog --> Content
+    end
+    
+    subgraph DOMTree["实际 DOM 树"]
+        Body["<body>"]
+        AppDiv["<div id='app'>"]
+        PortalDiv["<div data-radix-portal>"]
+        
+        Body --> AppDiv
+        Body --> PortalDiv
+    end
+    
+    Content -->|Portal| PortalDiv
+```
+
+**Portal 实现：**
+
+```tsx
+import { createPortal } from 'react-dom'
+
+interface PortalProps {
+  container?: HTMLElement | null
+  children: React.ReactNode
+}
+
+function Portal({ container, children }: PortalProps) {
+  const [mounted, setMounted] = React.useState(false)
+  
+  // 确保在客户端渲染
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  // 默认渲染到 document.body
+  const portalContainer = container ?? 
+    (globalThis?.document?.body as HTMLElement)
+
+  if (!mounted || !portalContainer) {
+    return null
+  }
+
+  return createPortal(
+    <div data-radix-portal="">
+      {children}
+    </div>,
+    portalContainer
+  )
+}
+```
+
+**Portal 的作用：**
+
+| 问题 | Portal 解决方案 |
+|------|---------------|
+| **z-index 层级** | 渲染到 body，避免父元素 `overflow: hidden` |
+| **布局影响** | 脱离原始 DOM 位置，`position: fixed` 生效 |
+| **事件冒泡** | React 事件仍然正常工作 |
+| **SSR 兼容** | `mounted` 状态确保客户端渲染 |
+
+### 4.5 事件系统设计
+
+#### Dismiss 事件处理
+
+```tsx
+// 统一的 Dismiss 处理
+function useDismiss({
+  onDismiss,
+  disableOutsidePointerEvents = false,
+}) {
+  const handleEscape = useEscapeKeydown((event) => {
+    onDismiss()
+  })
+  
+  const handleOutsideClick = useOutsideClick((event) => {
+    onDismiss()
+  }, disableOutsidePointerEvents)
+  
+  const handleFocusOutside = useFocusOutside((event) => {
+    // 处理焦点离开的情况
+  })
+  
+  return {
+    onEscapeKeyDown: handleEscape,
+    onPointerDownOutside: handleOutsideClick,
+    onFocusOutside: handleFocusOutside,
+  }
+}
+```
+
+#### 事件拦截与传播
+
+```tsx
+// Dialog Content 的事件处理
+function DialogContent({ 
+  onEscapeKeyDown,
+  onPointerDownOutside,
+  onInteractOutside,
+  ...props 
+}) {
+  return (
+    <DismissableLayer
+      // 允许拦截默认行为
+      onEscapeKeyDown={(event) => {
+        onEscapeKeyDown?.(event)
+        if (!event.defaultPrevented) {
+          context.onOpenChange(false)
+        }
+      }}
+      // 点击外部关闭
+      onPointerDownOutside={(event) => {
+        onPointerDownOutside?.(event)
+        if (!event.defaultPrevented) {
+          context.onOpenChange(false)
+        }
+      }}
+      // 统一的交互外部事件
+      onInteractOutside={(event) => {
+        onInteractOutside?.(event)
+      }}
+      {...props}
+    />
+  )
+}
+
+// 使用示例：阻止 ESC 关闭
+<DialogContent
+  onEscapeKeyDown={(e) => {
+    e.preventDefault()  // 阻止默认关闭行为
+    showConfirmation()  // 显示确认弹窗
+  }}
+>
+  {/* ... */}
+</DialogContent>
+```
+
+### 4.6 动画集成模式
+
+#### 使用 data-state 属性
+
+```tsx
+// Radix 自动注入 data-state 属性
+<DialogOverlay 
+  data-state="open"   // 或 "closed"
+  className="..."
+/>
+
+<DialogContent
+  data-state="open"   // 或 "closed"
+  className="..."
+/>
+```
+
+**CSS 动画方案：**
+
+```css
+/* 使用 Tailwind + data-state */
+.dialog-overlay {
+  @apply fixed inset-0 bg-black/50;
+  
+  /* 进入动画 */
+  &[data-state="open"] {
+    @apply animate-in fade-in;
+  }
+  
+  /* 退出动画 */
+  &[data-state="closed"] {
+    @apply animate-out fade-out;
+  }
+}
+
+.dialog-content {
+  @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+  
+  &[data-state="open"] {
+    @apply animate-in fade-in-0 zoom-in-95;
+  }
+  
+  &[data-state="closed"] {
+    @apply animate-out fade-out-0 zoom-out-95;
+  }
+}
+```
+
+**Framer Motion 集成：**
+
+```tsx
+import { motion, AnimatePresence } from 'framer-motion'
+
+function AnimatedDialog({ open, onOpenChange }) {
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Trigger asChild>
+        <Button>打开</Button>
+      </Dialog.Trigger>
+      
+      <AnimatePresence>
+        {open && (
+          <Dialog.Portal forceMount>
+            <Dialog.Overlay asChild>
+              <motion.div
+                className="fixed inset-0 bg-black/50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              />
+            </Dialog.Overlay>
+            
+            <Dialog.Content asChild>
+              <motion.div
+                className="fixed top-1/2 left-1/2 ..."
+                initial={{ opacity: 0, scale: 0.95, y: '-48%', x: '-50%' }}
+                animate={{ opacity: 1, scale: 1, y: '-50%', x: '-50%' }}
+                exit={{ opacity: 0, scale: 0.95, y: '-48%', x: '-50%' }}
+                transition={{ duration: 0.2 }}
+              >
+                {/* Dialog content */}
+              </motion.div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        )}
+      </AnimatePresence>
+    </Dialog.Root>
+  )
+}
+```
+
+---
+
+## 📖 Section 5：shadcn/ui 如何基于 Radix 构建
+
+### 5.1 核心公式
+
+```mermaid
+graph LR
+    Radix["Radix 原语<br/>逻辑 + 行为 + 可访问性"]
+    Tailwind["Tailwind 样式<br/>视觉表现"]
+    CopyPaste["Copy-Paste<br/>代码在项目里"]
+    
+    Radix --> Plus1(("+"))
+    Tailwind --> Plus1
+    Plus1 --> Plus2(("+"))
+    CopyPaste --> Plus2
+    Plus2 --> Result["shadcn/ui"]
+    
+    style Result fill:#10b981,color:#fff
+```
+
+### 5.2 代码走读：Button
+
+```tsx
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"       // ← Radix 的 Slot
+import { cva, type VariantProps } from "class-variance-authority"  // ← CVA 管理变体
+import { cn } from "@/lib/utils"                  // ← 类名合并工具
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center ...",  // ← 基础样式
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground ...",
+        destructive: "bg-destructive ...",
+        outline: "border border-input ...",
+        // ...
+      },
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-md px-8",
+        icon: "h-9 w-9",
+      },
+    },
+    defaultVariants: { variant: "default", size: "default" },
+  }
+)
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+    const Comp = asChild ? Slot : "button"  // ← 支持 asChild 模式
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -689,196 +1195,106 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     )
   }
 )
-Button.displayName = "Button"
 
 export { Button, buttonVariants }
 ```
 
-我们拆解一下：
+**技术栈拆解：**
 
-**1. 使用 Radix 的 Slot**
+| 技术 | 作用 |
+|------|------|
+| **@radix-ui/react-slot** | 支持 asChild，避免额外 DOM |
+| **class-variance-authority (CVA)** | 管理 Tailwind 变体组合 |
+| **cn() = clsx + tailwind-merge** | 合并类名，解决冲突 |
 
-```tsx
-import { Slot } from "@radix-ui/react-slot"
-```
-
-这样 Button 可以支持 `asChild`，避免额外的 DOM 节点。
-
-**2. 使用 CVA 管理变体**
+### 5.3 代码走读：Dialog
 
 ```tsx
-import { cva } from "class-variance-authority"
-
-const buttonVariants = cva(
-  "基础样式",
-  {
-    variants: {
-      variant: { ... },
-      size: { ... },
-    }
-  }
-)
-```
-
-CVA（Class Variance Authority）是一个用来管理 Tailwind 变体的工具。它让你可以定义不同的变体组合。
-
-**3. 使用 cn 合并类名**
-
-```tsx
-import { cn } from "@/lib/utils"
-
-className={cn(buttonVariants({ variant, size, className }))}
-```
-
-`cn` 是一个工具函数，用来合并 Tailwind 类名，避免冲突。
-
-实现很简单：
-
-```tsx
-import { clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
-
-export function cn(...inputs) {
-  return twMerge(clsx(inputs))
-}
-```
-
-- `clsx`：合并类名
-- `twMerge`：解决 Tailwind 类名冲突（比如 `px-4 px-2` 会保留后者）
-
-### 4.3 代码走读：Dialog
-
-现在我们看一个复杂的例子：Dialog。
-
-shadcn/ui 的 Dialog 源码：
-
-```tsx
-import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
 
+// 直接导出 Radix 原语
 const Dialog = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
 const DialogPortal = DialogPrimitive.Portal
 const DialogClose = DialogPrimitive.Close
 
-const DialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+// 包装样式
+const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 z-50 bg-black/80",
+      "data-[state=open]:animate-in data-[state=closed]:animate-out",
+      "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
   />
 ))
-DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
-const DialogContent = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+        "fixed left-[50%] top-[50%] z-50 ...",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out",
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      {/* 内置关闭按钮 */}
+      <DialogPrimitive.Close className="absolute right-4 top-4 ...">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
-DialogContent.displayName = DialogPrimitive.Content.displayName
 
-const DialogHeader = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
-      className
-    )}
-    {...props}
-  />
+// 便利组件
+const DialogHeader = ({ className, ...props }) => (
+  <div className={cn("flex flex-col space-y-1.5 ...", className)} {...props} />
 )
-DialogHeader.displayName = "DialogHeader"
 
-const DialogFooter = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className
-    )}
-    {...props}
-  />
+const DialogFooter = ({ className, ...props }) => (
+  <div className={cn("flex flex-col-reverse sm:flex-row ...", className)} {...props} />
 )
-DialogFooter.displayName = "DialogFooter"
 
-const DialogTitle = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Title>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
->(({ className, ...props }, ref) => (
+const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
-      className
-    )}
+    className={cn("text-lg font-semibold ...", className)}
     {...props}
   />
 ))
-DialogTitle.displayName = DialogPrimitive.Title.displayName
 
-const DialogDescription = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Description>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
->(({ className, ...props }, ref) => (
+const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ))
-DialogDescription.displayName = DialogPrimitive.Description.displayName
-
-export {
-  Dialog,
-  DialogPortal,
-  DialogOverlay,
-  DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-}
 ```
 
-看到了吗？核心逻辑：
+**shadcn/ui 的封装策略：**
 
-1. **直接导出 Radix 原语**：`Dialog`、`DialogTrigger` 等直接等于 Radix 的组件
-2. **包装样式**：`DialogOverlay`、`DialogContent` 等用 `forwardRef` 包装，加上 Tailwind 样式
-3. **添加便利组件**：`DialogHeader`、`DialogFooter` 是 shadcn/ui 自己加的，方便布局
-4. **内置关闭按钮**：`DialogContent` 里自动包含一个关闭按钮
+```mermaid
+graph TB
+    subgraph Strategy["shadcn/ui 的封装策略"]
+        S1["1️⃣ 直接导出 Radix 原语<br/>Dialog, DialogTrigger 等"]
+        S2["2️⃣ 包装样式<br/>DialogOverlay, DialogContent"]
+        S3["3️⃣ 添加便利组件<br/>DialogHeader, DialogFooter"]
+        S4["4️⃣ 内置常用元素<br/>关闭按钮"]
+    end
+```
 
-使用起来：
+### 5.4 使用对比
+
+**使用 shadcn/ui 的 Dialog：**
 
 ```tsx
 <Dialog>
@@ -900,370 +1316,960 @@ export {
 </Dialog>
 ```
 
-简洁、清晰、可定制。
+> ✅ 简洁、清晰、可定制
 
-### 4.4 代码走读：Select
+---
 
-最后我们看一个更复杂的例子：Select。
+## 📖 Section 6：常用 Radix 组件实战
 
-Select 的特殊之处在于，它需要处理很多交互细节：
+### 6.1 Select 选择器
 
-- 键盘导航（上下箭头）
-- 搜索（输入字母快速定位）
-- 滚动（选项很多时）
-- 可访问性（屏幕阅读器）
-
-Radix 的 Select 原语：
-
-```tsx
-<Select.Root>
-  <Select.Trigger>
-    <Select.Value />
-  </Select.Trigger>
-  <Select.Portal>
-    <Select.Content>
-      <Select.Viewport>
-        <Select.Item value="apple">
-          <Select.ItemText>Apple</Select.ItemText>
-          <Select.ItemIndicator>✓</Select.ItemIndicator>
-        </Select.Item>
-      </Select.Viewport>
-    </Select.Content>
-  </Select.Portal>
-</Select.Root>
+```mermaid
+graph TB
+    subgraph SelectParts["Select 组件结构"]
+        Root["Select.Root"]
+        Trigger["Select.Trigger<br/>触发器"]
+        Value["Select.Value<br/>当前值"]
+        Content["Select.Content<br/>下拉内容"]
+        Viewport["Select.Viewport<br/>滚动区域"]
+        Item["Select.Item<br/>选项"]
+    end
+    
+    Root --> Trigger --> Value
+    Root --> Content --> Viewport --> Item
 ```
 
-shadcn/ui 的包装（简化版）：
+**完整示例：用户角色选择器**
 
 ```tsx
-const Select = SelectPrimitive.Root
-const SelectTrigger = React.forwardRef<...>(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-      className
+import * as Select from '@radix-ui/react-select'
+import { ChevronDown, Check } from 'lucide-react'
+
+const roles = [
+  { value: 'admin', label: '管理员', description: '拥有所有权限' },
+  { value: 'editor', label: '编辑者', description: '可以编辑内容' },
+  { value: 'viewer', label: '查看者', description: '只能查看内容' },
+]
+
+function RoleSelect({ value, onValueChange }) {
+  return (
+    <Select.Root value={value} onValueChange={onValueChange}>
+      <Select.Trigger
+        className="inline-flex items-center justify-between
+          w-[200px] px-3 py-2 text-sm
+          border rounded-md bg-white
+          focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <Select.Value placeholder="选择角色..." />
+        <Select.Icon>
+          <ChevronDown className="w-4 h-4 text-gray-500" />
+        </Select.Icon>
+      </Select.Trigger>
+
+      <Select.Portal>
+        <Select.Content
+          className="overflow-hidden bg-white rounded-md shadow-lg
+            border animate-in fade-in-0 zoom-in-95"
+          position="popper"
+          sideOffset={4}
+        >
+          <Select.Viewport className="p-1">
+            {roles.map((role) => (
+              <Select.Item
+                key={role.value}
+                value={role.value}
+                className="relative flex items-center px-8 py-2 text-sm
+                  rounded cursor-pointer select-none
+                  data-[highlighted]:bg-blue-50
+                  data-[highlighted]:outline-none"
+              >
+                <Select.ItemIndicator className="absolute left-2">
+                  <Check className="w-4 h-4 text-blue-500" />
+                </Select.ItemIndicator>
+                <div>
+                  <Select.ItemText>{role.label}</Select.ItemText>
+                  <p className="text-xs text-gray-500">{role.description}</p>
+                </div>
+              </Select.Item>
+            ))}
+          </Select.Viewport>
+        </Select.Content>
+      </Select.Portal>
+    </Select.Root>
+  )
+}
+```
+
+**Select 组件的关键特性：**
+
+| 特性 | 说明 | 对应 Prop |
+|------|------|----------|
+| **位置控制** | 下拉位置自动调整 | `position="popper"` |
+| **键盘导航** | 上下键选择，Enter 确认 | 内置 |
+| **搜索过滤** | 输入字母快速定位 | 内置 |
+| **分组支持** | 支持 Select.Group | `Select.Label` |
+
+### 6.2 DropdownMenu 下拉菜单
+
+```tsx
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { Settings, User, LogOut, ChevronRight } from 'lucide-react'
+
+function UserMenu() {
+  return (
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger asChild>
+        <button className="flex items-center gap-2 px-3 py-2 rounded-full
+          hover:bg-gray-100 focus:outline-none focus:ring-2">
+          <img
+            src="/avatar.png"
+            alt=""
+            className="w-8 h-8 rounded-full"
+          />
+          <span>张三</span>
+        </button>
+      </DropdownMenu.Trigger>
+
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className="min-w-[220px] bg-white rounded-md shadow-lg border p-1
+            animate-in fade-in-0 zoom-in-95"
+          sideOffset={5}
+        >
+          {/* 普通菜单项 */}
+          <DropdownMenu.Item
+            className="flex items-center gap-2 px-3 py-2 text-sm rounded
+              cursor-pointer outline-none
+              data-[highlighted]:bg-gray-100"
+          >
+            <User className="w-4 h-4" />
+            个人资料
+          </DropdownMenu.Item>
+
+          <DropdownMenu.Item className="flex items-center gap-2 px-3 py-2 text-sm rounded
+            cursor-pointer outline-none data-[highlighted]:bg-gray-100">
+            <Settings className="w-4 h-4" />
+            设置
+          </DropdownMenu.Item>
+
+          {/* 分割线 */}
+          <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+
+          {/* 子菜单 */}
+          <DropdownMenu.Sub>
+            <DropdownMenu.SubTrigger
+              className="flex items-center justify-between px-3 py-2 text-sm
+                rounded cursor-pointer outline-none
+                data-[highlighted]:bg-gray-100"
+            >
+              主题
+              <ChevronRight className="w-4 h-4" />
+            </DropdownMenu.SubTrigger>
+            
+            <DropdownMenu.Portal>
+              <DropdownMenu.SubContent
+                className="min-w-[160px] bg-white rounded-md shadow-lg border p-1"
+                sideOffset={2}
+              >
+                <DropdownMenu.RadioGroup value="system">
+                  <DropdownMenu.RadioItem value="light" className="...">
+                    浅色
+                  </DropdownMenu.RadioItem>
+                  <DropdownMenu.RadioItem value="dark" className="...">
+                    深色
+                  </DropdownMenu.RadioItem>
+                  <DropdownMenu.RadioItem value="system" className="...">
+                    跟随系统
+                  </DropdownMenu.RadioItem>
+                </DropdownMenu.RadioGroup>
+              </DropdownMenu.SubContent>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Sub>
+
+          <DropdownMenu.Separator className="h-px bg-gray-200 my-1" />
+
+          {/* 危险操作 */}
+          <DropdownMenu.Item
+            className="flex items-center gap-2 px-3 py-2 text-sm text-red-600
+              rounded cursor-pointer outline-none
+              data-[highlighted]:bg-red-50"
+          >
+            <LogOut className="w-4 h-4" />
+            退出登录
+          </DropdownMenu.Item>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
+  )
+}
+```
+
+### 6.3 Tabs 标签页
+
+```tsx
+import * as Tabs from '@radix-ui/react-tabs'
+
+function SettingsTabs() {
+  return (
+    <Tabs.Root defaultValue="profile" className="w-full">
+      {/* Tab 列表 */}
+      <Tabs.List className="flex border-b">
+        <Tabs.Trigger
+          value="profile"
+          className="px-4 py-2 text-sm font-medium
+            border-b-2 border-transparent
+            data-[state=active]:border-blue-500
+            data-[state=active]:text-blue-600
+            hover:text-gray-700"
+        >
+          个人资料
+        </Tabs.Trigger>
+        
+        <Tabs.Trigger
+          value="security"
+          className="px-4 py-2 text-sm font-medium
+            border-b-2 border-transparent
+            data-[state=active]:border-blue-500
+            data-[state=active]:text-blue-600
+            hover:text-gray-700"
+        >
+          安全设置
+        </Tabs.Trigger>
+        
+        <Tabs.Trigger
+          value="notifications"
+          className="px-4 py-2 text-sm font-medium
+            border-b-2 border-transparent
+            data-[state=active]:border-blue-500
+            data-[state=active]:text-blue-600
+            hover:text-gray-700"
+        >
+          通知设置
+        </Tabs.Trigger>
+      </Tabs.List>
+
+      {/* Tab 内容 */}
+      <Tabs.Content value="profile" className="p-4">
+        <h3 className="text-lg font-medium mb-4">个人资料</h3>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">用户名</label>
+            <input type="text" className="w-full px-3 py-2 border rounded" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">邮箱</label>
+            <input type="email" className="w-full px-3 py-2 border rounded" />
+          </div>
+        </form>
+      </Tabs.Content>
+
+      <Tabs.Content value="security" className="p-4">
+        <h3 className="text-lg font-medium mb-4">安全设置</h3>
+        <div className="space-y-4">
+          <button className="px-4 py-2 bg-blue-500 text-white rounded">
+            修改密码
+          </button>
+          <button className="px-4 py-2 border rounded">
+            启用两步验证
+          </button>
+        </div>
+      </Tabs.Content>
+
+      <Tabs.Content value="notifications" className="p-4">
+        <h3 className="text-lg font-medium mb-4">通知设置</h3>
+        {/* 内容... */}
+      </Tabs.Content>
+    </Tabs.Root>
+  )
+}
+```
+
+### 6.4 Tooltip 提示框
+
+```tsx
+import * as Tooltip from '@radix-ui/react-tooltip'
+
+function TooltipDemo() {
+  return (
+    <Tooltip.Provider delayDuration={200}>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <button className="p-2 rounded hover:bg-gray-100">
+            <HelpCircle className="w-5 h-5 text-gray-500" />
+          </button>
+        </Tooltip.Trigger>
+        
+        <Tooltip.Portal>
+          <Tooltip.Content
+            className="px-3 py-1.5 text-sm text-white bg-gray-900 rounded
+              animate-in fade-in-0 zoom-in-95
+              data-[side=top]:slide-in-from-bottom-2
+              data-[side=bottom]:slide-in-from-top-2"
+            sideOffset={5}
+          >
+            这是一个提示信息
+            <Tooltip.Arrow className="fill-gray-900" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  )
+}
+```
+
+**Tooltip 配置选项：**
+
+| 属性 | 说明 | 默认值 |
+|------|------|--------|
+| `delayDuration` | 显示延迟 | 700ms |
+| `skipDelayDuration` | 快速切换时延迟 | 300ms |
+| `disableHoverableContent` | 禁用悬停内容 | false |
+| `sideOffset` | 与触发器的距离 | 0 |
+| `side` | 显示位置 | "top" |
+
+### 6.5 Popover 弹出框
+
+```tsx
+import * as Popover from '@radix-ui/react-popover'
+import { Calendar } from 'lucide-react'
+
+function DatePicker() {
+  const [date, setDate] = useState<Date | null>(null)
+  
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <button className="flex items-center gap-2 px-3 py-2 border rounded
+          hover:bg-gray-50">
+          <Calendar className="w-4 h-4" />
+          {date ? format(date, 'yyyy-MM-dd') : '选择日期'}
+        </button>
+      </Popover.Trigger>
+
+      <Popover.Portal>
+        <Popover.Content
+          className="w-auto p-4 bg-white rounded-lg shadow-lg border
+            animate-in fade-in-0 zoom-in-95"
+          sideOffset={5}
+        >
+          {/* 日历组件 */}
+          <CalendarComponent
+            selected={date}
+            onSelect={setDate}
+          />
+          
+          <Popover.Arrow className="fill-white" />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
+```
+
+### 6.6 AlertDialog 确认弹窗
+
+> AlertDialog 与 Dialog 的区别：**AlertDialog 不能通过点击外部关闭**，必须明确操作。
+
+```tsx
+import * as AlertDialog from '@radix-ui/react-alert-dialog'
+
+function DeleteConfirm({ onConfirm }) {
+  return (
+    <AlertDialog.Root>
+      <AlertDialog.Trigger asChild>
+        <button className="px-4 py-2 bg-red-500 text-white rounded">
+          删除账户
+        </button>
+      </AlertDialog.Trigger>
+
+      <AlertDialog.Portal>
+        <AlertDialog.Overlay className="fixed inset-0 bg-black/50" />
+        
+        <AlertDialog.Content
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+            w-[400px] bg-white rounded-lg p-6 shadow-xl"
+        >
+          <AlertDialog.Title className="text-lg font-semibold">
+            确认删除账户？
+          </AlertDialog.Title>
+          
+          <AlertDialog.Description className="mt-2 text-gray-600">
+            此操作不可撤销。删除后，您的所有数据将被永久删除。
+          </AlertDialog.Description>
+
+          <div className="flex justify-end gap-3 mt-6">
+            <AlertDialog.Cancel asChild>
+              <button className="px-4 py-2 border rounded hover:bg-gray-50">
+                取消
+              </button>
+            </AlertDialog.Cancel>
+            
+            <AlertDialog.Action asChild>
+              <button
+                onClick={onConfirm}
+                className="px-4 py-2 bg-red-500 text-white rounded
+                  hover:bg-red-600"
+              >
+                确认删除
+              </button>
+            </AlertDialog.Action>
+          </div>
+        </AlertDialog.Content>
+      </AlertDialog.Portal>
+    </AlertDialog.Root>
+  )
+}
+```
+
+**Dialog vs AlertDialog：**
+
+| 特性 | Dialog | AlertDialog |
+|------|--------|-------------|
+| **点击外部** | 关闭 | 不关闭 |
+| **ESC 键** | 关闭 | 关闭 |
+| **用途** | 一般弹窗 | 确认/危险操作 |
+| **Action/Cancel** | 没有 | 有专门组件 |
+
+### 6.7 组件组合实战：命令面板 (Command Palette)
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog'
+import { Command } from 'cmdk'  // 搭配 cmdk 库使用
+
+function CommandPalette() {
+  const [open, setOpen] = useState(false)
+  
+  // 快捷键监听
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
+  }, [])
+
+  return (
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
+        
+        <Dialog.Content
+          className="fixed top-[20%] left-1/2 -translate-x-1/2
+            w-[640px] bg-white rounded-xl shadow-2xl overflow-hidden"
+        >
+          <Command className="[&_[cmdk-input]]:px-4 [&_[cmdk-input]]:py-3">
+            <Command.Input
+              placeholder="输入命令或搜索..."
+              className="w-full border-b outline-none"
+            />
+            
+            <Command.List className="max-h-[300px] overflow-auto p-2">
+              <Command.Empty className="p-4 text-center text-gray-500">
+                未找到结果
+              </Command.Empty>
+              
+              <Command.Group heading="导航">
+                <Command.Item className="px-3 py-2 rounded cursor-pointer
+                  data-[selected=true]:bg-blue-50">
+                  🏠 首页
+                </Command.Item>
+                <Command.Item className="px-3 py-2 rounded cursor-pointer
+                  data-[selected=true]:bg-blue-50">
+                  📊 仪表盘
+                </Command.Item>
+              </Command.Group>
+              
+              <Command.Group heading="操作">
+                <Command.Item className="px-3 py-2 rounded cursor-pointer
+                  data-[selected=true]:bg-blue-50">
+                  ➕ 新建文档
+                </Command.Item>
+                <Command.Item className="px-3 py-2 rounded cursor-pointer
+                  data-[selected=true]:bg-blue-50">
+                  🔍 搜索
+                </Command.Item>
+              </Command.Group>
+            </Command.List>
+          </Command>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  )
+}
+```
+
+---
+
+## 📖 Section 7：Headless UI 横向对比
+
+### 7.1 主要 Headless UI 库
+
+```mermaid
+graph TB
+    subgraph Libraries["Headless UI 生态"]
+        Radix["Radix UI<br/>React"]
+        HeadlessUI["Headless UI<br/>React/Vue"]
+        ReactAria["React Aria<br/>React"]
+        ArkUI["Ark UI<br/>React/Vue/Solid"]
+        Kobalte["Kobalte<br/>Solid"]
+    end
+```
+
+### 7.2 详细对比表
+
+| 特性 | Radix UI | Headless UI | React Aria | Ark UI |
+|------|----------|-------------|------------|--------|
+| **框架支持** | React | React, Vue | React | React, Vue, Solid |
+| **组件数量** | 30+ | 10+ | 40+ | 25+ |
+| **Composition 模式** | ✅ 强 | ⚠️ 中 | ✅ 强 | ✅ 强 |
+| **可访问性** | WCAG 2.1 AA | WCAG 2.1 AA | WCAG 2.1 AAA | WCAG 2.1 AA |
+| **动画支持** | 需自行实现 | 内置 transition | 需自行实现 | 需自行实现 |
+| **文档质量** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **维护者** | Modulz | Tailwind Labs | Adobe | Chakra UI 团队 |
+| **GitHub Stars** | 15k+ | 25k+ | 12k+ | 3k+ |
+| **Bundle Size** | ~50kb | ~30kb | ~80kb | ~60kb |
+
+### 7.3 各库优劣势分析
+
+```mermaid
+graph TB
+    subgraph Radix["Radix UI"]
+        R1["✅ Composition 最成熟"]
+        R2["✅ 组件最丰富"]
+        R3["✅ shadcn/ui 生态"]
+        R4["❌ 只支持 React"]
+        R5["❌ 没有内置动画"]
+    end
+    
+    subgraph HeadlessUI["Headless UI"]
+        H1["✅ 支持 React + Vue"]
+        H2["✅ 内置 transition"]
+        H3["✅ Bundle 小"]
+        H4["❌ 组件数量少"]
+        H5["❌ Composition 不够灵活"]
+    end
+    
+    subgraph ReactAria["React Aria"]
+        A1["✅ 可访问性最强 (AAA)"]
+        A2["✅ 组件最多 (40+)"]
+        A3["✅ 文档详细"]
+        A4["❌ 学习曲线陡峭"]
+        A5["❌ Bundle 最大"]
+    end
+```
+
+### 7.4 选型建议
+
+| 场景 | 推荐方案 | 理由 |
+|------|---------|------|
+| **React + Tailwind** | Radix UI + shadcn/ui | 生态最成熟 |
+| **Vue + Tailwind** | Headless UI | 官方支持 Vue |
+| **可访问性要求极高** | React Aria | WCAG AAA 级别 |
+| **Solid 项目** | Kobalte | Solid 最佳选择 |
+| **多框架支持** | Ark UI | 支持 React/Vue/Solid |
+
+### 7.5 实际案例
+
+| 公司 | 使用的库 | 场景 |
+|------|---------|------|
+| **Vercel** | Radix UI | 高度定制化 |
+| **Linear** | Radix UI | 极致交互体验 |
+| **GitHub** | React Aria（部分） | 可访问性要求高 |
+| **Tailwind UI** | Headless UI | 官方示例 |
+
+---
+
+## 📖 Section 8：常见问题 FAQ
+
+### Q1: Radix UI 和 Headless UI 怎么选？
+
+```mermaid
+flowchart TD
+    Start["项目选型"] --> Framework{"你用什么框架？"}
+    
+    Framework -->|React| React{"需要 Tailwind？"}
+    Framework -->|Vue| Vue["Headless UI"]
+    Framework -->|Solid| Solid["Kobalte"]
+    
+    React -->|Yes| Shadcn{"想用 shadcn/ui？"}
+    React -->|No| Other["都可以"]
+    
+    Shadcn -->|Yes| Radix["Radix UI"]
+    Shadcn -->|No| Both["都可以，看组件需求"]
+```
+
+**简单结论：**
+- 用 React + Tailwind + 想用 shadcn/ui → **Radix UI**
+- 用 Vue → **Headless UI**
+- 可访问性要求极高 → **React Aria**
+
+### Q2: asChild 和 forwardRef 有什么关系？
+
+```tsx
+// 常见错误：自定义组件没有 forwardRef
+function MyButton({ children, ...props }) {
+  return <button {...props}>{children}</button>
+}
+
+// ❗ 这样会出问题，因为 ref 不会传递
+<Dialog.Trigger asChild>
+  <MyButton>Open</MyButton>  {/* ref 丢失！ */}
+</Dialog.Trigger>
+
+// ✅ 正确做法：使用 forwardRef
+const MyButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, ...props }, ref) => {
+    return <button ref={ref} {...props}>{children}</button>
+  }
+)
+
+<Dialog.Trigger asChild>
+  <MyButton>Open</MyButton>  {/* ref 正确传递 */}
+</Dialog.Trigger>
+```
+
+> 💡 **记住**：任何要与 `asChild` 配合使用的自定义组件，都必须使用 `forwardRef`
+
+### Q3: 如何在 Radix 组件中添加动画？
+
+**方法 1：使用 CSS + data-state**
+
+```css
+/* tailwind.css */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+
+.dropdown-content[data-state="open"] {
+  animation: slideDown 200ms ease-out;
+}
+
+.dropdown-content[data-state="closed"] {
+  animation: slideUp 200ms ease-in;
+}
+```
+
+**方法 2：使用 Tailwind animate-in/out**
+
+```tsx
+<DropdownMenu.Content
+  className="data-[state=open]:animate-in data-[state=closed]:animate-out
+    data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0
+    data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95
+    data-[side=bottom]:slide-in-from-top-2
+    data-[side=top]:slide-in-from-bottom-2"
+/>
+```
+
+**方法 3：使用 Framer Motion**
+
+```tsx
+import { AnimatePresence, motion } from 'framer-motion'
+
+<Dialog.Root open={open} onOpenChange={setOpen}>
+  <AnimatePresence>
+    {open && (
+      <Dialog.Portal forceMount>
+        <Dialog.Content asChild>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+          >
+            {/* content */}
+          </motion.div>
+        </Dialog.Content>
+      </Dialog.Portal>
     )}
-    {...props}
-  >
+  </AnimatePresence>
+</Dialog.Root>
+```
+
+### Q4: Portal 导致样式不生效怎么办？
+
+```tsx
+// 问题：CSS 作用域限制，Portal 内容在 body 下，父组件样式不生效
+
+// 方案 1：使用全局样式
+// globals.css
+[data-radix-portal] {
+  /* 全局样式 */
+}
+
+// 方案 2：指定 Portal 容器
+const [container, setContainer] = useState<HTMLElement | null>(null)
+
+<div ref={setContainer}>
+  <Dialog.Root>
+    <Dialog.Portal container={container}>
+      {/* 渲染到父容器内，样式作用域正常 */}
+    </Dialog.Portal>
+  </Dialog.Root>
+</div>
+
+// 方案 3：Tailwind 内联样式（推荐）
+<Dialog.Content className="fixed ... bg-white rounded-lg">
+  {/* Tailwind 不受作用域影响 */}
+</Dialog.Content>
+```
+
+### Q5: 如何处理 Radix 组件的 TypeScript 类型？
+
+```tsx
+import * as Dialog from '@radix-ui/react-dialog'
+import { ComponentPropsWithoutRef } from 'react'
+
+// 获取组件的 Props 类型
+type DialogContentProps = ComponentPropsWithoutRef<typeof Dialog.Content>
+
+// 扩展组件
+interface CustomDialogProps extends DialogContentProps {
+  title: string
+  description?: string
+}
+
+const CustomDialog = React.forwardRef<
+  React.ElementRef<typeof Dialog.Content>,
+  CustomDialogProps
+>(({ title, description, children, ...props }, ref) => (
+  <Dialog.Content ref={ref} {...props}>
+    <Dialog.Title>{title}</Dialog.Title>
+    {description && <Dialog.Description>{description}</Dialog.Description>}
     {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
+  </Dialog.Content>
 ))
 
-const SelectContent = React.forwardRef<...>(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Portal>
-    <SelectPrimitive.Content
-      ref={ref}
-      className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-        className
-      )}
-      position={position}
-      {...props}
-    >
-      <SelectPrimitive.Viewport className={cn("p-1", position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]")}>
-        {children}
-      </SelectPrimitive.Viewport>
-    </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
-))
-
-const SelectItem = React.forwardRef<...>(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-      <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
-      </SelectPrimitive.ItemIndicator>
-    </span>
-    <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
-  </SelectPrimitive.Item>
-))
+// 使用
+<CustomDialog
+  title="确认删除"
+  description="此操作不可撤销"
+  onOpenAutoFocus={(e) => e.preventDefault()}
+>
+  {/* content */}
+</CustomDialog>
 ```
 
-使用起来：
+### Q6: Radix 组件在 SSR/Next.js 中有问题吗？
 
 ```tsx
-<Select>
-  <SelectTrigger className="w-[180px]">
-    <SelectValue placeholder="选择水果" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectItem value="apple">苹果</SelectItem>
-    <SelectItem value="banana">香蕉</SelectItem>
-    <SelectItem value="orange">橙子</SelectItem>
-  </SelectContent>
-</Select>
+// Radix 完全支持 SSR，但有些注意事项：
+
+// 1. Portal 需要客户端渲染
+function ClientOnlyDialog() {
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
+  if (!mounted) return null
+  
+  return (
+    <Dialog.Root>
+      {/* ... */}
+    </Dialog.Root>
+  )
+}
+
+// 2. 使用 'use client' 指令 (Next.js App Router)
+'use client'
+
+import * as Dialog from '@radix-ui/react-dialog'
+
+export function MyDialog() {
+  // 客户端组件
+}
+
+// 3. Hydration 错误处理
+// 如果遇到 hydration mismatch，检查：
+// - 是否使用了服务器特定的值
+// - Portal 容器是否在服务器端存在
 ```
 
-所有的复杂逻辑（键盘导航、搜索、可访问性）都由 Radix 处理，shadcn/ui 只负责样式。
+### Q7: 如何测试 Radix 组件？
+
+```tsx
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import * as Dialog from '@radix-ui/react-dialog'
+
+describe('Dialog', () => {
+  it('应该能打开和关闭', async () => {
+    const user = userEvent.setup()
+    
+    render(
+      <Dialog.Root>
+        <Dialog.Trigger>打开</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Content>
+            <Dialog.Title>标题</Dialog.Title>
+            <Dialog.Close>关闭</Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    )
+    
+    // Dialog 初始关闭
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    
+    // 点击打开
+    await user.click(screen.getByText('打开'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    
+    // ESC 关闭
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+  
+  it('应该正确管理焦点', async () => {
+    const user = userEvent.setup()
+    
+    render(
+      <Dialog.Root>
+        <Dialog.Trigger data-testid="trigger">打开</Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Content>
+            <input data-testid="input" />
+            <Dialog.Close>关闭</Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
+    )
+    
+    const trigger = screen.getByTestId('trigger')
+    await user.click(trigger)
+    
+    // 焦点应该移到 Dialog 内
+    const input = screen.getByTestId('input')
+    input.focus()
+    expect(document.activeElement).toBe(input)
+    
+    // 关闭后焦点应该回到触发器
+    await user.keyboard('{Escape}')
+    expect(document.activeElement).toBe(trigger)
+  })
+})
+```
+
+### Q8: 如何实现受控和非受控切换？
+
+```tsx
+// 创建一个支持两种模式的组件
+interface ControlledDialogProps {
+  // 受控 props
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  // 非受控 props
+  defaultOpen?: boolean
+  // 共同 props
+  trigger: React.ReactNode
+  children: React.ReactNode
+}
+
+function SmartDialog({
+  open,
+  onOpenChange,
+  defaultOpen,
+  trigger,
+  children,
+}: ControlledDialogProps) {
+  // 判断是否受控
+  const isControlled = open !== undefined
+  
+  return (
+    <Dialog.Root
+      // 受控模式
+      {...(isControlled && {
+        open,
+        onOpenChange,
+      })}
+      // 非受控模式
+      {...(!isControlled && {
+        defaultOpen,
+        onOpenChange,  // 仍然可以监听变化
+      })}
+    >
+      <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 ...">
+          {children}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
+  )
+}
+
+// 使用方式 1：非受控
+<SmartDialog
+  defaultOpen={false}
+  trigger={<Button>打开</Button>}
+>
+  内容
+</SmartDialog>
+
+// 使用方式 2：受控
+const [open, setOpen] = useState(false)
+<SmartDialog
+  open={open}
+  onOpenChange={setOpen}
+  trigger={<Button>打开</Button>}
+>
+  内容
+</SmartDialog>
+```
 
 ---
 
-## Section 5：横向对比（20 min）
+## 📋 Closing：总结与实践建议
 
-### 5.1 Headless UI 生态
+### 核心要点速查
 
-好，现在我们把视野放宽一点。Radix 不是唯一的 Headless UI 库。
-
-市面上主要有这几个：
-
-1. **Radix UI**（React）
-2. **Headless UI**（React / Vue）
-3. **React Aria**（React）
-4. **Ark UI**（React / Vue / Solid）
-5. **Kobalte**（Solid）
-
-我们来横向对比一下。
-
-### 5.2 对比表格
-
-| 特性 | Radix UI | Headless UI | React Aria | Ark UI | Kobalte |
-|------|----------|-------------|------------|--------|---------|
-| **框架支持** | React | React, Vue | React | React, Vue, Solid | Solid |
-| **组件数量** | 30+ | 10+ | 40+ | 25+ | 20+ |
-| **Composition 模式** | ✅ 强 | ⚠️ 中 | ✅ 强 | ✅ 强 | ✅ 强 |
-| **可访问性** | ✅ WCAG 2.1 AA | ✅ WCAG 2.1 AA | ✅ WCAG 2.1 AAA | ✅ WCAG 2.1 AA | ✅ WCAG 2.1 AA |
-| **样式方案** | 无 | 无 | 无 | 无 | 无 |
-| **动画支持** | 需自行实现 | 内置 transition | 需自行实现 | 需自行实现 | 需自行实现 |
-| **TypeScript** | ✅ 完整 | ✅ 完整 | ✅ 完整 | ✅ 完整 | ✅ 完整 |
-| **文档质量** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **社区生态** | 🔥 最活跃 | 🔥 活跃 | 🔥 活跃 | 🌱 成长中 | 🌱 成长中 |
-| **维护者** | Modulz | Tailwind Labs | Adobe | Chakra UI 团队 | Kobalte 团队 |
-| **GitHub Stars** | 15k+ | 25k+ | 12k+ | 3k+ | 1k+ |
-| **Bundle Size** | ~50kb | ~30kb | ~80kb | ~60kb | ~40kb |
-
-### 5.3 详细对比
-
-**Radix UI**
-
-优势：
-- Composition 模式最成熟
-- 组件最丰富
-- shadcn/ui 生态加持
-- 文档和示例非常详细
-
-劣势：
-- 只支持 React
-- 没有内置动画（需要配合 Framer Motion 等）
-- Bundle size 相对较大
-
-适合场景：
-- React 项目
-- 需要高度定制的 UI
-- 配合 shadcn/ui 使用
-
-**Headless UI**
-
-优势：
-- 支持 React 和 Vue
-- 内置 transition 动画
-- Bundle size 小
-- Tailwind Labs 官方维护
-
-劣势：
-- 组件数量少（只有 10 个左右）
-- Composition 模式不如 Radix 灵活
-- 文档相对简单
-
-适合场景：
-- 使用 Tailwind CSS 的项目
-- 需要简单的 Headless 组件
-- Vue 项目
-
-**React Aria**
-
-优势：
-- Adobe 出品，可访问性最强（WCAG 2.1 AAA）
-- 组件最多（40+）
-- 文档非常详细
-- 提供 React Aria Components（预设样式版本）
-
-劣势：
-- 学习曲线陡峭
-- API 相对复杂
-- Bundle size 最大
-
-适合场景：
-- 对可访问性要求极高的项目
-- 企业级应用
-- 需要复杂交互的组件
-
-**Ark UI**
-
-优势：
-- 支持 React、Vue、Solid 三个框架
-- Chakra UI 团队出品，设计理念成熟
-- Composition 模式灵活
-
-劣势：
-- 相对较新，生态还在成长
-- 文档还在完善中
-- 社区相对较小
-
-适合场景：
-- 多框架项目
-- 喜欢 Chakra UI 设计理念的团队
-
-**Kobalte**
-
-优势：
-- Solid 生态最好的 Headless UI 库
-- API 设计优雅
-- 性能优秀（Solid 的优势）
-
-劣势：
-- 只支持 Solid
-- 社区较小
-- 组件数量相对较少
-
-适合场景：
-- Solid 项目
-- 追求极致性能
-
-### 5.4 如何选择？
-
-我的建议：
-
-**如果你用 React + Tailwind**
-→ Radix UI + shadcn/ui（首选）
-→ Headless UI（备选）
-
-**如果你用 Vue + Tailwind**
-→ Headless UI（首选）
-→ Ark UI（备选）
-
-**如果你对可访问性要求极高**
-→ React Aria
-
-**如果你用 Solid**
-→ Kobalte
-
-**如果你需要多框架支持**
-→ Ark UI
-
-### 5.5 实际案例
-
-我们看几个实际案例：
-
-**案例 1：Vercel**
-- 使用 Radix UI
-- 配合自己的设计系统
-- 高度定制化
-
-**案例 2：Linear**
-- 使用 Radix UI
-- 极致的交互体验
-- 自定义动画
-
-**案例 3：GitHub**
-- 使用 React Aria（部分组件）
-- 可访问性要求高
-- 企业级应用
-
-**案例 4：Tailwind UI**
-- 使用 Headless UI
-- 官方示例
-- 简单直接
-
-
----
-
-## Closing（15 min）
-
-### 6.1 总结
-
-好，我们今天讲了很多内容。我们来快速回顾一下。
-
-**核心要点 1：Headless UI 的本质**
-
-Headless UI 不是一个新技术，而是一个设计理念：
-
-> 分离逻辑与样式，让组件库专注于行为和可访问性，把样式的自由留给开发者。
-
-这个理念在 AI 时代特别重要，因为 AI 擅长组合和定制，而不是理解复杂的样式系统。
-
-**核心要点 2：Radix 的 Composition 模式**
-
-Radix 不是给你一个大而全的组件，而是给你一堆小而精的原语（primitives）：
-
-```
-Dialog.Root
-Dialog.Trigger
-Dialog.Portal
-Dialog.Overlay
-Dialog.Content
-Dialog.Title
-Dialog.Description
-Dialog.Close
+```mermaid
+graph TB
+    subgraph Summary["📝 本课核心要点"]
+        S1["1️⃣ Headless UI 的本质<br/>分离逻辑与样式"]
+        S2["2️⃣ Composition 模式<br/>原语自由组合"]
+        S3["3️⃣ 可访问性原语<br/>ARIA + 焦点 + 键盘"]
+        S4["4️⃣ shadcn/ui = Radix + Tailwind<br/>核心逻辑来自 Radix"]
+    end
 ```
 
-你可以自由组合这些原语，构建出任何你想要的 UI。
+### ✅ 实践建议清单
 
-**核心要点 3：可访问性不是可选项**
-
-Radix 自动处理：
-- ARIA 属性
-- 焦点管理
-- 键盘导航
-- 屏幕阅读器支持
-
-你不需要成为可访问性专家，就能做出符合标准的组件。
-
-**核心要点 4：shadcn/ui 的创新**
-
-shadcn/ui = Radix 原语 + Tailwind 样式 + 复制粘贴
-
-它不是一个 npm 包，而是一个代码生成器。它把组件源码直接复制到你的项目里，给你完全的控制权。
-
-### 6.2 实践建议
-
-基于今天的内容，我给大家几个实践建议：
-
-**建议 1：从 shadcn/ui 开始**
-
-如果你是第一次接触 Headless UI，不要直接用 Radix。先用 shadcn/ui：
+#### 建议 1：从 shadcn/ui 开始
 
 ```bash
 npx shadcn-ui@latest init
 npx shadcn-ui@latest add button dialog select
 ```
 
-看看 shadcn/ui 是怎么封装 Radix 的，学习它的设计模式。
+> 看 shadcn/ui 如何封装 Radix，学习设计模式
 
-**建议 2：理解 Composition 模式**
+#### 建议 2：理解 Composition 模式
 
-花时间理解 Radix 的 Composition 模式。不要把它当成"麻烦"，而要把它当成"灵活性"。
+- 不要把它当"麻烦"，而是"灵活性"
+- 试着自己组合一个复杂的 Dialog
 
-试着自己组合一个复杂的 Dialog，加上自定义的动画、布局、交互。你会发现 Composition 模式的威力。
+#### 建议 3：学习可访问性基础
 
-**建议 3：学习可访问性基础**
+| 概念 | 说明 |
+|------|------|
+| **ARIA 属性** | role、aria-label、aria-describedby |
+| **焦点管理** | 打开聚焦、关闭恢复 |
+| **键盘导航** | Tab、ESC、Arrow Keys |
+| **屏幕阅读器** | VoiceOver、NVDA |
 
-虽然 Radix 帮你处理了大部分可访问性问题，但你还是应该了解基础知识：
-
-- 什么是 ARIA 属性？
-- 什么是焦点管理？
-- 什么是键盘导航？
-- 什么是屏幕阅读器？
-
-推荐资源：
-- MDN 的可访问性指南
-- W3C 的 ARIA 规范
-- WebAIM 的教程
-
-**建议 4：建立自己的组件库**
-
-不要每个项目都重新写一遍组件。基于 shadcn/ui，建立你们团队自己的组件库：
+#### 建议 4：建立团队组件库
 
 ```
 my-ui/
@@ -1271,166 +2277,56 @@ my-ui/
     button.tsx
     dialog.tsx
     select.tsx
-    ...
   lib/
     utils.ts
   styles/
     globals.css
 ```
 
-把常用的组件、工具函数、样式都放进去，形成团队的设计系统。
-
-**建议 5：拥抱 AI**
-
-Headless UI 对 AI 特别友好。试着让 AI 帮你写组件：
+#### 建议 5：拥抱 AI
 
 ```
-"用 Radix Dialog 和 Tailwind 写一个确认删除对话框，
-要有警告图标、红色按钮、模糊背景"
+Prompt: "用 Radix Dialog 和 Tailwind 写一个确认删除对话框，
+        要有警告图标、红色按钮、模糊背景"
 ```
 
-你会发现 AI 生成的代码质量很高，因为 Radix 的结构清晰、可预测。
+> AI 生成的代码质量很高，因为 Radix 的结构清晰、可预测
 
-### 6.3 常见问题
+### 📋 知识点速查表
 
-在结束之前，我回答几个常见问题：
-
-**Q1：Radix 的 Bundle Size 会不会太大？**
-
-A：Radix 是按需导入的。你只用 Dialog，就只会打包 Dialog 的代码。一个 Dialog 组件大约 10-15kb（gzipped）。
-
-而且，Radix 的代码质量很高，tree-shaking 效果很好。
-
-**Q2：Radix 的性能怎么样？**
-
-A：Radix 的性能非常好。它没有复杂的样式计算，没有运行时的 CSS-in-JS，只有纯粹的 React 组件。
-
-而且，Radix 大量使用了 React 的优化技术（memo、useMemo、useCallback 等）。
-
-**Q3：Radix 适合移动端吗？**
-
-A：Radix 主要是为桌面端设计的，但也支持移动端。
-
-不过，移动端有一些特殊的交互模式（比如底部抽屉、滑动手势），Radix 没有直接支持。你需要自己实现，或者用其他库（比如 Vaul）。
-
-**Q4：Radix 和 Chakra UI / Ant Design 能一起用吗？**
-
-A：可以，但不推荐。
-
-Radix 和传统组件库的设计理念不同，混用会导致样式冲突、可访问性问题。
-
-如果你要迁移，建议逐步替换，不要混用。
-
-**Q5：shadcn/ui 的代码可以直接用在生产环境吗？**
-
-A：可以。shadcn/ui 的代码质量很高，经过了大量项目的验证。
-
-但记住，代码在你的项目里，你要负责维护。如果 shadcn/ui 更新了，你需要手动同步。
-
-### 6.4 下节课预告
-
-好，今天的课就到这里。
-
-下节课，我们要讲一个更激动人心的话题：**Design to Code — AI 如何从设计稿生成代码**。
-
-我们会讲：
-
-1. **Figma 的设计系统**：如何在 Figma 中建立可被 AI 理解的设计系统
-2. **v0.dev 的原理**：Vercel 的 AI 设计工具是如何工作的
-3. **从设计到代码的完整流程**：设计师 → Figma → AI → shadcn/ui 代码
-4. **实战演示**：现场用 AI 从设计稿生成一个完整的页面
-
-为什么今天要先讲 Radix 和 shadcn/ui？因为它们是 Design to Code 的基础。
-
-AI 生成的代码，大部分都是基于 Radix + Tailwind 的。如果你不理解 Radix 的 Composition 模式，你就无法理解 AI 生成的代码。
-
-所以，今天的内容是下节课的铺垫。
-
-### 6.5 作业
-
-最后，给大家留一个作业：
-
-**用 Radix + Tailwind 实现一个复杂的 Popover 组件**
-
-要求：
-1. 支持四个方向（top、right、bottom、left）
-2. 支持箭头指示器
-3. 支持点击外部关闭
-4. 支持 ESC 关闭
-5. 支持键盘导航
-6. 完全可访问
-
-提示：
-- 使用 `@radix-ui/react-popover`
-- 使用 Tailwind 的 `data-[side]` 选择器处理不同方向
-- 使用 `@radix-ui/react-arrow` 实现箭头
-
-参考 shadcn/ui 的 Popover 实现，但不要直接复制，试着自己理解每一行代码。
-
-下节课我会讲解这个作业，并展示几个优秀的实现。
-
-### 6.6 Q&A
-
-好，现在是 Q&A 时间。大家有什么问题吗？
-
-（预留 10 分钟 Q&A 时间）
+| 概念 | 定义 | 关键点 |
+|------|------|--------|
+| **Headless UI** | 只提供逻辑，不提供样式 | 分离逻辑与样式 |
+| **Composition 模式** | 拆分成原语，自由组合 | Dialog.Root/Trigger/Content |
+| **asChild** | 合并 props 到子元素 | 避免额外 DOM 节点 |
+| **焦点陷阱** | Tab 在组件内循环 | Focus Trap |
+| **ARIA** | 可访问性富互联网应用 | role、aria-* 属性 |
 
 ---
 
-**常见 Q&A 参考：**
+## 📚 下节课预告
 
-**Q：Radix 的学习曲线会不会太陡？**
+> **第 4 课：Design to Code（上）— AI 如何从设计稿生成代码**
 
-A：确实比传统组件库陡一些，但一旦理解了 Composition 模式，你会发现它其实更简单。因为每个部分的职责都很清晰，没有隐藏的魔法。
+- Figma 的设计系统：如何建立可被 AI 理解的设计
+- v0.dev 的原理：Vercel 的 AI 设计工具如何工作
+- 从设计到代码的完整流程
 
-我的建议是：先用 shadcn/ui，看它是怎么封装的。然后再尝试自己用 Radix 实现一些简单的组件。
-
-**Q：为什么不用 Material-UI 或 Ant Design？**
-
-A：Material-UI 和 Ant Design 都是很好的组件库，但它们的设计理念不同。
-
-如果你需要快速搭建一个标准的后台系统，Ant Design 是很好的选择。
-
-但如果你需要高度定制的 UI，或者你在做一个面向 C 端的产品，Radix + shadcn/ui 会给你更多的自由。
-
-而且，在 AI 时代，Headless UI 的优势会越来越明显。
-
-**Q：Radix 的可访问性真的有那么重要吗？**
-
-A：非常重要。
-
-首先，很多国家有法律要求（如美国的 ADA）。如果你的网站不符合可访问性标准，可能会被起诉。
-
-其次，可访问性不只是为了残障人士。键盘用户、老年人、使用屏幕阅读器的用户，都会受益。
-
-最后，可访问性也是 SEO 的一部分。搜索引擎会考虑网站的可访问性。
-
-**Q：shadcn/ui 的代码会不会过时？**
-
-A：这是一个合理的担忧。shadcn/ui 的代码在你的项目里，如果 Radix 或 Tailwind 有重大更新，你需要手动同步。
-
-但实际上，Radix 和 Tailwind 都很稳定，不会频繁有 breaking changes。
-
-而且，代码在你的项目里，你可以根据自己的需求修改，不会被组件库的更新"绑架"。
-
-**Q：有没有 Vue 版本的 shadcn/ui？**
-
-A：有！shadcn-vue 项目提供了 Vue 版本，基于 Radix Vue（Radix 的 Vue 移植版）。
-
-不过，Vue 生态中 Headless UI（Tailwind Labs 出品）也是一个很好的选择。
+> 💡 为什么先讲 Radix + shadcn/ui？因为它们是 Design to Code 的基础。AI 生成的代码，大部分都是基于 Radix + Tailwind 的。
 
 ---
 
-好，今天的课就到这里。感谢大家的参与！
-
-记住：**Headless UI 不是让你的工作变复杂，而是给你更多的自由。**
-
-下节课见！
-
----
-
-**课程结束**
-
-*总时长：约 2.5 小时*
-*包含：理论讲解 + 代码示例 + 实战演示 + Q&A*
-
+**课程时间分配：**
+| 部分 | 时长 |
+|------|------|
+| Opening: shadcn/ui 的秘密 | 10 min |
+| Section 1: 什么是 Headless UI | 15 min |
+| Section 2: Composition 模式 | 20 min |
+| Section 3: 可访问性原语 | 20 min |
+| Section 4: 核心技术深度解析 | 25 min |
+| Section 5: shadcn/ui 构建分析 | 15 min |
+| Section 6: 常用组件实战 | 25 min |
+| Section 7: 横向对比 | 15 min |
+| Section 8: 常见问题 FAQ | 10 min |
+| Closing + Q&A | 15 min |
+| **总计** | **约 2.5-3 小时** |

@@ -1,37 +1,76 @@
 # 组件库范式转移：shadcn/ui 的 Copy-Paste 哲学
-## 最终版演讲稿（融合版）
 
-**演讲时长**: 2.5 小时
-**风格**: 故事开场 + 技术深度 + 实践建议
+> **课程时长**: 2.5 小时 | **难度**: 中级 | **风格**: 故事开场 + 技术深度 + 实践建议
 
 ---
 
-## Opening Hook：现场对比演示（10 min）
+## 📋 本课概览
 
-好，大家好。上节课我们聊了 Tailwind CSS v4，知道了为什么 utility-first 的样式方案对 AI 更友好。今天我们往上走一层——聊组件库。
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 核心观点：Copy-Paste 哲学是 AI 时代组件库的新范式           │
+├─────────────────────────────────────────────────────────────────┤
+│  📚 你将学到：                                                   │
+│    • 理解传统组件库在 AI 时代的困境（黑盒依赖、过度封装）        │
+│    • 掌握 shadcn/ui 的 Copy-Paste 哲学和 CLI 工作流             │
+│    • 深入理解 Registry 系统和组件架构                            │
+│    • 了解 shadcn/ui 生态工具（magic-ui、TweakCN、v0.dev）       │
+│    • 学会横向对比各类组件库，做出正确的技术选型                  │
+│    • 实战：初始化项目、添加组件、用 AI 定制组件                  │
+│    • 掌握创建自定义 Registry 的方法                              │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-我先做一个现场演示，大家感受一下。
+### 课程结构导航
 
-我现在有一个需求：**把一个 Dialog 组件的关闭按钮从右上角移到左上角，同时加一个渐变背景的遮罩层**。
+```mermaid
+flowchart LR
+    S1["Section 1<br/>传统组件库困境"] --> S2["Section 2<br/>Copy-Paste 哲学"]
+    S2 --> S3["Section 3<br/>核心技术解析"]
+    S3 --> S4["Section 4<br/>生态工具"]
+    S4 --> S5["Section 5<br/>横向对比"]
+    S5 --> S6["Section 6<br/>实战演示"]
+    S6 --> S7["Section 7<br/>深度思考"]
+```
 
-很简单的需求对吧？我们看看用两种不同的组件库，让 AI 来改，会发生什么。
+---
 
-**第一种：Ant Design 的 Modal**
+## 🎬 Opening：现场对比演示
 
-我告诉 AI："帮我修改 Ant Design 的 Modal 组件，把关闭按钮移到左上角，遮罩层改成渐变背景。"
+### 场景设定
 
-AI 的回答大概是这样的：
+> **需求**：把一个 Dialog 组件的关闭按钮从右上角移到左上角，同时加一个渐变背景的遮罩层
+
+```mermaid
+flowchart LR
+    subgraph Req["📋 定制需求"]
+        R1["关闭按钮移到左上角"]
+        R2["遮罩层改成渐变背景"]
+    end
+    
+    subgraph AntD["🅰️ Ant Design"]
+        A1["通过 CSS 覆盖"]
+        A2["需要猜测类名"]
+        A3["版本升级可能失效"]
+    end
+    
+    subgraph Shadcn["🅱️ shadcn/ui"]
+        S1["直接修改源码"]
+        S2["AI 能看到完整实现"]
+        S3["完全可控"]
+    end
+    
+    Req --> AntD
+    Req --> Shadcn
+```
+
+### 方案一：Ant Design（传统组件库）
 
 ```jsx
 import { Modal } from 'antd';
 
 // AI 的尝试：通过 CSS 覆盖
-<Modal
-  open={isOpen}
-  onCancel={handleClose}
-  title="设置"
-  className="custom-modal"
->
+<Modal open={isOpen} onCancel={handleClose} title="设置" className="custom-modal">
   <p>内容区域</p>
 </Modal>
 ```
@@ -47,209 +86,208 @@ import { Modal } from 'antd';
 }
 ```
 
-看起来能用？但问题来了——AI 怎么知道 `.ant-modal-close` 这个类名的？
+> ⚠️ **问题**：AI 怎么知道 `.ant-modal-close` 这个类名？靠文档或训练数据记忆，版本升级后可能失效。
 
-它要么是查文档，要么是靠训练数据里的记忆。如果 Ant Design 升级了，改了类名呢？AI 就懵了。
-
-而且更关键的是——**AI 看不到 Modal 组件的源码**。它在 node_modules 里，是编译后的代码。AI 只能通过 API 文档来猜测怎么定制。
-
-**第二种：shadcn/ui 的 Dialog**
-
-现在我换成 shadcn/ui，同样的需求。
-
-我告诉 AI："帮我修改 shadcn/ui 的 Dialog 组件，把关闭按钮移到左上角，遮罩层改成渐变背景。"
-
-AI 的回答是这样的：
+### 方案二：shadcn/ui（Copy-Paste 哲学）
 
 ```jsx
 // 直接修改 components/ui/dialog.tsx
-import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
-
-const DialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }, ref) => (
+const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-gradient-to-br from-black/60 to-black/30",
+      "fixed inset-0 z-50 bg-gradient-to-br from-black/60 to-black/30",  // ✅ 直接改
       "data-[state=open]:animate-in data-[state=closed]:animate-out",
-      "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
   />
 ))
 
-const DialogClose = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Close>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Close>
->(({ className, ...props }, ref) => (
+const DialogClose = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Close
     ref={ref}
     className={cn(
-      "absolute left-4 top-4 rounded-sm opacity-70",
-      "ring-offset-background transition-opacity",
-      "hover:opacity-100 focus:outline-none focus:ring-2",
-      "disabled:pointer-events-none data-[state=open]:bg-accent",
+      "absolute left-4 top-4 rounded-sm opacity-70",  // ✅ 直接改位置
       className
     )}
     {...props}
   >
     <X className="h-4 w-4" />
-    <span className="sr-only">Close</span>
   </DialogPrimitive.Close>
 ))
 ```
 
-看到区别了吗？
-
-AI 直接改了源码。因为 shadcn/ui 的组件**就在你的项目里**，在 `components/ui/` 目录下。AI 能看到完整的实现，知道怎么改。
-
-这就是今天要讲的核心——**Copy-Paste 哲学**。
+> ✅ **优势**：AI 直接改源码，因为组件**就在你的项目里**，在 `components/ui/` 目录下。
 
 ---
 
-## Section 1：传统组件库的 AI 困境（20 min）
+### 📊 两种方案对比
 
-好，我们先聊聊传统组件库为什么在 AI 时代遇到了困境。
-
-### 1.1 npm 黑盒依赖：AI 看不到源码
-
-传统组件库都是通过 npm 安装的：
-
-```bash
-npm install antd
-npm install @mui/material
-npm install @chakra-ui/react
+```mermaid
+graph TB
+    subgraph Traditional["❌ 传统组件库"]
+        T1["代码在 node_modules"]
+        T2["AI 只能看 API 文档"]
+        T3["定制靠 CSS 覆盖"]
+        T4["版本升级风险高"]
+    end
+    
+    subgraph CopyPaste["✅ Copy-Paste 哲学"]
+        C1["代码在项目目录"]
+        C2["AI 能看完整源码"]
+        C3["定制直接改源码"]
+        C4["版本自己控制"]
+    end
+    
+    Traditional -->|"AI友好度"| Low["⭐⭐"]
+    CopyPaste -->|"AI友好度"| High["⭐⭐⭐⭐⭐"]
+    
+    style High fill:#10b981,color:#fff
 ```
 
-安装完之后，代码在哪？在 `node_modules` 里。
+---
 
-你打开 `node_modules/antd/es/modal/Modal.js`，看到的是什么？编译后的代码，压缩过的，可读性很差。
+## 📖 Section 1：传统组件库的 AI 困境
 
-AI 能读到这些代码吗？理论上可以，但实际上：
+### 1.1 npm 黑盒依赖架构
 
-1. **Token 限制**：node_modules 太大了，AI 不可能把整个目录都读进上下文
-2. **编译后的代码**：即使读到了，也是编译后的 JavaScript，不是源码
-3. **没有类型信息**：TypeScript 类型定义和实现是分离的
-
-所以 AI 只能依赖什么？**API 文档**。
-
-但 API 文档只告诉你怎么用，不告诉你怎么改。
-
-### 1.2 过度封装：AI 难以定制
-
-我们看一个例子。假设你想改 Ant Design 的 Button 组件，加一个"加载中"的动画效果。
-
-Ant Design 提供了 `loading` 属性：
-
-```jsx
-<Button loading>提交</Button>
+```mermaid
+flowchart TB
+    subgraph Project["你的项目"]
+        Code["业务代码"]
+    end
+    
+    subgraph NodeModules["node_modules（黑盒）"]
+        Antd["antd/"]
+        MUI["@mui/material/"]
+        Chakra["@chakra-ui/react/"]
+    end
+    
+    subgraph Problems["❌ AI 的困境"]
+        P1["看不到源码"]
+        P2["只能依赖文档"]
+        P3["无法深度定制"]
+    end
+    
+    Code -->|"import"| NodeModules
+    NodeModules --> Problems
 ```
 
-但如果你想改这个加载动画呢？比如换成一个自定义的 Spinner？
+**为什么 AI 看不到源码？**
 
-你会发现，做不到。
+| 问题 | 原因 | 影响 |
+|------|------|------|
+| **Token 限制** | node_modules 太大，AI 无法全部读取 | 无法理解组件实现 |
+| **编译后的代码** | 只有编译后的 JS，不是源码 | 代码可读性差 |
+| **类型分离** | TypeScript 类型定义和实现分离 | 无法完整理解 API |
 
-因为 Ant Design 的 Button 组件是这样实现的（简化版）：
+### 1.2 过度封装问题
+
+```mermaid
+flowchart LR
+    subgraph Want["你想要的"]
+        W1["自定义 Loading 动画"]
+    end
+    
+    subgraph Reality["现实"]
+        R1["Button 内部封装了 LoadingIcon"]
+        R2["LoadingIcon 是内部组件"]
+        R3["你改不了"]
+    end
+    
+    subgraph Solution["唯一方案"]
+        S1["CSS 覆盖"]
+        S2["脆弱、易失效"]
+    end
+    
+    Want --> Reality --> Solution
+```
+
+**示例：Ant Design Button 的内部实现（简化版）**
 
 ```jsx
 // node_modules/antd/es/button/button.js
 function Button({ loading, children, ...props }) {
   return (
     <button {...props}>
-      {loading && <LoadingIcon />}
+      {loading && <LoadingIcon />}  {/* 内部组件，你改不了 */}
       {children}
     </button>
   )
 }
 ```
 
-`LoadingIcon` 是内部组件，你改不了。
+### 1.3 版本锁定困境
 
-你唯一的办法是什么？**CSS 覆盖**。
-
-```css
-.ant-btn-loading-icon {
-  display: none;
-}
-.ant-btn-loading::before {
-  content: '';
-  /* 自己画一个 Spinner */
-}
+```mermaid
+flowchart TB
+    subgraph Current["当前状态"]
+        V1["antd@4.20.0"]
+        V2["100+ 文件使用"]
+    end
+    
+    subgraph Upgrade["想要升级"]
+        V3["antd@5.0.0"]
+        V4["Breaking Changes"]
+    end
+    
+    subgraph Result["结果"]
+        R1["不敢升级"]
+        R2["一直用老版本"]
+        R3["技术债务累积"]
+    end
+    
+    Current -->|"升级风险"| Upgrade
+    Upgrade -->|"影响未知"| Result
 ```
 
-这就是过度封装的问题——**组件库帮你做了太多决定，你想改的时候改不了**。
-
-AI 遇到这种情况，也只能写 CSS 覆盖。但 CSS 覆盖是脆弱的，版本一升级就可能失效。
-
-### 1.3 版本锁定：升级困难
-
-传统组件库还有一个问题——**版本锁定**。
-
-你的项目依赖 `antd@4.20.0`，现在 Ant Design 发布了 5.0 版本，有很多 Breaking Changes。
-
-你想升级吗？不敢升。
-
-为什么？因为你不知道升级会影响哪些地方。你可能在 100 个文件里用了 Ant Design 的组件，每个地方都可能受影响。
-
-所以大部分团队的选择是什么？**不升级**。
-
-一直用老版本，直到老版本不维护了，才被迫升级。这时候升级成本就更大了。
-
-AI 能帮你升级吗？理论上可以，但实际上很难。因为 AI 不知道你的项目里哪些地方用了组件库，哪些地方会受影响。
-
-### 1.4 数据对比表
-
-我们用一个表格总结一下传统组件库的问题：
+### 1.4 传统组件库问题总结表
 
 | 维度 | 传统组件库（Ant Design / MUI） | AI 的困境 |
 |------|-------------------------------|-----------|
 | **代码位置** | node_modules（黑盒） | AI 看不到源码，只能靠文档 |
 | **定制能力** | 通过 props + CSS 覆盖 | AI 只能写脆弱的 CSS hack |
 | **版本升级** | Breaking Changes 多 | AI 难以评估影响范围 |
-| **Bundle 大小** | 全量引入（即使用 Tree Shaking） | 无法按需精简 |
-| **样式冲突** | 全局 CSS（需要 CSS-in-JS） | AI 难以调试样式优先级 |
-| **学习成本** | 需要学习组件库的 API | AI 需要大量文档上下文 |
-
-这就是传统组件库在 AI 时代的困境。
-
-那有没有解决方案？有，就是 shadcn/ui。
+| **Bundle 大小** | 全量引入 | 无法按需精简 |
+| **样式冲突** | 全局 CSS | AI 难以调试样式优先级 |
+| **学习成本** | 需要学习组件库 API | AI 需要大量文档上下文 |
 
 ---
 
-## Section 2：shadcn/ui 的 Copy-Paste 哲学（30 min）
+## 📖 Section 2：shadcn/ui 的 Copy-Paste 哲学
 
-好，现在我们进入今天的核心——shadcn/ui 的 Copy-Paste 哲学。
+### 2.1 核心理念：不是 npm 包，是代码片段
 
-### 2.1 不是 npm 包，是代码片段
-
-shadcn/ui 最颠覆的一点是什么？**它不是一个 npm 包**。
-
-你不会在 package.json 里看到 `"shadcn-ui": "^1.0.0"` 这样的依赖。
-
-那它是什么？**它是一个代码片段的集合**。
-
-什么意思？我演示一下。
-
-假设你想用 shadcn/ui 的 Button 组件，你不是 `npm install`，而是：
-
-```bash
-npx shadcn@latest add button
+```mermaid
+flowchart LR
+    subgraph Traditional["传统方式"]
+        T1["npm install antd"]
+        T2["代码在 node_modules"]
+        T3["你不拥有代码"]
+    end
+    
+    subgraph Shadcn["shadcn/ui 方式"]
+        S1["npx shadcn@latest add button"]
+        S2["代码在 components/ui/"]
+        S3["你拥有代码"]
+    end
+    
+    Traditional -->|"依赖模式"| Depend["依赖组件库维护者"]
+    Shadcn -->|"拥有模式"| Own["完全控制权"]
+    
+    style Own fill:#10b981,color:#fff
 ```
 
-这个命令做了什么？它把 Button 组件的源码**复制到你的项目里**：
+**执行 `npx shadcn@latest add button` 后的项目结构：**
 
 ```
 components/
   ui/
-    button.tsx  ← 完整的源码，在你的项目里
+    button.tsx  ← 完整的源码，在你的项目里，你可以随意修改
 ```
 
-你打开 `button.tsx`，看到的是什么？完整的、可读的、可修改的源码：
+### 2.2 Button 组件源码解析
 
 ```tsx
 import * as React from "react"
@@ -257,19 +295,17 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
+// 使用 CVA 定义样式变体
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  // 基础样式
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline: "border border-input bg-background shadow-sm hover:bg-accent",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -280,18 +316,9 @@ const buttonVariants = cva(
         icon: "h-9 w-9",
       },
     },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
+    defaultVariants: { variant: "default", size: "default" },
   }
 )
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
@@ -305,49 +332,73 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     )
   }
 )
-Button.displayName = "Button"
 
 export { Button, buttonVariants }
 ```
 
-这就是 Copy-Paste 哲学——**组件的源码在你的项目里，你可以随意修改**。
+**代码结构解析：**
 
+```mermaid
+flowchart TB
+    subgraph Components["组件构成"]
+        Slot["@radix-ui/react-slot<br/>支持 asChild 模式"]
+        CVA["class-variance-authority<br/>管理样式变体"]
+        CN["cn() 工具函数<br/>合并类名"]
+    end
+    
+    subgraph Result["最终效果"]
+        R1["AI 能看懂结构"]
+        R2["修改成本低"]
+        R3["样式完全可控"]
+    end
+    
+    Components --> Result
+```
 
-### 2.2 CLI 工作流：npx shadcn@latest
+### 2.3 CLI 工作流
 
-shadcn/ui 的核心是一个 CLI 工具。我们看看它的工作流程。
+```mermaid
+flowchart LR
+    subgraph Step1["Step 1: 初始化"]
+        Init["npx shadcn@latest init"]
+    end
+    
+    subgraph Step2["Step 2: 添加组件"]
+        Add["npx shadcn@latest add button"]
+    end
+    
+    subgraph Step3["Step 3: 使用组件"]
+        Use["import { Button } from '@/components/ui/button'"]
+    end
+    
+    Step1 --> Step2 --> Step3
+```
 
-**第一步：初始化**
+#### 初始化配置
 
 ```bash
 npx shadcn@latest init
 ```
 
-这个命令会问你几个问题：
-
+**交互式配置：**
 ```
-Which style would you like to use? › New York
-Which color would you like to use as base color? › Zinc
-Do you want to use CSS variables for colors? › yes
-Where is your global CSS file? › app/globals.css
-Would you like to use Tailwind CSS? › yes
-Where is your tailwind.config.js located? › tailwind.config.js
-Configure the import alias for components: › @/components
-Configure the import alias for utils: › @/lib/utils
+✔ Which style would you like to use? › New York
+✔ Which color would you like to use as base color? › Zinc
+✔ Do you want to use CSS variables for colors? › yes
+✔ Where is your global CSS file? › app/globals.css
+✔ Configure the import alias for components: › @/components
 ```
 
-然后它会创建几个文件：
-
+**生成的文件结构：**
 ```
 components/
-  ui/           ← 组件目录（空的）
+  ui/              ← 组件目录（空的）
 lib/
-  utils.ts      ← 工具函数（cn 函数）
-components.json ← 配置文件
+  utils.ts         ← cn 工具函数
+components.json    ← 配置文件
 ```
 
-`components.json` 是关键，它记录了你的项目配置：
-
+**components.json 配置文件：**
 ```json
 {
   "$schema": "https://ui.shadcn.com/schema.json",
@@ -367,51 +418,31 @@ components.json ← 配置文件
 }
 ```
 
-**第二步：添加组件**
+### 2.4 Registry 系统
 
-```bash
-npx shadcn@latest add button
+```mermaid
+flowchart TB
+    subgraph Registry["🌐 shadcn/ui Registry (JSON API)"]
+        R1["组件元数据"]
+        R2["组件源码"]
+        R3["依赖信息"]
+    end
+    
+    subgraph CLI["💻 CLI 工具"]
+        C1["读取 Registry"]
+        C2["检查依赖"]
+        C3["复制源码到项目"]
+    end
+    
+    subgraph Project["📁 你的项目"]
+        P1["components/ui/button.tsx"]
+        P2["完全属于你"]
+    end
+    
+    Registry --> CLI --> Project
 ```
 
-这个命令做了什么？
-
-1. 从 shadcn/ui 的 Registry 下载 Button 组件的源码
-2. 检查依赖（比如 Button 依赖 `@radix-ui/react-slot`）
-3. 自动安装缺失的依赖
-4. 把源码复制到 `components/ui/button.tsx`
-
-你可以一次添加多个组件：
-
-```bash
-npx shadcn@latest add button dialog card
-```
-
-或者添加所有组件：
-
-```bash
-npx shadcn@latest add --all
-```
-
-**第三步：使用组件**
-
-```tsx
-import { Button } from "@/components/ui/button"
-
-export function MyComponent() {
-  return <Button variant="outline">点击我</Button>
-}
-```
-
-就这么简单。
-
-### 2.3 Registry 系统：组件的中央仓库
-
-shadcn/ui 的组件是从哪来的？从 **Registry** 来的。
-
-Registry 是一个 JSON API，存储了所有组件的元数据和源码。
-
-比如 Button 组件的 Registry 数据：
-
+**Registry 数据示例：**
 ```json
 {
   "name": "button",
@@ -419,107 +450,552 @@ Registry 是一个 JSON API，存储了所有组件的元数据和源码。
   "files": [
     {
       "name": "button.tsx",
-      "content": "import * as React from \"react\"\nimport { Slot } from \"@radix-ui/react-slot\"..."
+      "content": "import * as React from \"react\"..."
     }
   ],
-  "dependencies": [
-    "@radix-ui/react-slot",
-    "class-variance-authority"
-  ],
+  "dependencies": ["@radix-ui/react-slot", "class-variance-authority"],
   "registryDependencies": []
 }
 ```
 
-CLI 工具就是从这个 API 拉取数据，然后写入你的项目。
+### 2.5 为什么 AI 能读、能改、能理解
 
-这个设计很聪明，因为：
-
-1. **组件可以独立更新**：shadcn/ui 可以随时更新 Registry，你可以选择是否同步
-2. **支持自定义 Registry**：你可以搭建自己的 Registry，分享给团队
-3. **版本控制在你手里**：组件在你的 Git 仓库里，你可以随时回滚
-
-### 2.4 为什么 AI 能读、能改、能理解
-
-现在我们回到最开始的问题——为什么 AI 能轻松修改 shadcn/ui 的组件？
-
-**原因 1：源码在项目里**
-
-AI 可以直接读取 `components/ui/button.tsx`，看到完整的实现。不需要去 node_modules 里翻，不需要查文档。
-
-**原因 2：代码结构清晰**
-
-shadcn/ui 的组件都是用 Tailwind CSS + Radix UI 写的，结构非常清晰：
-
-```tsx
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
+```mermaid
+graph TB
+    subgraph Reasons["✅ AI 友好的四大原因"]
+        R1["1️⃣ 源码在项目里<br/>直接读取 components/ui/"]
+        R2["2️⃣ 代码结构清晰<br/>Tailwind + Radix，一目了然"]
+        R3["3️⃣ 修改成本低<br/>直接改 buttonVariants"]
+        R4["4️⃣ 没有版本锁定<br/>你的代码就是你的版本"]
+    end
 ```
 
-AI 一眼就能看懂：
-- `buttonVariants` 是样式变体（用 CVA 定义）
-- `cn` 是合并 className 的工具函数
-- `asChild` 是 Radix UI 的 Slot 模式
-
-**原因 3：修改成本低**
-
-如果你想改 Button 的样式，直接改 `buttonVariants` 就行：
-
-```tsx
-const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 ...",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        // 加一个新的变体
-        gradient: "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl",
-      },
-      // ...
-    },
-  }
-)
-```
-
-AI 可以轻松做到这一点，因为它能看到完整的代码结构。
-
-**原因 4：没有版本锁定**
-
-shadcn/ui 没有版本号。你的项目里的组件就是你的版本。
-
-如果 shadcn/ui 更新了 Button 组件，你可以选择：
-- 重新运行 `npx shadcn@latest add button`（会覆盖）
-- 手动对比差异，选择性合并
-- 完全不管，继续用你的版本
-
-这种灵活性对 AI 来说非常友好，因为 AI 可以帮你做版本对比和合并。
+| 原因 | 说明 | AI 的优势 |
+|------|------|----------|
+| **源码在项目里** | 不在 node_modules | AI 可以直接读取 |
+| **代码结构清晰** | Tailwind + Radix + CVA | AI 一眼看懂 |
+| **修改成本低** | 直接改 buttonVariants | AI 精确定位修改点 |
+| **没有版本锁定** | 代码在 Git 仓库 | AI 可帮助版本对比合并 |
 
 ---
 
-## Section 3：shadcn/ui 生态工具（25 min）
+## 📖 Section 3：核心技术深度解析
 
-好，shadcn/ui 火了之后，社区出现了很多基于它的生态工具。我们看几个重要的。
+### 3.1 CVA (Class Variance Authority) 详解
+
+> 📌 **CVA 是什么**：一个用于管理 Tailwind CSS 类名变体的工具库
+
+```mermaid
+flowchart TB
+    subgraph CVA["🎯 CVA 的作用"]
+        C1["定义基础样式"]
+        C2["定义变体 variants"]
+        C3["定义默认值"]
+        C4["生成最终类名"]
+    end
+    
+    C1 --> C2 --> C3 --> C4
+```
+
+**完整示例解析：**
+
+```tsx
+import { cva, type VariantProps } from "class-variance-authority"
+
+// 1️⃣ 创建变体配置
+const buttonVariants = cva(
+  // 🟢 基础样式：所有变体都会应用这些样式
+  [
+    "inline-flex items-center justify-center",     // 布局
+    "gap-2 whitespace-nowrap",                     // 间距
+    "rounded-md text-sm font-medium",              // 外观
+    "transition-colors",                            // 过渡
+    "focus-visible:outline-none focus-visible:ring-1", // 焦点
+    "disabled:pointer-events-none disabled:opacity-50", // 禁用
+  ],
+  {
+    // 🟡 变体定义
+    variants: {
+      // 样式变体
+      variant: {
+        default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+        outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+      },
+      // 尺寸变体
+      size: {
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-md px-8",
+        icon: "h-9 w-9",
+      },
+    },
+    // 🟣 默认值
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  }
+)
+
+// 2️⃣ 类型推导
+type ButtonVariants = VariantProps<typeof buttonVariants>
+// 结果：{ variant?: "default" | "destructive" | ... ; size?: "default" | "sm" | ... }
+
+// 3️⃣ 使用
+buttonVariants({ variant: "destructive", size: "lg" })
+// 输出："inline-flex items-center ... bg-destructive ... h-10 rounded-md px-8"
+```
+
+**CVA 的优势：**
+
+| 优势 | 说明 |
+|------|------|
+| **类型安全** | 自动推导 variant 和 size 的类型 |
+| **可组合** | 多个变体可以自由组合 |
+| **可扩展** | 轻松添加新的变体 |
+| **AI 友好** | 结构清晰，AI 容易理解和修改 |
+
+### 3.2 cn() 工具函数详解
+
+> 📌 **cn() 是什么**：一个用于合并 Tailwind 类名的工具函数
+
+**实现源码：**
+
+```tsx
+// lib/utils.ts
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+```
+
+**两个库的作用：**
+
+```mermaid
+flowchart LR
+    subgraph clsx["🟢 clsx"]
+        CL1["处理条件类名"]
+        CL2["合并数组/对象"]
+    end
+    
+    subgraph twMerge["🟡 tailwind-merge"]
+        TW1["解决类名冲突"]
+        TW2["保留后者"]
+    end
+    
+    Input["输入类名"] --> clsx --> twMerge --> Output["最终类名"]
+```
+
+**具体示例：**
+
+```tsx
+// ✅ 处理条件类名
+cn("px-4", isActive && "bg-blue-500", disabled && "opacity-50")
+// 结果："px-4 bg-blue-500"(假设 isActive=true, disabled=false)
+
+// ✅ 解决冲突：后者覆盖前者
+cn("px-4 py-2", "px-6")
+// 结果："py-2 px-6"(不是 "px-4 py-2 px-6")
+
+// ✅ 处理对象形式
+cn({
+  "bg-red-500": hasError,
+  "bg-green-500": isSuccess,
+})
+
+// ✅ 处理数组
+cn(["flex", "items-center"], className)
+```
+
+**为什么需要 cn()？**
+
+| 问题 | 没有 cn() | 有 cn() |
+|------|-------------|----------|
+| **类名冲突** | `"px-4 px-6"` 两个都生效 | `"px-6"` 后者生效 |
+| **条件类名** | 需要手动处理 false 值 | 自动过滤 |
+| **组件覆盖** | 无法优雅覆盖样式 | `className` 可覆盖默认样式 |
+
+### 3.3 asChild 和 Slot 模式详解
+
+> 📌 **asChild 是什么**：允许组件将其属性和行为传递给子元素，而不是渲染额外的 DOM 节点
+
+```mermaid
+flowchart TB
+    subgraph Without["❌ 没有 asChild"]
+        W1["<Button>"]
+        W2["  <a href='/'>"]
+        W3["    Link"]
+        W4["  </a>"]
+        W5["</Button>"]
+        W6["渲染结果：<br/><button><a>Link</a></button>"]
+        W7["❌ 语义错误：button 包含 a"]
+    end
+    
+    subgraph With["✅ 有 asChild"]
+        A1["<Button asChild>"]
+        A2["  <a href='/'>"]
+        A3["    Link"]
+        A4["  </a>"]
+        A5["</Button>"]
+        A6["渲染结果：<br/><a href='/' class='...(button styles)'>Link</a>"]
+        A7["✅ 正确：只有 a 标签"]
+    end
+```
+
+**Slot 的实现原理：**
+
+```tsx
+import { Slot } from "@radix-ui/react-slot"
+
+// Button 组件内部
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ asChild = false, ...props }, ref) => {
+    // 根据 asChild 决定渲染什么
+    const Comp = asChild ? Slot : "button"
+    return <Comp ref={ref} {...props} />
+  }
+)
+
+// Slot 的简化实现
+function Slot({ children, ...props }) {
+  if (React.isValidElement(children)) {
+    return React.cloneElement(children, {
+      ...props,           // 父组件的 props（如 className、onClick）
+      ...children.props,  // 子组件的 props
+    })
+  }
+  return null
+}
+```
+
+**实际应用场景：**
+
+```tsx
+// 场景 1：Button 作为链接
+import Link from "next/link"
+
+<Button asChild>
+  <Link href="/dashboard">进入控制台</Link>
+</Button>
+
+// 场景 2：Dialog.Trigger 自定义触发器
+<Dialog.Trigger asChild>
+  <Button variant="destructive">删除</Button>
+</Dialog.Trigger>
+
+// 场景 3：DropdownMenu.Item 作为链接
+<DropdownMenu.Item asChild>
+  <a href="/settings">设置</a>
+</DropdownMenu.Item>
+```
+
+### 3.4 Dialog 组件完整源码解析
+
+> 让我们深入看一个复杂组件的完整实现
+
+```tsx
+// components/ui/dialog.tsx
+import * as React from "react"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { X } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+// 🟢 直接导出 Radix 原语
+const Dialog = DialogPrimitive.Root
+const DialogTrigger = DialogPrimitive.Trigger
+const DialogPortal = DialogPrimitive.Portal
+const DialogClose = DialogPrimitive.Close
+
+// 🟡 包装遮罩层，添加样式和动画
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      // 基础样式
+      "fixed inset-0 z-50 bg-black/80",
+      // 打开动画
+      "data-[state=open]:animate-in data-[state=open]:fade-in-0",
+      // 关闭动画
+      "data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
+      className
+    )}
+    {...props}
+  />
+))
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
+
+// 🟣 包装内容区域，包含 Overlay 和关闭按钮
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    {/* 自动渲染遮罩层 */}
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        // 定位和尺寸
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg",
+        "translate-x-[-50%] translate-y-[-50%]",
+        // 外观
+        "gap-4 border bg-background p-6 shadow-lg sm:rounded-lg",
+        // 动画
+        "duration-200",
+        "data-[state=open]:animate-in data-[state=closed]:animate-out",
+        "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+        "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+        "data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]",
+        "data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]",
+        className
+      )}
+      {...props}
+    >
+      {children}
+      {/* 内置关闭按钮 */}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <X className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+))
+DialogContent.displayName = DialogPrimitive.Content.displayName
+
+// 🟠 便利组件：Header 和 Footer
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col space-y-1.5 text-center sm:text-left",
+      className
+    )}
+    {...props}
+  />
+)
+DialogHeader.displayName = "DialogHeader"
+
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
+      className
+    )}
+    {...props}
+  />
+)
+DialogFooter.displayName = "DialogFooter"
+
+// 🟤 包装 Title 和 Description
+const DialogTitle = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Title>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Title
+    ref={ref}
+    className={cn(
+      "text-lg font-semibold leading-none tracking-tight",
+      className
+    )}
+    {...props}
+  />
+))
+DialogTitle.displayName = DialogPrimitive.Title.displayName
+
+const DialogDescription = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Description>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Description
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+))
+DialogDescription.displayName = DialogPrimitive.Description.displayName
+
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+}
+```
+
+**组件结构解析：**
+
+```mermaid
+flowchart TB
+    subgraph Radix["🟢 Radix 原语（直接导出）"]
+        R1["Dialog = DialogPrimitive.Root"]
+        R2["DialogTrigger"]
+        R3["DialogPortal"]
+        R4["DialogClose"]
+    end
+    
+    subgraph Styled["🟡 样式包装"]
+        S1["DialogOverlay<br/>遮罩层 + 动画"]
+        S2["DialogContent<br/>内容容器 + 动画 + 关闭按钮"]
+        S3["DialogTitle<br/>标题样式"]
+        S4["DialogDescription<br/>描述样式"]
+    end
+    
+    subgraph Custom["🟣 便利组件"]
+        C1["DialogHeader<br/>布局容器"]
+        C2["DialogFooter<br/>布局容器"]
+    end
+```
+
+### 3.5 主题系统：CSS 变量配置
+
+> shadcn/ui 使用 CSS 变量实现主题系统，支持亮色/暗色模式
+
+**globals.css 配置示例：**
+
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 🌞 亮色模式 */
+    --background: 0 0% 100%;           /* 白色背景 */
+    --foreground: 222.2 84% 4.9%;      /* 深色文字 */
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 222.2 47.4% 11.2%;      /* 主色 */
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
+    --destructive: 0 84.2% 60.2%;      /* 危险色 */
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    
+    --radius: 0.5rem;                   /* 圆角 */
+  }
+
+  .dark {
+    /* 🌙 暗色模式 */
+    --background: 222.2 84% 4.9%;       /* 深色背景 */
+    --foreground: 210 40% 98%;          /* 浅色文字 */
+    
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    
+    /* ... 其他变量 ... */
+  }
+}
+```
+
+**在组件中使用：**
+
+```tsx
+// 使用 CSS 变量
+className="bg-primary text-primary-foreground"
+// 等价于
+className="bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]"
+```
+
+**主题切换实现：**
+
+```tsx
+import { useTheme } from "next-themes"
+
+function ThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  
+  return (
+    <Button
+      variant="outline"
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+    >
+      {theme === "dark" ? "🌞" : "🌙"}
+    </Button>
+  )
+}
+```
+
+---
+
+## 📖 Section 4：shadcn/ui 生态工具
+
+```mermaid
+flowchart TB
+    subgraph Ecosystem["shadcn/ui 生态"]
+        Core["shadcn/ui<br/>基础组件库"]
+        Magic["magic-ui<br/>动画组件库"]
+        Aceternity["aceternity-ui<br/>现代UI组件"]
+        Tweak["TweakCN<br/>AI主题编辑器"]
+        V0["v0.dev<br/>AI代码生成"]
+    end
+    
+    Core --> Magic
+    Core --> Aceternity
+    Core --> Tweak
+    Core --> V0
+```
 
 ### 3.1 magic-ui：动画组件库
 
-magic-ui 是一个专注于动画效果的组件库，完全兼容 shadcn/ui 的工作流。
+> 🔗 官网：https://magicui.design
 
-官网：https://magicui.design
+**特点：** 专注于炫酷的动画效果，完全兼容 shadcn/ui 工作流
 
-它提供了很多炫酷的动画组件，比如：
+**安装方式：**
+```bash
+npx shadcn@latest add "https://magicui.design/r/marquee"
+```
 
-**Marquee（跑马灯）**
+**示例组件：**
+
+| 组件 | 效果 | 适用场景 |
+|------|------|---------|
+| **Marquee** | 跑马灯 | 品牌展示、合作伙伴 |
+| **Animated Beam** | 连线动画 | 流程展示、架构图 |
+| **Particles** | 粒子效果 | 背景装饰、氛围营造 |
 
 ```tsx
+// Marquee 示例
 import Marquee from "@/components/magicui/marquee"
 
 export function MarqueeDemo() {
@@ -533,56 +1009,22 @@ export function MarqueeDemo() {
 }
 ```
 
-**Animated Beam（连线动画）**
-
-```tsx
-import { AnimatedBeam } from "@/components/magicui/animated-beam"
-
-export function AnimatedBeamDemo() {
-  return (
-    <AnimatedBeam
-      containerRef={containerRef}
-      fromRef={fromRef}
-      toRef={toRef}
-    />
-  )
-}
-```
-
-**Particles（粒子效果）**
-
-```tsx
-import Particles from "@/components/magicui/particles"
-
-export function ParticlesDemo() {
-  return (
-    <div className="relative h-screen">
-      <Particles className="absolute inset-0" quantity={100} />
-      <div className="relative z-10">Your content</div>
-    </div>
-  )
-}
-```
-
-magic-ui 的安装方式和 shadcn/ui 一样：
-
-```bash
-npx shadcn@latest add "https://magicui.design/r/marquee"
-```
-
-源码会复制到你的项目里，你可以随意修改。
-
 ### 3.2 aceternity-ui：现代 UI 组件
 
-aceternity-ui 是另一个基于 shadcn/ui 的组件库，专注于现代化的 UI 设计。
+> 🔗 官网：https://ui.aceternity.com
 
-官网：https://ui.aceternity.com
+**特点：** 3D 效果、视觉冲击，适合营销页面、落地页
 
-它提供了很多独特的组件，比如：
+**示例组件：**
 
-**3D Card Effect**
+| 组件 | 效果 | 适用场景 |
+|------|------|---------|
+| **3D Card** | 3D 悬浮卡片 | 产品展示 |
+| **Background Beams** | 光束背景 | Hero 区域 |
+| **Spotlight** | 聚光灯效果 | 重点内容 |
 
 ```tsx
+// 3D Card 示例
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card"
 
 export function ThreeDCardDemo() {
@@ -601,45 +1043,37 @@ export function ThreeDCardDemo() {
 }
 ```
 
-**Background Beams**
-
-```tsx
-import { BackgroundBeams } from "@/components/ui/background-beams"
-
-export function BackgroundBeamsDemo() {
-  return (
-    <div className="relative h-screen">
-      <BackgroundBeams />
-      <div className="relative z-10">Your content</div>
-    </div>
-  )
-}
-```
-
-aceternity-ui 的组件更注重视觉效果，适合做营销页面、落地页。
-
 ### 3.3 TweakCN：AI 主题编辑器
 
-TweakCN 是一个非常有意思的工具，它让你可以用 AI 来编辑 shadcn/ui 的主题。
+> 🔗 GitHub：https://github.com/tweakcn/tweakcn (20K+ stars)
 
-GitHub：https://github.com/tweakcn/tweakcn（20K+ stars）
+```mermaid
+flowchart LR
+    subgraph Input["输入"]
+        I1["自然语言描述主题"]
+    end
+    
+    subgraph Process["AI 处理"]
+        P1["理解描述"]
+        P2["生成 CSS 变量"]
+    end
+    
+    subgraph Output["输出"]
+        O1["实时预览"]
+        O2["导出配置"]
+    end
+    
+    Input --> Process --> Output
+```
 
-它的工作流程是这样的：
-
-1. 你描述你想要的主题："我想要一个深色主题，主色调是紫色，强调色是粉色"
-2. AI 生成对应的 CSS 变量
-3. 实时预览效果
-4. 导出配置到你的项目
-
-比如你可以这样描述：
+**使用示例：**
 
 ```
-"Create a dark theme with purple as primary color, 
-pink as accent color, and a subtle gradient background"
+输入: "Create a dark theme with purple as primary color, 
+      pink as accent color, and a subtle gradient background"
 ```
 
-TweakCN 会生成：
-
+**AI 生成：**
 ```css
 :root {
   --background: 224 71% 4%;
@@ -648,35 +1082,40 @@ TweakCN 会生成：
   --primary-foreground: 210 40% 98%;
   --accent: 330 81% 60%;
   --accent-foreground: 222 47% 11%;
-  /* ... */
 }
 ```
 
-然后你可以直接复制到 `globals.css` 里。
+### 3.4 v0.dev：AI 代码生成
 
-这就是 AI 友好性的体现——因为 shadcn/ui 的主题系统是基于 CSS 变量的，AI 可以轻松理解和生成。
+> 🔗 官网：https://v0.dev（Vercel 出品）
 
-### 3.4 v0.dev：AI 生成工具
+```mermaid
+flowchart LR
+    subgraph Input["输入"]
+        I1["自然语言描述 UI"]
+    end
+    
+    subgraph V0["v0.dev"]
+        V1["AI 理解需求"]
+        V2["生成 shadcn/ui 代码"]
+    end
+    
+    subgraph Output["输出"]
+        O1["在线预览"]
+        O2["一键导出"]
+        O3["直接复制到项目"]
+    end
+    
+    Input --> V0 --> Output
+```
 
-v0.dev 是 Vercel 推出的 AI 生成工具，专门为 shadcn/ui 优化。
-
-官网：https://v0.dev
-
-它的工作流程：
-
-1. 你描述你想要的 UI："一个用户资料卡片，包含头像、姓名、邮箱、编辑按钮"
-2. v0.dev 生成代码（使用 shadcn/ui 组件）
-3. 你可以在线预览、修改
-4. 导出代码到你的项目
-
-比如你输入：
+**使用示例：**
 
 ```
-"Create a user profile card with avatar, name, email, and edit button"
+输入: "Create a user profile card with avatar, name, email, and edit button"
 ```
 
-v0.dev 会生成：
-
+**v0.dev 生成：**
 ```tsx
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -694,20 +1133,14 @@ export function UserProfileCard() {
           <h3 className="font-semibold text-lg">John Doe</h3>
           <p className="text-sm text-muted-foreground">john@example.com</p>
         </div>
-        <Button variant="outline" size="sm">
-          Edit
-        </Button>
+        <Button variant="outline" size="sm">Edit</Button>
       </CardContent>
     </Card>
   )
 }
 ```
 
-关键是，这些代码可以直接复制到你的项目里，因为它用的就是 shadcn/ui 的组件。
-
-### 3.5 横向对比表
-
-我们用一个表格对比这些生态工具：
+### 3.5 生态工具对比表
 
 | 工具 | 定位 | 特点 | 使用场景 | GitHub Stars |
 |------|------|------|----------|--------------|
@@ -715,163 +1148,123 @@ export function UserProfileCard() {
 | **magic-ui** | 动画组件库 | 炫酷动画效果 | 营销页面、落地页 | 10K+ |
 | **aceternity-ui** | 现代 UI 组件 | 3D 效果、视觉冲击 | 创意项目、展示页 | 15K+ |
 | **TweakCN** | AI 主题编辑器 | 自然语言生成主题 | 快速定制主题 | 20K+ |
-| **v0.dev** | AI 代码生成 | 描述生成组件 | 快速原型开发 | N/A（Vercel 产品） |
+| **v0.dev** | AI 代码生成 | 描述生成组件 | 快速原型开发 | Vercel 产品 |
 
-这些工具的共同点是什么？**都基于 Copy-Paste 哲学**。
-
-它们不是 npm 包，而是代码片段。你可以随意修改，AI 可以轻松理解。
+> 💡 **共同点**：都基于 Copy-Paste 哲学，不是 npm 包，而是代码片段
 
 ---
 
-## Section 4：横向对比其他组件库（20 min）
+## 📖 Section 5：横向对比组件库
 
-好，现在我们把视野放宽一点，对比一下市面上主流的组件库。
+### 5.1 对比维度
 
-### 4.1 对比维度
+```mermaid
+graph TB
+    subgraph Dimensions["📊 对比维度"]
+        D1["分发方式"]
+        D2["定制能力"]
+        D3["AI 友好性"]
+        D4["样式方案"]
+        D5["无障碍性"]
+        D6["Bundle 大小"]
+        D7["学习成本"]
+    end
+```
 
-我们从几个维度来对比：
+### 5.2 主流组件库对比
 
-1. **分发方式**：npm 包 vs Copy-Paste
-2. **定制能力**：配置 vs 源码修改
-3. **AI 友好性**：文档依赖 vs 源码可见
-4. **样式方案**：CSS-in-JS vs Tailwind CSS
-5. **无障碍性**：内置 vs 依赖 Radix UI
-6. **Bundle 大小**：全量 vs 按需
-7. **学习成本**：高 vs 低
+| 维度 | Ant Design | MUI | Chakra UI | shadcn/ui | Headless UI |
+|------|-----------|-----|-----------|-----------|-------------|
+| **分发方式** | npm 包 | npm 包 | npm 包 | Copy-Paste | npm 包 |
+| **定制能力** | 主题配置 | 主题配置 | 主题配置 | 源码修改 | 完全自定义 |
+| **AI 友好性** | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| **样式方案** | Less | Emotion | Emotion | Tailwind | 无样式 |
+| **无障碍性** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| **Bundle 大小** | ~500KB | ~400KB | ~200KB | 按需 | ~50KB |
+| **学习成本** | 中 | 高 | 中 | 低 | 低 |
 
-### 4.2 主流组件库对比表
+### 5.3 AI 友好性详细对比
 
-| 维度 | Ant Design | MUI | Chakra UI | shadcn/ui | Park UI | Headless UI |
-|------|-----------|-----|-----------|-----------|---------|-------------|
-| **分发方式** | npm 包 | npm 包 | npm 包 | Copy-Paste | Copy-Paste | npm 包 |
-| **定制能力** | 主题配置 | 主题配置 | 主题配置 | 源码修改 | 源码修改 | 完全自定义 |
-| **AI 友好性** | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **样式方案** | Less | Emotion | Emotion | Tailwind | Panda CSS | 无样式 |
-| **无障碍性** | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| **Bundle 大小** | 大（~500KB） | 大（~400KB） | 中（~200KB） | 小（按需） | 小（按需） | 极小（~50KB） |
-| **学习成本** | 中 | 高 | 中 | 低 | 低 | 低 |
-| **生态工具** | 丰富 | 丰富 | 中等 | 快速增长 | 新兴 | 中等 |
-| **适用场景** | 中后台 | 复杂应用 | 营销页面 | 所有场景 | 所有场景 | 需要完全控制 |
+```mermaid
+graph LR
+    subgraph Low["⭐⭐ 低"]
+        L1["Ant Design"]
+        L2["MUI"]
+    end
+    
+    subgraph Medium["⭐⭐⭐ 中"]
+        M1["Chakra UI"]
+    end
+    
+    subgraph High["⭐⭐⭐⭐ 高"]
+        H1["Headless UI"]
+    end
+    
+    subgraph Best["⭐⭐⭐⭐⭐ 最高"]
+        B1["shadcn/ui"]
+        B2["Park UI"]
+    end
+    
+    Low -->|"AI 只能依赖文档"| Problem1["定制靠 CSS 覆盖"]
+    Medium -->|"API 清晰但源码不可见"| Problem2["主题系统复杂"]
+    High -->|"无样式，AI 可自由发挥"| Advantage1["但需要写所有样式"]
+    Best -->|"源码可见 + Tailwind"| Advantage2["AI 可直接读取修改"]
+    
+    style Best fill:#10b981,color:#fff
+```
 
-### 4.3 详细分析
+### 5.4 选型建议
 
-**Ant Design**
-- 优点：组件丰富，中后台场景成熟
-- 缺点：Bundle 大，定制困难，AI 友好性差
-- 适合：传统中后台项目，不需要深度定制
-
-**MUI（Material-UI）**
-- 优点：Material Design 规范，组件质量高
-- 缺点：学习成本高，主题系统复杂
-- 适合：需要 Material Design 风格的项目
-
-**Chakra UI**
-- 优点：API 设计优雅，主题系统灵活
-- 缺点：依赖 Emotion，Bundle 较大
-- 适合：需要快速开发的中小型项目
-
-**shadcn/ui**
-- 优点：Copy-Paste 哲学，AI 友好，完全可控
-- 缺点：需要手动管理组件代码
-- 适合：所有场景，尤其是需要深度定制的项目
-
-**Park UI**
-- 优点：类似 shadcn/ui，但基于 Panda CSS
-- 缺点：生态较新，社区较小
-- 适合：喜欢 Panda CSS 的团队
-
-**Headless UI**
-- 优点：完全无样式，灵活性最高
-- 缺点：需要自己写所有样式
-- 适合：需要完全自定义设计的项目
-
-### 4.4 AI 友好性对比
-
-我们重点看 AI 友好性这个维度。
-
-**Ant Design / MUI：⭐⭐**
-- AI 只能通过文档理解 API
-- 定制需要写 CSS 覆盖
-- 版本升级需要人工检查
-
-**Chakra UI：⭐⭐⭐**
-- API 设计清晰，AI 容易理解
-- 但源码在 node_modules，AI 看不到
-- 主题系统复杂，AI 难以深度定制
-
-**Headless UI：⭐⭐⭐⭐**
-- 无样式，AI 可以自由发挥
-- 但需要 AI 写所有样式代码
-- 适合 AI 生成完整组件
-
-**shadcn/ui / Park UI：⭐⭐⭐⭐⭐**
-- 源码在项目里，AI 可以直接读取
-- 基于 Tailwind，AI 容易理解和修改
-- Copy-Paste 哲学，AI 可以自由定制
-
-这就是为什么 shadcn/ui 在 AI 时代脱颖而出。
-
+| 场景 | 推荐方案 | 理由 |
+|------|---------|------|
+| **新项目，追求 AI 效率** | shadcn/ui + Tailwind | AI 友好性最高 |
+| **传统中后台项目** | Ant Design | 组件丰富，开箱即用 |
+| **需要 Material Design** | MUI | 设计规范完整 |
+| **Vue + Tailwind 项目** | Headless UI | 官方支持 Vue |
+| **完全自定义设计** | Radix UI + Tailwind | 最大灵活性 |
 
 ---
 
-## Section 5：实战演示（20 min）
+## 📖 Section 6：实战演示
 
-好，理论讲完了，我们来实战演示一下。
+### 6.1 从零初始化项目
 
-### 5.1 初始化 shadcn/ui 项目
+```mermaid
+flowchart LR
+    S1["创建 Next.js 项目"] --> S2["初始化 shadcn/ui"]
+    S2 --> S3["添加组件"]
+    S3 --> S4["使用组件"]
+    S4 --> S5["AI 定制"]
+```
 
-我们从零开始创建一个项目。
-
-**第一步：创建 Next.js 项目**
+#### Step 1: 创建 Next.js 项目
 
 ```bash
 npx create-next-app@latest my-app
 cd my-app
 ```
 
-选择配置：
-
+**选择配置：**
 ```
 ✔ Would you like to use TypeScript? Yes
 ✔ Would you like to use ESLint? Yes
 ✔ Would you like to use Tailwind CSS? Yes
-✔ Would you like to use `src/` directory? No
 ✔ Would you like to use App Router? Yes
-✔ Would you like to customize the default import alias? No
 ```
 
-**第二步：初始化 shadcn/ui**
+#### Step 2: 初始化 shadcn/ui
 
 ```bash
 npx shadcn@latest init
 ```
 
-选择配置：
-
-```
-✔ Which style would you like to use? › New York
-✔ Which color would you like to use as base color? › Zinc
-✔ Do you want to use CSS variables for colors? › yes
-```
-
-这会创建：
-
-```
-components/
-  ui/           ← 组件目录
-lib/
-  utils.ts      ← cn 函数
-components.json ← 配置文件
-```
-
-**第三步：添加组件**
+#### Step 3: 添加组件
 
 ```bash
 npx shadcn@latest add button card dialog
 ```
 
-现在你的项目结构是这样的：
-
+**项目结构：**
 ```
 my-app/
 ├── app/
@@ -880,20 +1273,18 @@ my-app/
 │   └── page.tsx
 ├── components/
 │   └── ui/
-│       ├── button.tsx
-│       ├── card.tsx
-│       └── dialog.tsx
+│       ├── button.tsx    ← 源码在这里
+│       ├── card.tsx      ← 源码在这里
+│       └── dialog.tsx    ← 源码在这里
 ├── lib/
 │   └── utils.ts
-├── components.json
-└── package.json
+└── components.json
 ```
 
-**第四步：使用组件**
-
-编辑 `app/page.tsx`：
+#### Step 4: 使用组件
 
 ```tsx
+// app/page.tsx
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
@@ -916,122 +1307,99 @@ export default function Home() {
 }
 ```
 
-运行项目：
+### 6.2 用 AI 定制组件
 
-```bash
-npm run dev
-```
+#### 需求：给 Button 加一个渐变变体
 
-打开 http://localhost:3000，你会看到一个漂亮的卡片。
+**告诉 AI：** "帮我给 Button 组件加一个 gradient 变体，从紫色渐变到粉色。"
 
-### 5.2 用 AI 定制组件
-
-现在我们让 AI 来定制这个 Button 组件。
-
-**需求：加一个"渐变"变体**
-
-我告诉 AI："帮我给 Button 组件加一个 gradient 变体，从紫色渐变到粉色。"
-
-AI 会打开 `components/ui/button.tsx`，找到 `buttonVariants`：
+**AI 修改 `components/ui/button.tsx`：**
 
 ```tsx
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center ...",
   {
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline: "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        // AI 添加这一行
+        destructive: "bg-destructive text-destructive-foreground ...",
+        // ✅ AI 添加这一行
         gradient: "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg hover:shadow-xl hover:from-purple-600 hover:to-pink-600",
       },
-      size: {
-        default: "h-9 px-4 py-2",
-        sm: "h-8 rounded-md px-3 text-xs",
-        lg: "h-10 rounded-md px-8",
-        icon: "h-9 w-9",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
+      // ...
     },
   }
 )
 ```
 
-然后我就可以使用了：
-
+**使用：**
 ```tsx
 <Button variant="gradient">渐变按钮</Button>
 ```
 
-整个过程不到 10 秒。
+> ⏱️ 整个过程不到 10 秒
 
-**需求：改变 Card 的圆角**
+### 6.3 实战技巧清单
 
-我告诉 AI："把 Card 的圆角改成 16px。"
+| 技巧 | 命令 | 说明 |
+|------|------|------|
+| **批量添加组件** | `npx shadcn@latest add button card dialog input` | 一次添加多个 |
+| **查看可用组件** | `npx shadcn@latest add` | 列出所有组件 |
+| **更新组件** | `npx shadcn@latest add button --overwrite` | 覆盖更新 |
+| **对比差异** | `git diff components/ui/button.tsx` | 更新前先对比 |
 
-AI 会打开 `components/ui/card.tsx`，找到 `Card` 组件：
+### 6.4 组件变体库目录建议
 
-```tsx
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      // AI 改成 rounded-2xl（16px）
-      className
-    )}
-    {...props}
-  />
-))
+```
+components/
+  ui/              ← shadcn/ui 原始组件
+  variants/        ← 自定义变体
+    gradient-button.tsx
+    glass-card.tsx
 ```
 
-改成：
+> 💡 既保留原始组件，又有自定义版本
 
-```tsx
-className={cn(
-  "rounded-2xl border bg-card text-card-foreground shadow-sm",
-  className
-)}
+### 6.5 创建自定义 Registry
+
+> 如果你的团队有自己的设计系统，可以创建自己的 Registry
+
+```mermaid
+flowchart LR
+    subgraph Team["团队 Registry"]
+        T1["自定义组件"]
+        T2["统一设计规范"]
+        T3["版本管理"]
+    end
+    
+    subgraph Projects["多个项目"]
+        P1["项目 A"]
+        P2["项目 B"]
+        P3["项目 C"]
+    end
+    
+    Team -->|"npx shadcn add"| Projects
 ```
 
-就这么简单。
-
-### 5.3 创建自定义 Registry
-
-如果你的团队有自己的设计系统，你可以创建自己的 Registry。
-
-**第一步：创建 Registry 服务器**
-
-创建一个 JSON API，返回组件的元数据：
+**Step 1：创建 Registry 服务器**
 
 ```json
+// https://your-registry.com/r/custom-button.json
 {
   "name": "custom-button",
   "type": "components:ui",
   "files": [
     {
       "name": "custom-button.tsx",
-      "content": "import * as React from \"react\"\n\nexport function CustomButton() {\n  return <button>Custom</button>\n}"
+      "content": "import * as React from \"react\"\n\nexport function CustomButton({ children, gradient = false, ...props }) {\n  return (\n    <button\n      className={cn(\n        'px-4 py-2 rounded-lg font-medium',\n        gradient && 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'\n      )}\n      {...props}\n    >\n      {children}\n    </button>\n  )\n}"
     }
   ],
   "dependencies": [],
-  "registryDependencies": []
+  "registryDependencies": ["button"]
 }
 ```
 
-**第二步：配置 components.json**
-
-在 `components.json` 里添加自定义 Registry：
+**Step 2：配置 components.json**
 
 ```json
 {
@@ -1049,327 +1417,237 @@ className={cn(
     "components": "@/components",
     "utils": "@/lib/utils"
   },
-  "registry": "https://your-registry.com"
+  "registries": {
+    "my-team": {
+      "url": "https://your-registry.com/r"
+    }
+  }
 }
 ```
 
-**第三步：使用自定义组件**
+**Step 3：使用自定义组件**
 
 ```bash
-npx shadcn@latest add custom-button
+# 从自定义 Registry 添加组件
+npx shadcn@latest add my-team/custom-button
+
+# 或者直接使用 URL
+npx shadcn@latest add "https://your-registry.com/r/custom-button"
 ```
 
-这样你就可以在团队内部分享自定义组件了。
+### 6.6 常见问题 FAQ
 
-### 5.4 实战技巧
-
-**技巧 1：批量添加组件**
-
-如果你知道项目需要哪些组件，可以一次性添加：
-
-```bash
-npx shadcn@latest add button card dialog input label select textarea
+```mermaid
+graph TB
+    subgraph FAQ["❓ 常见问题"]
+        Q1["适合所有项目吗？"]
+        Q2["会导致代码难维护吗？"]
+        Q3["如何在现有项目引入？"]
+        Q4["性能如何？"]
+        Q5["支持哪些框架？"]
+        Q6["如何升级组件？"]
+    end
 ```
 
-**技巧 2：查看可用组件**
+#### Q1：shadcn/ui 适合所有项目吗？
+
+| 项目类型 | 是否适合 | 说明 |
+|----------|---------|------|
+| **新项目** | ✅ 非常适合 | 从零开始，完全控制 |
+| **中小型项目** | ✅ 适合 | 灵活定制，效率高 |
+| **大型企业项目** | ✅ 适合 | 配合自定义 Registry |
+| **严格 Material Design** | ⚠️ 不太适合 | MUI 更合适 |
+| **已有 Ant Design 的项目** | ⚠️ 渐进式 | 可并存，逐步迁移 |
+
+#### Q2：Copy-Paste 模式会不会导致代码难以维护？
+
+**不会。原因：**
+
+1. 组件在你的 Git 仓库，可以用 Git 管理版本
+2. shadcn/ui 的组件都很小，单文件，易于维护
+3. 代码结构清晰，标准化程度高
+4. AI 可以帮助理解和修改
+
+#### Q3：如何在现有项目中引入 shadcn/ui？
 
 ```bash
-npx shadcn@latest add
+# 1. 初始化（不会影响现有代码）
+npx shadcn@latest init
+
+# 2. 逐步添加组件（按需）
+npx shadcn@latest add button dialog
+
+# 3. 在新功能中使用
+import { Button } from "@/components/ui/button"
 ```
 
-会列出所有可用的组件。
+> 💡 **建议**：老组件和新组件可以并存，逐步迁移
 
-**技巧 3：更新组件**
+#### Q4：shadcn/ui 的性能如何？
 
-如果 shadcn/ui 更新了某个组件，你可以重新添加：
+| 指标 | shadcn/ui | Ant Design | MUI |
+|------|-----------|------------|-----|
+| **Bundle Size** | 按需加载 | ~500KB | ~400KB |
+| **运行时性能** | 极佳 | 良好 | 良好 |
+| **样式计算** | 无运行时开销 | 较少 | CSS-in-JS 开销 |
+| **Tree Shaking** | 完美支持 | 部分支持 | 部分支持 |
+
+#### Q5：shadcn/ui 支持哪些框架？
+
+| 框架 | 支持程度 | 说明 |
+|------|---------|------|
+| **Next.js** | ✅ 官方支持 | App Router 和 Pages Router |
+| **Remix** | ✅ 官方支持 | 完整支持 |
+| **Vite + React** | ✅ 官方支持 | 最简单的配置 |
+| **Astro** | ✅ 官方支持 | 需要 React 集成 |
+| **Laravel** | ✅ 官方支持 | Inertia.js |
+| **Gatsby** | ⚠️ 社区支持 | 需要手动配置 |
+
+#### Q6：如何升级 shadcn/ui 的组件？
 
 ```bash
+# 方法 1：直接覆盖（丢失自定义修改）
 npx shadcn@latest add button --overwrite
+
+# 方法 2：先对比再决定（推荐）
+git stash                                    # 保存当前修改
+npx shadcn@latest add button --overwrite     # 拉取最新版本
+git diff components/ui/button.tsx           # 对比差异
+git stash pop                                # 恢复修改
+# 手动合并差异
 ```
 
-**技巧 4：使用 diff 工具对比**
+#### Q7：可以用 shadcn/ui 做移动端吗？
 
-在更新之前，先用 Git 查看差异：
+可以，但需要注意：
 
-```bash
-git diff components/ui/button.tsx
+1. **响应式设计**：默认桌面端优先，需要调整
+2. **触摸交互**：部分组件需要适配移动端手势
+3. **底部抽屉**：可以配合 Vaul 库实现
+
+```tsx
+// 移动端底部抽屉示例
+import { Drawer } from "vaul"
+
+<Drawer.Root>
+  <Drawer.Trigger asChild>
+    <Button>打开菜单</Button>
+  </Drawer.Trigger>
+  <Drawer.Content>
+    {/* 移动端友好的内容 */}
+  </Drawer.Content>
+</Drawer.Root>
 ```
 
-这样你可以选择性地合并更新。
+---
 
-**技巧 5：创建组件变体库**
+## 📖 Section 7：深度思考
 
-你可以在项目里创建一个 `components/variants/` 目录，存放自定义的变体：
+### 7.1 范式转移：从依赖到拥有
 
+```mermaid
+graph LR
+    subgraph Old["传统模式：依赖"]
+        O1["依赖 npm 包"]
+        O2["依赖维护者"]
+        O3["依赖更新节奏"]
+    end
+    
+    subgraph New["新模式：拥有"]
+        N1["代码在项目里"]
+        N2["完全控制权"]
+        N3["随时修改/回滚"]
+    end
+    
+    Old -->|"范式转移"| New
+    
+    style New fill:#10b981,color:#fff
 ```
-components/
-  ui/              ← shadcn/ui 原始组件
-  variants/        ← 自定义变体
-    gradient-button.tsx
-    glass-card.tsx
+
+### 7.2 AI 时代组件库设计五原则
+
+```mermaid
+graph TB
+    subgraph Principles["🎯 AI 时代组件库设计原则"]
+        P1["1️⃣ 源码可见<br/>AI 需要看到完整实现"]
+        P2["2️⃣ 结构清晰<br/>单文件，结构简单"]
+        P3["3️⃣ 样式可控<br/>基于 utility-first"]
+        P4["4️⃣ 依赖透明<br/>基于 Radix，关系清晰"]
+        P5["5️⃣ 版本自主<br/>不强制版本锁定"]
+    end
 ```
 
-这样既保留了原始组件，又有了自定义版本。
+### 7.3 Copy-Paste 哲学的局限性
+
+| 局限 | 说明 | 解决方案 |
+|------|------|---------|
+| **代码冗余** | 多项目各有一份代码 | 每个项目需求可能不同，冗余=灵活 |
+| **更新成本** | 需手动同步更新 | 可选择性更新，不被强制升级 |
+| **团队协作** | 各自修改可能不一致 | 创建自定义 Registry 或用 Git 管理 |
+| **学习曲线** | 新手不习惯 | 理解好处后会爱上 |
 
 ---
 
-## Section 6：深度思考（15 min）
+## 📋 Closing：总结与行动建议
 
-好，我们已经看到了 shadcn/ui 的强大之处。现在我们深入思考一下，这种 Copy-Paste 哲学背后的意义。
+### 核心要点速查
 
-### 6.1 范式转移：从依赖到拥有
+```mermaid
+graph TB
+    subgraph Summary["📝 本课核心要点"]
+        S1["1️⃣ 传统组件库的 AI 困境<br/>黑盒依赖、过度封装、版本锁定"]
+        S2["2️⃣ Copy-Paste 哲学<br/>不是 npm 包，是代码片段"]
+        S3["3️⃣ CLI 工作流<br/>init → add → 使用 → 定制"]
+        S4["4️⃣ 生态工具<br/>magic-ui、TweakCN、v0.dev"]
+        S5["5️⃣ AI 友好性最高<br/>源码可见、结构清晰、样式可控"]
+    end
+```
 
-传统的组件库是什么模式？**依赖模式**。
+### ✅ 行动建议清单
 
-你依赖 npm 包，依赖组件库的维护者，依赖他们的更新节奏。
+#### 新项目
+- [ ] 使用 Tailwind CSS v4 作为样式方案
+- [ ] 使用 shadcn/ui 作为组件库
+- [ ] 配合 v0.dev + Cursor 进行 AI 辅助开发
 
-shadcn/ui 是什么模式？**拥有模式**。
+#### 老项目
+- [ ] 渐进式迁移：先用 shadcn/ui 做新功能
+- [ ] 混合使用：shadcn/ui + 老组件库并存
+- [ ] 评估成本：稳定项目不一定要迁移
 
-组件的源码在你的项目里，你拥有完全的控制权。你可以随时修改，随时更新，随时回滚。
+### 📋 知识点速查表
 
-这是一个范式转移——从"使用别人的代码"到"拥有自己的代码"。
-
-### 6.2 AI 时代的组件库设计原则
-
-通过 shadcn/ui，我们可以总结出 AI 时代的组件库设计原则：
-
-**原则 1：源码可见**
-
-AI 需要看到完整的实现，才能理解和修改。黑盒依赖是 AI 的天敌。
-
-**原则 2：结构清晰**
-
-代码结构要清晰，AI 才能快速定位需要修改的地方。shadcn/ui 的组件都是单文件，结构简单。
-
-**原则 3：样式可控**
-
-样式要基于 utility-first 的方案（如 Tailwind），AI 才能轻松修改。CSS-in-JS 对 AI 来说太复杂了。
-
-**原则 4：依赖透明**
-
-组件的依赖要透明，AI 才能理解组件的工作原理。shadcn/ui 的组件都基于 Radix UI，依赖关系清晰。
-
-**原则 5：版本自主**
-
-不要强制版本锁定，让开发者自己决定何时更新。Copy-Paste 模式天然支持这一点。
-
-### 6.3 Copy-Paste 哲学的局限性
-
-当然，Copy-Paste 哲学也不是完美的。我们要清楚它的局限性。
-
-**局限 1：代码冗余**
-
-每个项目都有一份组件代码，会导致代码冗余。如果你有 10 个项目，就有 10 份 Button 组件。
-
-但这真的是问题吗？现代的代码编辑器（如 VS Code）可以轻松搜索和替换。而且，每个项目的需求可能不同，冗余反而是一种灵活性。
-
-**局限 2：更新成本**
-
-如果 shadcn/ui 更新了某个组件，你需要手动同步。不像 npm 包，`npm update` 就能更新。
-
-但这也是优点——你可以选择性地更新，不会被强制升级。
-
-**局限 3：团队协作**
-
-如果团队成员各自修改组件，可能会导致不一致。
-
-解决方案是创建自定义 Registry，或者用 Git 来管理组件的版本。
-
-**局限 4：学习曲线**
-
-新手可能不习惯这种模式，觉得"为什么不直接用 npm 包"。
-
-但一旦理解了 Copy-Paste 哲学的好处，就会爱上这种模式。
-
-### 6.4 未来趋势
-
-我认为，Copy-Paste 哲学会成为未来的趋势。
-
-为什么？因为 **AI 正在改变我们写代码的方式**。
-
-在 AI 时代，代码不再是"写一次，到处运行"，而是"生成一次，随时修改"。
-
-AI 可以帮你生成组件，帮你定制样式，帮你修复 bug。但前提是，AI 能看到你的代码。
-
-shadcn/ui 的成功证明了这一点——**源码可见、结构清晰、样式可控**，这些特性在 AI 时代变得至关重要。
-
-我预测，未来会有更多的工具采用 Copy-Paste 哲学：
-
-- 状态管理库（Copy-Paste 的 Zustand store）
-- 路由库（Copy-Paste 的路由配置）
-- 工具函数库（Copy-Paste 的 utils）
-
-这不是回到"复制粘贴"的原始时代，而是一种新的范式——**代码即资产，拥有即控制**。
+| 概念 | 定义 | 关键点 |
+|------|------|--------|
+| **Copy-Paste 哲学** | 组件源码复制到项目中 | 代码即资产，拥有即控制 |
+| **CLI 工作流** | npx shadcn@latest add | 从 Registry 拉取源码 |
+| **Registry** | 组件的中央仓库 | JSON API，存储元数据和源码 |
+| **CVA** | Class Variance Authority | 管理 Tailwind 变体 |
+| **cn()** | 类名合并工具 | clsx + tailwind-merge |
+| **asChild** | Radix Slot 模式 | 避免额外 DOM 节点 |
 
 ---
 
-## Closing：总结与预告（15 min）
+## 📚 下节课预告
 
-好，我们今天讲了很多内容，我来总结一下。
+> **第 3 课：Radix UI - 无头组件的底层逻辑**
 
-### 核心要点
-
-1. **传统组件库的 AI 困境**
-   - npm 黑盒依赖，AI 看不到源码
-   - 过度封装，AI 难以定制
-   - 版本锁定，升级困难
-
-2. **shadcn/ui 的 Copy-Paste 哲学**
-   - 不是 npm 包，是代码片段
-   - CLI 工作流：`npx shadcn@latest add`
-   - Registry 系统：组件的中央仓库
-   - AI 友好：源码可见、结构清晰、样式可控
-
-3. **生态工具**
-   - magic-ui：动画组件库
-   - aceternity-ui：现代 UI 组件
-   - TweakCN：AI 主题编辑器
-   - v0.dev：AI 代码生成
-
-4. **横向对比**
-   - Ant Design / MUI：传统 npm 包，AI 友好性差
-   - Chakra UI：API 优雅，但源码不可见
-   - Headless UI：完全无样式，灵活性高
-   - shadcn/ui / Park UI：Copy-Paste 哲学，AI 友好性最高
-
-5. **实战技巧**
-   - 初始化项目：`npx shadcn@latest init`
-   - 添加组件：`npx shadcn@latest add button`
-   - 用 AI 定制组件：直接修改源码
-   - 创建自定义 Registry：团队内部分享
-
-### 关键洞察
-
-**Copy-Paste 哲学的本质是什么？**
-
-不是简单的"复制粘贴"，而是一种新的代码分发模式——**代码即资产，拥有即控制**。
-
-在 AI 时代，这种模式有三个核心优势：
-
-1. **AI 可见**：源码在项目里，AI 能读、能改、能理解
-2. **完全可控**：你拥有代码，可以随时修改，不受版本限制
-3. **灵活演进**：可以选择性地更新，不会被强制升级
-
-### 实践建议
-
-如果你现在要开始一个新项目，我的建议是：
-
-1. **样式方案**：Tailwind CSS v4
-2. **组件库**：shadcn/ui
-3. **动画库**：magic-ui（如果需要）
-4. **AI 工具**：v0.dev + Cursor / Claude
-
-这套技术栈的特点是：**AI 友好、完全可控、快速迭代**。
-
-如果你在维护老项目，可以考虑：
-
-1. **渐进式迁移**：先用 shadcn/ui 做新功能
-2. **混合使用**：shadcn/ui + 老组件库并存
-3. **评估成本**：如果老项目很稳定，不一定要迁移
-
-### 预告下节课
-
-下节课我们会深入 **Radix UI**——shadcn/ui 的底层依赖。
-
-我们会讲：
-
-1. **Headless UI 的设计哲学**
-   - 为什么要分离逻辑和样式？
-   - Radix UI 的无障碍性设计
-   - Compound Components 模式
-
-2. **Radix UI 的核心组件**
-   - Dialog / Popover / Dropdown Menu
-   - Accordion / Tabs / Collapsible
-   - Form / Select / Checkbox
-
-3. **如何基于 Radix UI 创建自己的组件库**
-   - 不用 shadcn/ui，从零开始
-   - 自定义样式系统
-   - 构建团队的设计系统
-
-4. **Radix UI vs Headless UI vs Ark UI**
-   - 三大 Headless UI 库对比
-   - 如何选择适合你的方案
-
-shadcn/ui 的成功，很大程度上是因为它站在了 Radix UI 的肩膀上。理解 Radix UI，你就能理解 shadcn/ui 的设计哲学。
-
-### Q&A 时间
-
-好，现在是 Q&A 时间。大家有什么问题吗？
-
-**常见问题预设：**
-
-**Q1：shadcn/ui 适合所有项目吗？**
-
-A：大部分项目都适合。但如果你的项目需要严格的设计规范（如 Material Design），可能 MUI 更合适。如果是中后台项目，团队习惯 Ant Design，也可以继续用。
-
-**Q2：Copy-Paste 模式会不会导致代码难以维护？**
-
-A：不会。因为组件在你的 Git 仓库里，你可以用 Git 来管理版本。而且，shadcn/ui 的组件都很小，单文件，易于维护。
-
-**Q3：如何在现有项目中引入 shadcn/ui？**
-
-A：可以渐进式引入。先用 `npx shadcn@latest init` 初始化，然后逐步添加组件。老组件和新组件可以并存。
-
-**Q4：shadcn/ui 的性能如何？**
-
-A：非常好。因为它基于 Tailwind CSS 和 Radix UI，Bundle 大小很小。而且你只添加需要的组件，不会有冗余代码。
-
-**Q5：shadcn/ui 支持哪些框架？**
-
-A：官方支持 Next.js、Remix、Vite、Astro、Laravel。理论上任何支持 React 的框架都可以用。
-
-**Q6：如何升级 shadcn/ui 的组件？**
-
-A：重新运行 `npx shadcn@latest add button --overwrite`。建议先用 Git 查看差异，再决定是否覆盖。
-
-**Q7：可以用 shadcn/ui 做移动端吗？**
-
-A：可以，但需要自己适配移动端样式。shadcn/ui 默认是桌面端优先的。
-
-**Q8：shadcn/ui 有中文文档吗？**
-
-A：官方没有，但社区有翻译版本。不过英文文档很简单，建议直接看英文。
+- Headless UI 的设计哲学
+- Radix UI 的 Composition 模式
+- 可访问性原语
+- shadcn/ui 如何基于 Radix 构建
 
 ---
 
-好，今天的课就到这里。下节课见！
-
----
-
-## 附录：参考资源
-
-### 官方资源
-
-- shadcn/ui 官网：https://ui.shadcn.com
-- shadcn/ui GitHub：https://github.com/shadcn-ui/ui
-- Radix UI 官网：https://www.radix-ui.com
-- Tailwind CSS 官网：https://tailwindcss.com
-
-### 生态工具
-
-- magic-ui：https://magicui.design
-- aceternity-ui：https://ui.aceternity.com
-- TweakCN：https://github.com/tweakcn/tweakcn
-- v0.dev：https://v0.dev
-
-### 学习资源
-
-- shadcn/ui 视频教程：https://www.youtube.com/watch?v=...
-- Radix UI 文档：https://www.radix-ui.com/docs
-- Tailwind CSS 文档：https://tailwindcss.com/docs
-
-### 社区
-
-- shadcn/ui Discord：https://discord.gg/...
-- shadcn/ui Twitter：https://twitter.com/shadcn
-
----
-
-**演讲稿结束**
-
-**总字数**：约 12,000 字
-**预计演讲时长**：2.5 小时（包含演示和 Q&A）
-**风格**：融合版（故事开场 + 技术深度 + 实践建议）
-
+**课程时间分配：**
+| 部分 | 时长 |
+|------|------|
+| Opening: 现场对比演示 | 10 min |
+| Section 1: 传统组件库的 AI 困境 | 20 min |
+| Section 2: Copy-Paste 哲学 | 30 min |
+| Section 3: 生态工具 | 25 min |
+| Section 4: 横向对比 | 20 min |
+| Section 5: 实战演示 | 20 min |
+| Section 6: 深度思考 | 15 min |
+| Closing + Q&A | 10 min |
+| **总计** | **2.5 小时** |
