@@ -50,6 +50,18 @@
 
 一个完整的 AI-Native 前端开发工作流，从头到尾包含九个关键节点。我把它画出来，大家看一下：
 
+```mermaid
+graph LR
+    A[设计 Figma AI] --> B[D2C v0.dev]
+    B --> C[开发 Cursor]
+    C --> D[组件 shadcn/ui]
+    D --> E[数据层 Supabase]
+    E --> F[AI功能 Vercel AI SDK]
+    F --> G[测试 Playwright MCP]
+    G --> H[CI/CD]
+    H --> I[部署]
+```
+
 ```
 设计（Figma AI）
   → D2C（v0.dev）
@@ -316,6 +328,17 @@ export function useAnalyzeFeedback() {
 
 ### 1.7 节点六：自动化测试——Playwright MCP
 
+```mermaid
+graph LR
+    A[页面结构] --> B[Playwright MCP]
+    B --> C[自动生成测试用例]
+    C --> D[执行测试]
+    D --> E{结果}
+    E -->|通过| F[继续 CI]
+    E -->|失败| G[AI 分析原因]
+    G --> H[自动修复建议]
+```
+
 第六个节点是测试。
 
 传统的前端测试是一个痛点。写测试用例耗时，维护测试用例更耗时。很多团队的测试覆盖率长期在 30% 以下徘徊，不是不想写，是真的没时间写。
@@ -384,6 +407,21 @@ test.describe("反馈列表功能", () => {
 
 ### 1.8 节点七和八：CI/CD 与部署
 
+```mermaid
+graph TB
+    A[代码推送] --> B[GitHub Actions]
+    B --> C[Lint 检查]
+    C --> D[类型检查]
+    D --> E[单元测试]
+    E --> F[E2E 测试]
+    F --> G{全部通过?}
+    G -->|是| H[自动构建]
+    H --> I[Vercel 部署]
+    I --> J[Preview 环境]
+    J --> K[生产环境]
+    G -->|否| L[通知开发者]
+```
+
 最后两个节点是 CI/CD 和部署。
 
 GitHub Actions 负责自动化流水线：代码推送后自动运行 lint、类型检查、单元测试、E2E 测试，全部通过后自动构建和部署。
@@ -446,6 +484,24 @@ Vercel Platform 负责部署和托管。它提供了开箱即用的 Preview Depl
 
 ### 1.9 全链路的核心价值
 
+```mermaid
+graph TB
+    subgraph "传统工作流"
+        T1[设计] -->|沟通摩擦| T2[开发]
+        T2 -->|编码摩擦| T3[测试]
+        T3 -->|意愿摩擦| T4[部署]
+        T4 -->|操作摩擦| T5[上线]
+    end
+    
+    subgraph "AI-Native 工作流"
+        A1[想法] --> A2[AI 辅助设计]
+        A2 --> A3[AI 辅助开发]
+        A3 --> A4[AI 自动测试]
+        A4 --> A5[自动部署]
+        A5 --> A6[产品上线]
+    end
+```
+
 好，九个节点我们都过了一遍。现在我想让大家思考一个问题：这条全链路的核心价值到底是什么？
 
 不是速度快。速度快只是表象。
@@ -459,6 +515,27 @@ Vercel Platform 负责部署和托管。它提供了开箱即用的 Preview Depl
 好，理论部分讲完了。在进入项目实战之前，我要先展开讲讲数据层的选型——也就是为什么我们选择 Supabase。
 
 ### 1.10 数据层选型：为什么是 Supabase？
+
+```mermaid
+graph TB
+    subgraph "传统方案"
+        A1[Prisma] --> B1[数据库]
+        A2[NextAuth] --> B2[认证]
+        A3[WebSocket] --> B3[实时]
+        A4[S3/OSS] --> B4[存储]
+        A5[Pinecone] --> B5[向量]
+        B1 --> C1[分别配置部署]
+    end
+    
+    subgraph "Supabase 一站式"
+        D[Supabase] --> E1[PostgreSQL]
+        D --> E2[Auth]
+        D --> E3[Realtime]
+        D --> E4[Storage]
+        D --> E5[Vector pgvector]
+        E1 --> F[开箱即用]
+    end
+```
 
 很多同学在做全栈项目的时候，第一反应可能是用 Prisma + SQLite，或者 Prisma + PostgreSQL，再配一个 NextAuth 做认证。这套方案没有问题，但你仔细想想，你需要做多少事情？
 
@@ -477,6 +554,28 @@ Vercel Platform 负责部署和托管。它提供了开箱即用的 Preview Depl
 **第四，免费额度够用。** Supabase 的免费套餐给了你 500MB 数据库空间、1GB 文件存储、50000 月活用户的 Auth 额度。对于训练营的项目、个人项目、甚至小型创业项目来说，绰绰有余。
 
 #### Supabase 在全链路中的角色
+
+```mermaid
+graph TB
+    subgraph "Supabase 能力矩阵"
+        A[数据库 PostgreSQL] --> A1[复杂查询]
+        A --> A2[JSON 字段]
+        A --> A3[全文搜索]
+        
+        B[Auth] --> B1[邮箱密码]
+        B --> B2[OAuth]
+        B --> B3[RLS 权限控制]
+        
+        C[Realtime] --> C1[实时订阅]
+        C --> C2[自动刷新]
+        
+        D[Vector pgvector] --> D1[语义搜索]
+        D --> D2[RAG 支持]
+        
+        E[Storage] --> E1[文件上传]
+        E --> E2[CDN 分发]
+    end
+```
 
 让我具体拆解一下 Supabase 在我们全链路中承担的角色：
 
