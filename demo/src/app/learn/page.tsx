@@ -14,7 +14,7 @@ export default function LearnPage() {
         <div className="flex gap-4 md:gap-6 text-sm text-muted-foreground">
           <span>12 节课</span>
           <span>27 小时</span>
-          <span>3-5 年中高级前端</span>
+          <span>具备项目经验的前端工程师</span>
         </div>
       </div>
 

@@ -1,22 +1,27 @@
-# 工程化与全栈化
-## 最终版演讲稿（融合版）
+# 工程化与全栈化：AI 时代的开发基础设施
 
-**演讲时长**: 2.5 小时
-**风格**: 故事开场 + 技术深度 + 实践建议
-
-**课程大纲**:
-- Opening Hook: 10 min
-- Section 1: AI 驱动的 CI/CD: 20 min
-- Section 2: 项目配置与规范化: 25 min ⭐ 新增
-- Section 3: 代码质量工具 (Biome): 30 min
-- Section 4: 前端全栈化趋势: 40 min
-- Section 5: 常用 Skills + MCP tools: 20 min
-- Section 6: 技术选型决策框架: 20 min
-- Closing: 15 min
+> **课程时长**: 2.5 小时 | **难度**: 进阶 | **风格**: 故事驱动 + 技术深度 + 实践建议
 
 ---
 
-## Opening Hook（10 min）
+## 📋 本课概览
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 核心观点：AI 时代的工程化 = 更简单的工具 + 更完整的数据流   │
+├─────────────────────────────────────────────────────────────────┤
+│  📚 你将学到：                                                   │
+│    • 掌握 AI 驱动的 CI/CD 流水线设计                             │
+│    • 学习项目配置与规范化的最佳实践                               │
+│    • 理解 Biome 替代 ESLint + Prettier 的优势                    │
+│    • 掌握前端全栈化趋势（Server Actions + tRPC + Supabase）     │
+│    • 学习技术选型的评估矩阵方法                                   │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🎬 Opening Hook（10 min）
 
 大家好，欢迎来到第 10 课。
 
@@ -2578,7 +2583,20 @@ styled-components:
 
 ---
 
-## Closing（15 min）
+## 📋 知识点速查表
+
+| 概念 | 定义 | 关键点 |
+|------|------|--------|
+| **Biome** | 统一的 lint + format 工具 | 比 ESLint + Prettier 快 100 倍 |
+| **Server Actions** | Next.js 的服务端函数调用 | 前端直接写后端逻辑 |
+| **tRPC** | 端到端类型安全的 RPC 框架 | 前后端类型自动同步 |
+| **Prisma** | TypeScript 友好的 ORM | Schema 即文档，AI 友好 |
+| **Supabase** | 开源的 Firebase 替代品 | PostgreSQL + Auth + Realtime + Vector |
+| **评估矩阵** | 技术选型的量化方法 | 多维度加权评分 |
+| **AI Code Review** | AI 自动审查 PR 代码 | CodeRabbit 等工具 |
+| **渐进式迁移** | 新代码用新技术，旧代码遇修改时迁移 | 降低迁移风险 |
+
+## 🎯 Closing（15 min）
 
 ### 今天的核心要点
 
@@ -2601,41 +2619,43 @@ graph TB
 6. **全栈化对 AI 友好**：一个代码库，完整数据流
 7. **Supabase 是 AI 友好的 BaaS**：自动 API + 内置 Vector + MCP Server
 
-### 行动建议
+### 🎯 行动建议
 
-1. **立即行动**：
-   - 为现有项目补充缺失的配置文件（`.editorconfig`、`.npmrc`、`CHANGELOG.md`）
-   - 设置 Git Hooks 强制提交规范
-   - 创建 GitHub Issue/PR 模板
+- [ ] 为现有项目补充缺失的配置文件（.editorconfig、.npmrc、CHANGELOG.md）
+- [ ] 把项目的 ESLint + Prettier 迁移到 Biome
+- [ ] 开启 TypeScript 严格模式
+- [ ] 尝试用 Server Actions 或 Supabase 做一个全栈功能
+- [ ] 用评估矩阵方法做一次技术选型
+- [ ] 设置 Git Hooks 强制提交规范
 
-2. **本周尝试**：
-   - 把项目的 ESLint + Prettier 迁移到 Biome
-   - 开启 TypeScript 严格模式
-   - 更新 README 和 CONTRIBUTING 文档
+---
 
-3. **下个项目**：
-   - 使用完整的配置文件模板初始化项目
-   - 尝试 Server Actions 或 Supabase
-   - 用评估矩阵做技术选型
+## 📚 下节课预告
 
-### 下节课预告
+> **第 11 课：全链路整合与未来展望**
 
-下节课是我们的最后一课：**全链路整合与未来展望**。我会把所有知识串联起来，展示完整的 AI-Native 工作流。
+- 从设计到部署的完整 AI-Native 工作流串联
+- 项目实战：从 Figma 设计稿到线上部署
+- AI 时代前端工程师的核心竞争力
+- 未来展望：Agent 化开发与 AI-Native 框架
 
-### Q&A
+---
+
+### 💬 Q&A
 
 现在我们有 15 分钟的 Q&A 时间。
 
 ---
 
-**演讲稿完成！**
-
-**总时长**: 约 2.5 小时
-- Opening: 10 min
-- Section 1 (AI 驱动的 CI/CD): 20 min
-- Section 2 (项目配置与规范化): 25 min ⭐ 新增
-- Section 3 (代码质量工具): 30 min
-- Section 4 (前端全栈化趋势): 40 min
-- Section 5 (常用 Skills + MCP tools): 20 min
-- Section 6 (技术选型决策框架): 20 min
-- Closing: 15 min
+**课程时间分配：**
+| 部分 | 时长 |
+|------|------|
+| Opening: AI 时代的工程化 | 10 min |
+| Section 1: AI 驱动的 CI/CD | 20 min |
+| Section 2: 项目配置与规范化 | 25 min |
+| Section 3: 代码质量工具（Biome） | 30 min |
+| Section 4: 前端全栈化趋势 | 40 min |
+| Section 5: 常用 Skills + MCP tools | 20 min |
+| Section 6: 技术选型决策框架 | 20 min |
+| Closing + Q&A | 15 min |
+| **总计** | **2.5 小时** |

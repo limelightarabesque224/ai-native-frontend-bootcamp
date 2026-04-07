@@ -1,12 +1,27 @@
 # AI 编程工具与 Memory 管理
-## 最终版演讲稿（融合版）
 
-**演讲时长**: 2.5 小时
-**风格**: 故事开场 + 技术深度 + 实践建议
+> **课程时长**: 2.5 小时 | **难度**: 进阶 | **风格**: 故事驱动 + 技术深度 + 实战演示
 
 ---
 
-## Opening Hook（10 min）
+## 📋 本课概览
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 核心观点：AI 编程工具不只是代码补全，而是 AI 结对编程        │
+├─────────────────────────────────────────────────────────────────┤
+│  📚 你将学到：                                                   │
+│    • 理解 AI 编程工具的三个层次（补全→对话→Agent）              │
+│    • 深度掌握 Cursor 的核心功能和高级技巧                        │
+│    • 学习 .cursorrules 和 Memory 管理的最佳实践                  │
+│    • 横向对比 Cursor、Windsurf、Claude Code 等主流工具           │
+│    • 掌握结构化 Prompt 提高 AI 输出质量的技巧                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🎬 Opening Hook（10 min）
 
 大家好，欢迎来到第 8 课。
 
@@ -1918,7 +1933,22 @@ graph TB
 
 ---
 
-## Closing（20 min）
+## 📋 知识点速查表
+
+| 概念 | 定义 | 关键点 |
+|------|------|--------|
+| **L1 代码补全** | AI 补全当前行/函数 | Copilot Tab 补全 |
+| **L2 对话式编程** | 通过对话生成代码 | Cursor Chat |
+| **L3 Agent 编程** | AI 自主规划和执行多步任务 | Cursor Composer |
+| **.cursorrules** | Cursor 专用规则文件 | 控制 AI 代码生成风格 |
+| **AGENTS.md** | 通用 AI 指令文件 | 项目架构 + 约定 |
+| **Memory 管理** | 让 AI 记住项目上下文 | 项目级 + 会话级 + 个人级 |
+| **Composer** | Cursor 的多文件编辑模式 | Agent 模式自主规划执行 |
+| **结构化 Prompt** | 用清晰结构描述需求 | 提高 AI 输出质量 |
+
+---
+
+## 🎯 Closing（20 min）
 
 ### 今天的核心要点
 
@@ -1927,20 +1957,28 @@ graph TB
 3. **Memory 管理让 AI 越用越懂你**：项目级、会话级、个人级三层管理
 4. **Prompt 质量决定输出质量**：学会写结构化的 Prompt
 
-### 行动建议
+### 🎯 行动建议
 
-1. **今天就做**：在项目中创建 .cursorrules 和 AGENTS.md
-2. **这周做**：配置个人级 Memory（~/.claude/memory/）
-3. **持续做**：每月维护和更新 Memory
+- [ ] 在项目中创建 .cursorrules 和 AGENTS.md
+- [ ] 配置个人级 Memory（~/.claude/memory/）
+- [ ] 尝试用 Composer Agent 模式完成一个多文件任务
+- [ ] 练习写结构化 Prompt，对比输出质量差异
+- [ ] 每月维护和更新 Memory 文件
 
-### 下节课预告
+---
 
-下节课我们讲 **Vercel AI SDK**：
+## 📚 下节课预告
+
+> **第 9 课：前端 AI 功能集成 - Vercel AI SDK**
+
 - 在前端应用中集成 AI 能力
 - useChat Hook 和流式响应
 - AI Agents 和工具调用
+- Supabase + Vercel AI SDK 构建 RAG 应用
 
-### Q&A
+---
+
+### 💬 Q&A
 
 现在我们有 20 分钟的 Q&A 时间。
 
@@ -1948,12 +1986,15 @@ graph TB
 
 **演讲稿完成！**
 
-**总时长**: 约 3 小时
-- Opening: 10 min
-- Section 1: 15 min
-- Section 2: 40 min
-- Section 3: 25 min (常用开发 Skills 详解)
-- Section 4: 35 min
-- Section 5: 20 min
-- Section 6: 15 min
-- Closing: 15 min
+**课程时间分配：**
+| 部分 | 时长 |
+|------|------|
+| Opening: AI 编程工具的认知转变 | 10 min |
+| Section 1: AI 编程工具的定位 | 15 min |
+| Section 2: Cursor 深度解析 | 40 min |
+| Section 3: 常用开发 Skills 详解 | 25 min |
+| Section 4: Memory 管理 | 35 min |
+| Section 5: 横向对比 | 20 min |
+| Section 6: Prompt 工程 | 15 min |
+| Closing + Q&A | 15 min |
+| **总计** | **2.5 小时** |

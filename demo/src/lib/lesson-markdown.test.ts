@@ -7,7 +7,7 @@ import { buildProcessedLessonContent, generateToc, slugifyHeading } from './less
 
 const sampleMarkdown = `# 组件库范式转移：shadcn/ui 的 Open Code 哲学
 
-> **课程时长**: 2.5-3 小时 | **难度**: 中级 | **风格**: 故事开场 + 技术深度 + 实践指导
+> **课程时长**: 2.5-3 小时 | **难度**: 进阶 | **风格**: 故事开场 + 技术深度 + 实践指导
 
 ## 📋 本课概览
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Switch Snapshot"
+  short_description: "Keep local Codex conversations continuous across auth changes"
+  default_prompt: "Use $codex-switch-snapshot to keep local Codex conversations continuous across account or API key changes while leaving auth and runtime state local."

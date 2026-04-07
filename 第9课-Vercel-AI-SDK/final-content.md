@@ -1,12 +1,27 @@
 # 前端 AI 功能集成：Vercel AI SDK
-## 最终版演讲稿（融合版）
 
-**演讲时长**: 2.5 小时
-**风格**: 故事开场 + 技术深度 + 实践建议
+> **课程时长**: 2.5 小时 | **难度**: 进阶 | **风格**: 故事驱动 + 技术深度 + 实战演示
 
 ---
 
-## Opening Hook（10 min）
+## 📋 本课概览
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  🎯 核心观点：前端工程师可以直接集成 AI 能力，无需 ML 背景       │
+├─────────────────────────────────────────────────────────────────┤
+│  📚 你将学到：                                                   │
+│    • 理解前端 AI 功能的四大常见场景                               │
+│    • 深度掌握 Vercel AI SDK 的核心能力（useChat、streamText）    │
+│    • 实战构建 AI 聊天界面、智能客服、语义搜索                    │
+│    • 横向对比 Vercel AI SDK、LangChain.js、OpenAI SDK 等        │
+│    • 掌握 Supabase + Vercel AI SDK 构建 RAG 应用                │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🎬 Opening Hook（10 min）
 
 大家好，欢迎来到第 9 课。
 
@@ -1490,7 +1505,22 @@ export async function POST(req: Request) {
 
 ---
 
-## Closing（25 min）
+## 📋 知识点速查表
+
+| 概念 | 定义 | 关键点 |
+|------|------|--------|
+| **Vercel AI SDK** | 统一接口的 AI 开发工具包 | 多模型支持 + React Hook |
+| **useChat** | 核心聊天 Hook | 消息管理 + 流式响应 |
+| **streamText** | 流式文本生成 | 打字机效果 + 实时输出 |
+| **streamUI** | AI 返回 React 组件 | 超越纯文本的交互体验 |
+| **Tool Calling** | AI 调用外部工具 | 查询数据库、调用 API |
+| **generateObject** | 结构化输出 | Zod Schema 约束 |
+| **RAG** | 检索增强生成 | 基于私有数据的 AI 问答 |
+| **pgvector** | PostgreSQL 向量搜索扩展 | 语义搜索的基础 |
+
+---
+
+## 🎯 Closing（25 min）
 
 ### 今天的核心要点
 
@@ -1499,21 +1529,29 @@ export async function POST(req: Request) {
 3. **useChat 是最核心的 API**：开箱即用的聊天功能
 4. **AI Agent 是未来**：AI 不只是聊天，还能执行操作
 
-### 行动建议
+### 🎯 行动建议
 
-1. 在你的项目中试试 `useChat`，体验流式响应
-2. 尝试定义一个工具，让 AI 调用你的 API
-3. 思考你的产品中哪些场景可以用 AI 增强
+- [ ] 在项目中安装 Vercel AI SDK，体验 useChat
+- [ ] 尝试定义一个 Tool，让 AI 调用你的 API
+- [ ] 构建一个简单的 AI 聊天界面（含 Markdown 渲染）
+- [ ] 用 Supabase + pgvector 做一个语义搜索 Demo
+- [ ] 思考你的产品中哪些场景可以用 AI 增强
 
-### 下节课预告
+---
 
-下节课我们讲**工程化与全栈化**：
-- Biome vs ESLint
-- Next.js Server Actions
-- tRPC 和 Prisma
+## 📚 下节课预告
+
+> **第 10 课：工程化与全栈化**
+
+- Biome 替代 ESLint + Prettier
+- Next.js Server Actions 全栈开发
+- tRPC 类型安全贯通
+- Supabase BaaS 一站式后端
 - 技术选型决策框架
 
-### Q&A
+---
+
+### 💬 Q&A
 
 现在我们有 25 分钟的 Q&A 时间。
 
@@ -1521,10 +1559,13 @@ export async function POST(req: Request) {
 
 **演讲稿完成！**
 
-**总时长**: 约 2.5 小时
-- Opening: 10 min
-- Section 1: 15 min
-- Section 2: 50 min
-- Section 3: 20 min
-- Section 4: 40 min
-- Closing: 25 min
+**课程时间分配：**
+| 部分 | 时长 |
+|------|------|
+| Opening: 前端 AI 功能的场景 | 10 min |
+| Section 1: 前端 AI 功能的常见场景 | 15 min |
+| Section 2: Vercel AI SDK 深度解析 | 50 min |
+| Section 3: 横向对比 | 20 min |
+| Section 4: 实战演示 | 40 min |
+| Closing + Q&A | 25 min |
+| **总计** | **2.5 小时** |
